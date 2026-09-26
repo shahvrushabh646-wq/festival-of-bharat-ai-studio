@@ -129,7 +129,11 @@ async function autoPilot(){
       }catch(e){ console.warn('auto import failed',x.title,e) }
     }
     if(imported<3){$('autoPilotStatus').textContent=`Auto-import got ${imported} clip(s). At least 3 are needed for a professional Reel. Use the Scout source links for manual downloads, then run Auto Pilot again.`; return;}
-    $('autoPilotStatus').textContent=`AUTO PILOT imported ${imported} clips. Now building 4 distinct Reels…`; await buildToday(); $('autoPilotStatus').textContent=`AUTO PILOT complete ✓ ${imported} clips → 4 Reels + Creator Pack. Review before posting.`;
+    $('autoPilotStatus').textContent=`AUTO PILOT imported ${imported} clips. Now building 4 distinct Reels…`;
+    if($('creativeTopic')) $('creativeTopic').value=topic;
+    if(typeof renderCreativePlans==='function') renderCreativePlans();
+    await buildToday();
+    $('autoPilotStatus').textContent=`AUTO PILOT complete ✓ ${imported} clips → 4 Reels + Quality/Re-edit + Creator Pack. Review before posting.`;
   }catch(e){console.error(e);$('autoPilotStatus').textContent='Auto Pilot stopped. Your imported clips are preserved; you can continue from Reel Factory.'}
   finally{btn.disabled=false}
 }

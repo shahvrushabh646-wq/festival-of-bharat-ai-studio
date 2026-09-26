@@ -274,7 +274,17 @@ async function renderAll(){
 async function buildToday(){
   if(clips.length<3){$('analysisStatus').textContent='Add at least 3 clips first.';return}
   const b=$('buildToday');b.disabled=true;$('analysisStatus').textContent='AUTO BUILD TODAY: analyzing → selecting → rendering 4 Reels → preparing Creator Pack…';
-  try{await renderAll();buildCreatorKit();$('analysisStatus').textContent='Today is built: 4 distinct Reels + Creator Pack ready ✓';document.getElementById('batch').scrollIntoView({behavior:'smooth'});}finally{b.disabled=false}
+  try{
+    await renderAll();
+    buildCreatorKit();
+    $('analysisStatus').textContent='4 Reels rendered ✓ — running Quality Judge…';
+    if(typeof runJudge==='function'){await runJudge();}
+    $('analysisStatus').textContent='Quality Judge complete ✓ — checking for weak cuts…';
+    if(typeof selfReEdit==='function'){await selfReEdit();}
+    buildCreatorKit();
+    $('analysisStatus').textContent='AUTO PILOT COMPLETE ✓ 4 Reels + Quality Check + Self-Re-Edit + Creator Pack ready. Human approval required.';
+    document.getElementById('batch').scrollIntoView({behavior:'smooth'});
+  }finally{b.disabled=false}
 }
 
 const creativeAngles=[

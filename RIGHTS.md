@@ -1,0 +1,2 @@
+# Rights gate
+Use only footage you own or have a license/permission to use for the intended Instagram use. Check identifiable people, logos, artworks and locations as appropriate. Do not download creator Reels, movie scenes or commercial songs. The app is a workflow safeguard, not legal advice.

@@ -444,6 +444,39 @@ document.getElementById('reeditBtn').onclick=selfReEdit;
 </script>
 
 
+<section class="section card" id="dailyArchive" style="margin-top:18px">
+ <div class="eyebrow">V27 DAILY ARCHIVE</div>
+ <h2>Keep a local history of every 4-Reel production day</h2>
+ <p class="muted">Save the current topic, four Reel directions, Creator Pack and Judge results in this browser. This gives the next planning cycle a usable production history without sending your content to a third party.</p>
+ <div class="controls">
+  <button class="btn gold" id="archiveSave">SAVE TODAY'S PRODUCTION</button>
+  <button class="btn" id="archiveLoad">LOAD LATEST DAY</button>
+  <button class="btn" id="archiveClear">CLEAR ARCHIVE</button>
+  <span id="archiveStatus" class="small"></span>
+ </div>
+ <div id="archiveGrid" class="briefgrid" style="margin-top:12px"></div>
+</section>
+<script>
+(()=>{
+ const KEY='fob-daily-production-archive-v27'; const $=id=>document.getElementById(id);
+ const get=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return[]}};
+ const save=a=>localStorage.setItem(KEY,JSON.stringify(a.slice(-30)));
+ function render(){
+  const a=get();
+  $('archiveGrid').innerHTML=a.length?a.slice().reverse().map((x,n)=>`<div class="brief"><b>${x.date} — ${x.topic}</b><span class="small">4-Reel production saved • ${x.passed}/4 passed Judge • ${x.approved}/4 approved<br>${x.hooks.join(' • ')}</span></div>`).join(''):'<div class="notice">No production days archived yet.</div>';
+ }
+ $('archiveSave').onclick=()=>{
+  const topic=(document.getElementById('creativeTopic')?.value||document.getElementById('autoTopic')?.value||'Bharat culture').trim();
+  const kits=creatorKit||[]; const judged=window.judgedBatch||[];
+  const item={date:new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium'}).format(new Date()),topic,hooks:kits.map(x=>x.hook).slice(0,4),passed:judged.filter(x=>x.score>=75&&!x.flags.length).length,approved:Object.keys(window.judgeApprovals||{}).filter(k=>window.judgeApprovals[k]).length};
+  const a=get();a.push(item);save(a);render();$('archiveStatus').textContent='Production day archived ✓';
+ };
+ $('archiveLoad').onclick=()=>{const a=get();if(!a.length){$('archiveStatus').textContent='Archive is empty.';return}const x=a[a.length-1];if(document.getElementById('creativeTopic'))document.getElementById('creativeTopic').value=x.topic;if(typeof renderCreativePlans==='function')renderCreativePlans();$('archiveStatus').textContent='Latest production topic loaded ✓';};
+ $('archiveClear').onclick=()=>{localStorage.removeItem(KEY);render();$('archiveStatus').textContent='Archive cleared.'};
+ render();
+})();
+</script>
+
 <section class="card" id="performance-memory" style="margin-top:18px">
   <div class="eyebrow">V24 PERFORMANCE MEMORY</div>
   <h2>Learn from your Festival of Bharat results</h2>

@@ -98,7 +98,18 @@ async function autoPilot(){
   const btn=$('autoPilot'); btn.disabled=true; $('autoPilotStatus').textContent='AUTO PILOT: scouting multiple searches…'; $('autoPilotResults').innerHTML='';
   try{
     if(clips.length>=8){$('autoPilotStatus').textContent='8 clips already loaded. Building 4 Reels…'; await buildToday(); return;}
-    const topic=($('autoTopic').value.trim()||'Indian festival India').slice(0,100);
+    let topic=$('autoTopic').value.trim();
+    if(!topic){
+      try{
+        const tr=await fetch('/api/trends'); const tj=await tr.json();
+        const culture=/ganesh|ganpati|bappa|festival|diwali|holi|navratri|garba|krishna|janmashtami|shiva|mahadev|temple|india|bharat/i;
+        const live=(tj.items||[]).find(x=>culture.test(x.title)) || (tj.items||[])[0];
+        topic=(live?.title||'Indian festival India')+' India';
+        $('autoTopic').value=topic;
+      }catch(e){topic='Indian festival India'}
+    }
+    topic=topic.slice(0,100);
+    $('autoPilotStatus').textContent='AUTO PILOT: live India trend selected → '+topic+' …';
     const queries=[topic,topic+' temple devotion',topic+' crowd street India',topic+' details culture India'];
     const all=[]; const seen=new Set();
     for(const q of queries){

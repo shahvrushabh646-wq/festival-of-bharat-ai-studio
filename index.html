@@ -249,11 +249,23 @@ function makePlan(mode,variant=0,usedAcross=[]){
   });
 }
 function buildCreatorKit(){
-  const moods=['cinematic Indian culture','festival energy and celebration','quiet devotion and faith','living heritage and tradition'];
-  const audio=['Search Instagram audio for: cinematic Indian instrumental / ambient tabla','Search Instagram audio for: upbeat Indian percussion / festival energy','Search Instagram audio for: devotional instrumental / temple ambience','Search Instagram audio for: Indian classical / heritage instrumental'];
-  creatorKit=PACK.map((x,i)=>({reel:i+1,title:x.title,hook:x.hook,caption:x.caption,hashtags:x.tags.split(' '),coverText:x.hook.split('.').shift(),creativeDirection:moods[i],audioDirection:audio[i],approvalChecklist:['Check crop and faces','Verify source/license','Check caption spelling','Add eligible Instagram audio in Instagram','Approve before posting']}));
-  $('creatorKitGrid').innerHTML=creatorKit.map(x=>`<div class="brief"><b>REEL ${String(x.reel).padStart(2,'0')} — ${x.title}</b><span class="small"><b>Hook:</b> ${x.hook}<br><b>Cover:</b> ${x.coverText}<br><b>Caption:</b> ${x.caption}<br><b>Audio direction:</b> ${x.audioDirection}<br><b>Hashtags:</b> ${x.hashtags.join(' ')}</span></div>`).join('');
-  return creatorKit;
+ const moods=['cinematic Indian culture','festival energy and celebration','quiet devotion and faith','living heritage and tradition'];
+ const audio=['cinematic Indian instrumental / ambient tabla','upbeat Indian percussion / festival energy','devotional instrumental / temple ambience','Indian classical / heritage instrumental'];
+ const topic=(($('creativeTopic')?.value||$('autoTopic')?.value||'Bharat culture').trim().replace(/\s+/g,' '))||'Bharat culture';
+ const words=topic.replace(/[^a-zA-Z0-9 ]/g,' ').trim().split(/\s+/).filter(Boolean);
+ const topicTags=words.slice(0,3).map(w=>'#'+w).filter(x=>x.length>1);
+ const baseTags=['#FestivalOfBharat','#Bharat','#IndianCulture'];
+ const dynamic=[
+  ['FEEL THE MOMENT',`When ${topic} comes alive, the feeling arrives before the explanation.`],
+  ['LOOK CLOSER',`Look closer at ${topic}. The smallest details carry the story.`],
+  ['FEEL THE ENERGY',`The movement, sound and people are what make ${topic} unforgettable.`],
+  ['STILL ALIVE',`${topic} is not only history — it is a living part of Bharat today.`]
+ ];
+ const profile=typeof topicProfile==='function'?topicProfile(topic):null;
+ const hooks=profile?.hook?[profile.hook,profile.hook,profile.hook,profile.hook]:PACK.map(x=>x.hook);
+ creatorKit=PACK.map((x,i)=>({reel:i+1,title:dynamic[i][0]+' — '+topic,hook:hooks[i],caption:dynamic[i][1],hashtags:[...new Set([...topicTags,...baseTags,'#'+['Moment','Detail','Energy','Heritage'][i]])],coverText:dynamic[i][0],creativeDirection:moods[i],audioDirection:'Search Instagram audio for: '+audio[i]+'; use audio eligible for your account and region.',approvalChecklist:['Check crop and faces','Verify source/license','Check caption spelling','Add eligible Instagram audio in Instagram','Approve before posting']}));
+ $('creatorKitGrid').innerHTML=creatorKit.map(x=>`<div class="brief"><b>REEL ${String(x.reel).padStart(2,'0')} — ${x.title}</b><span class="small"><b>Hook:</b> ${x.hook}<br><b>Cover:</b> ${x.coverText}<br><b>Caption:</b> ${x.caption}<br><b>Audio direction:</b> ${x.audioDirection}<br><b>Hashtags:</b> ${x.hashtags.join(' ')}</span></div>`).join('');
+ return creatorKit;
 }
 async function renderCore(name,p,args,plan){
   const s=settings[p];const usePlan=plan||clips.map((_,i)=>({index:i,duration:s.clip}));

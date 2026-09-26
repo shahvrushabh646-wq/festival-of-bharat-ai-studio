@@ -110,7 +110,10 @@ async function autoPilot(){
     }
     topic=topic.slice(0,100);
     $('autoPilotStatus').textContent='AUTO PILOT: live India trend selected → '+topic+' …';
-    const queries=[topic,topic+' temple devotion',topic+' crowd street India',topic+' details culture India'];
+    // V19 shot-specific scouting: search the actual story requirements before generic topic searches.
+    const profile=typeof topicProfile==='function'?topicProfile(topic):null;
+    const shotQueries=(profile?.shots||[]).slice(0,5).map(s=>s+' '+topic);
+    const queries=[...shotQueries,topic,topic+' temple devotion',topic+' crowd street India',topic+' details culture India'];
     const all=[]; const seen=new Set();
     for(const q of queries){
       try{const r=await fetch('/api/scout?q='+encodeURIComponent(q)); const j=await r.json(); for(const x of (j.results||[])){const key=x.downloadUrl||x.pageUrl||x.title;if(!seen.has(key)){seen.add(key);all.push(x)}}}catch(e){console.warn('scout query failed',q,e)}

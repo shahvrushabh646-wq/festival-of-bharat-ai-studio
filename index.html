@@ -332,7 +332,15 @@ async function importShotResult(x){if(clips.length>=8){document.getElementById('
 <section class="section card" id="qualityJudge"><h2>V21 — AI Reel Quality Judge & Approval Gate</h2><div class="small">Before publishing, the Judge runs a production preflight across the four cuts. It checks measurable edit signals such as shot variety, opening diversity, pacing, clip quality metadata, rights records and export settings. It is a heuristic production gate — it does not claim to understand every frame or guarantee copyright clearance.</div><div class="controls" style="margin-top:12px"><button class="btn gold" id="judgeBtn">✓ JUDGE TODAY'S 4 REELS</button><button class="btn" id="approveAllBtn">Approve All If Passed</button><span id="judgeStatus" class="small"></span></div><div id="judgeSummary" class="briefgrid" style="margin-top:12px"></div><div id="judgeResults" class="briefgrid" style="margin-top:12px"></div><div class="notice"><b>Approval rule:</b> a Reel with missing source/license metadata, fewer than 3 useful shots, repeated opening footage, or an export mismatch is flagged for review. Final posting remains a human decision.</div></section>
 <script>
 window.lastBatch=window.lastBatch||[]; window.judgeApprovals=window.judgeApprovals||{};
-function clipQualityScore(i){const c=clips[i]; if(!c)return 0; let s=50; if(c.size>250000)s+=15; if(c.size>1000000)s+=10; const m=clipMeta[i]||{}; if(m.source)s+=8; if(m.license)s+=10; if(m.author)s+=4; if(m.url)s+=3; return Math.min(100,s);}
+function clipQualityScore(i){
+ const c=clips[i]; if(!c)return 0;
+ let s=50;
+ if(c.size>250000)s+=15;if(c.size>1000000)s+=10;
+ const m=clipMeta[i]||{};
+ if(m.source)s+=8;if(m.license)s+=10;if(m.author)s+=4;if(m.url)s+=3;
+ if(m.source==='Wikimedia Commons'&&m.license)s+=5;
+ return Math.min(100,s);
+}
 function judgeOne(x,idx){
  const plan=x.planIndexes||[]; const unique=new Set(plan).size; const variety=Math.min(100,50+unique*10);
  const opening=plan.length?plan[0]:-1; const prior=(window.lastBatch||[]).slice(0,idx).map(r=>r.planIndexes?.[0]); const openingDiversity=opening>=0&&!prior.includes(opening)?100:45;
@@ -344,6 +352,9 @@ function judgeOne(x,idx){
  if(plan.length<3)flags.push('Too few shots');
  if(openingDiversity<60)flags.push('Repeated opening shot');
  if(rights<70)flags.push('Rights/source metadata incomplete');
+ const sourceChecks=plan.map(i=>clipMeta[i]||{});
+ const missingRights=sourceChecks.filter(m=>!m.license||!m.url).length;
+ if(missingRights)flags.push(missingRights+' shot(s) need source/license verification');
  if(unique<Math.max(3,Math.ceil(plan.length*.75)))flags.push('Low shot variety');
  return {...x,score,flags,metrics:{variety,openingDiversity,pacing,exportScore,rights}};
 }

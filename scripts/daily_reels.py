@@ -3,6 +3,7 @@ import json, os, re, subprocess, urllib.parse, urllib.request, xml.etree.Element
 from pathlib import Path
 from datetime import datetime, timezone
 import textwrap
+import time
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/"daily-output"; RAW=ROOT/"daily-raw"
@@ -130,10 +131,14 @@ STATUS_API="https://api.github.com"
 REPO=os.getenv("GITHUB_REPOSITORY","shahvrushabh646-wq/festival-of-bharat-ai-studio")
 GH_TOKEN=os.getenv("GITHUB_TOKEN","").strip()
 STATUS_BRANCH="status"
+RUN_STARTED_AT=datetime.now(timezone.utc)
+RUN_STARTED_MONO=time.monotonic()
 
 def publish_status(percent, team, employee, task, phase, departments=None, reel=None):
+
     if not GH_TOKEN:
         return
+    now=datetime.now(timezone.utc)
     payload={
         "date":today_key,
         "run_id":os.getenv("GITHUB_RUN_ID",""),
@@ -144,7 +149,9 @@ def publish_status(percent, team, employee, task, phase, departments=None, reel=
         "current_employee":employee,
         "current_task":task,
         "reel":reel,
-        "departments":departments or {}
+        "departments":departments or {},
+        "updated_at":now.isoformat(),
+        "elapsed_seconds":round(time.monotonic()-RUN_STARTED_MONO,1)
     }
     try:
         data=json.dumps(payload,ensure_ascii=False).encode()
@@ -154,12 +161,40 @@ def publish_status(percent, team, employee, task, phase, departments=None, reel=
         # Read the current status file on the status branch to obtain its SHA.
         req=urllib.request.Request(STATUS_API+path+"?ref="+STATUS_BRANCH,headers=headers)
         sha=None
+        previous={}
         try:
             with urllib.request.urlopen(req,timeout=20) as r:
                 old=json.loads(r.read().decode())
                 sha=old.get("sha")
+                previous=old.get("content") and json.loads(__import__("base64").b64decode(old["content"]).decode()) or {}
         except Exception:
             pass
+        history=list(previous.get("history") or [])
+        prev=history[-1] if history else None
+        if prev:
+            prev["ended_at"]=payload["updated_at"]
+            prev["duration_seconds"]=round(max(0, (now-datetime.fromisoformat(prev["started_at"])).total_seconds()),1)
+        event={
+            "started_at":payload["updated_at"],
+            "ended_at":None,
+            "duration_seconds":None,
+            "percent":percent,
+            "phase":phase,
+            "team":team,
+            "employee":employee,
+            "task":task,
+            "reel":reel,
+            "topic":next((x.get("topic") for x in daily_topics if x.get("reel")==reel), None) if isinstance(reel,int) else None
+        }
+        history.append(event)
+        payload["history"]=history[-100:]
+        payload["department_details"]={
+            "Strategy & Research":"Trend selection, daily topic strategy, cultural research and source/fact gate.",
+            "Creative & Story":"Creative direction, four story angles, scripts, six-beat structure and storyboards.",
+            "Production":"Licensed visual scouting, rights screening, video editing, rendering and master export.",
+            "Quality & Growth":"Quality checks, automatic re-edit, caption/cover preparation, approval gate and learning."
+        }
+        data=json.dumps(payload,ensure_ascii=False).encode()
         body={"message":f"live status: {employee}","content":__import__("base64").b64encode(data).decode(),
               "branch":STATUS_BRANCH}
         if sha: body["sha"]=sha

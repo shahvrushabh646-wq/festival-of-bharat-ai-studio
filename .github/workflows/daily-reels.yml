@@ -8,6 +8,10 @@ on:
         description: "Optional topic; leave blank for India trend selection"
         required: false
         default: ""
+      source_url:
+        description: "Optional public direct MP4 URL"
+        required: false
+        default: ""
   schedule:
     - cron: "30 0 * * *"
 permissions:
@@ -26,7 +30,8 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - name: Build today's four Reels
         env:
-          TOPIC: ${{ github.event.inputs.topic }}\n          SOURCE_URL: ${{ github.event.inputs.source_url }}
+          TOPIC: ${{ github.event.inputs.topic }}
+          SOURCE_URL: ${{ github.event.inputs.source_url }}
         run: python3 scripts/daily_reels.py
       - name: Upload four MP4 Reels
         uses: actions/upload-artifact@v4

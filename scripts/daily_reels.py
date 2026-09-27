@@ -83,11 +83,12 @@ def scout_wikimedia():
     queries=list(dict.fromkeys(search_terms+["Indian culture festival India","Indian temple culture"]))
     seen=set()
     for q in queries:
+        import time; time.sleep(0.8)
         api=("https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+urllib.parse.quote(q)+"&gsrnamespace=6&gsrlimit=15&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=1600&format=json")
         try:data=json.loads(fetch(api))
         except Exception:continue
         for page in data.get("query",{}).get("pages",{}).values():
-            info=(page.get("imageinfo") or [{}])[0]; url=info.get("url",""); mime=info.get("mime","")
+            info=(page.get("imageinfo") or [{}])[0]; url=(info.get("thumburl") if info.get("mime","").startswith("image/") and info.get("thumburl") else info.get("url","")); mime=info.get("mime","")
             meta=info.get("extmetadata",{}); title=page.get("title","")
             lic=(meta.get("LicenseShortName") or {}).get("value",""); author=clean((meta.get("Artist") or {}).get("value",""))
             pageurl="https://commons.wikimedia.org/?curid="+str(page.get("pageid"))

@@ -66,6 +66,8 @@ stage("02-strategy",{"status":"complete","objective":"Create one useful Indian-c
 stage("03-idea",{"status":"complete","title":educational_title,"core_idea":educational_fact,"rule":"one clear cultural idea per Reel"})
 stage("04-script",{"status":"complete","beats":[{"time":"0-2s","role":"HOOK","text":f"STOP SCROLLING: {educational_title}"},{"time":"2-4s","role":"VISUAL PROOF","text":f"LOOK CLOSER • {culture_name}"},{"time":"4-7s","role":"CONTEXT","text":educational_fact},{"time":"7-10s","role":"DETAIL","text":"This is the detail most quick videos skip."},{"time":"10-12s","role":"MEANING","text":"Now you know what you're actually seeing."},{"time":"12-14s","role":"CTA","text":"SAVE THIS • FOLLOW FESTIVAL OF BHARAT"}]})
 stage("05-storyboard",{"status":"complete","format":"9:16 vertical","beats":["hook","proof","context","detail","meaning","CTA"],"visual_direction":"cinematic realistic Indian culture; no random montage"})
+instagram_refs=[{"type":"explore","url":"https://www.instagram.com/explore/","use":"trend discovery"},{"type":"hashtag","url":"https://www.instagram.com/explore/tags/indianculture/","use":"culture patterns"},{"type":"hashtag","url":"https://www.instagram.com/explore/tags/indianfestivals/","use":"festival patterns"},{"type":"hashtag","url":"https://www.instagram.com/explore/tags/ganeshchaturthi/","use":"Ganpati patterns"}]
+stage("05a-instagram-intelligence",{"status":"reference_only","platform":"Instagram","sources":instagram_refs,"analyze":["hook","opening visual","pacing","text","cover","topic angle","editing pattern","audio direction"],"rule":"Instagram references guide original production; arbitrary creator Reels are not downloaded or reused without permission/license."})
 assets=[]
 
 WATERMARK_RISK=re.compile(r"watermark|youtube|instagram|tiktok|facebook|vimeo|dailymotion|@\w+|©|www\.|https?://",re.I)
@@ -108,7 +110,7 @@ if source_url:
             add_source_asset("Provided MP4",source_url,"User-provided source — verify rights","",source_url,str(dest),"video")
     except Exception as e:print("provided source unusable",e)
 if len(assets)<6:scout_wikimedia()
-if len(assets)<6:raise RuntimeError("Not enough clean, rights-reviewable footage; risky/random sources were rejected.")
+if len(assets)<4:raise RuntimeError("Not enough clean, rights-reviewable visual assets; risky/random sources were rejected.")
 
 def visual_risk(path):
     try:

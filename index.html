@@ -119,7 +119,7 @@ async function getStatus(){
   const deps=status.departments||{};
   $("departments").innerHTML=Object.entries(deps).map(([k,v])=>`<div class="employee"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join("");
   renderTeam();
- }catch(e){$("connection").textContent="Status unavailable")}
+ }catch(e){$("connection").textContent="Status unavailable"}
 }
 async function getBatch(){
  try{const r=await fetch("/api/batch?x="+Date.now(),{cache:"no-store"});batch=await r.json();renderBatch();renderRights();renderPack();}catch(e){batch=null}
@@ -139,10 +139,12 @@ function reelCard(r,review=false){
 }
 function renderBatch(){
  const reels=batch?.reels||[];
- $("commandReels").innerHTML=reels.length?reels.map(r=>reelCard(r)).join(""):`<div class="empty">No finished batch yet.</div>`;
- $("reviewReels").innerHTML=reels.length?reels.map(r=>reelCard(r,true)).join(""):`<div class="empty">No finished batch yet.</div>`;
- const decided=reels.filter(r=>r.decision&&r.decision!=="pending").length;
- $("reviewCount").textContent=`${decided}/${reels.length||4} decided`;
+ const saved=JSON.parse(localStorage.getItem("fob-decisions-v2-"+(batch?.date||"today"))||"{}");
+ const effective=reels.map(r=>({...r,decision:saved[r.reel]?.decision||r.decision}));
+ $("commandReels").innerHTML=effective.length?effective.map(r=>reelCard(r)).join(""):`<div class="empty">No finished batch yet.</div>`;
+ $("reviewReels").innerHTML=effective.length?effective.map(r=>reelCard(r,true)).join(""):`<div class="empty">No finished batch yet.</div>`;
+ const decided=effective.filter(r=>r.decision&&r.decision!=="pending").length;
+ $("reviewCount").textContent=`${decided}/${effective.length||4} decided`;
 }
 async function approve(reel){
  const key="fob-decisions-v2-"+(batch?.date||"today");

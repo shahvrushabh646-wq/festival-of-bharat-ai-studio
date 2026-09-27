@@ -195,4 +195,8 @@ Rights: verify every displayed license and attribution/share-alike requirement b
 Music: add eligible/trending Instagram audio in Instagram after human approval.
 """)
 (OUT/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
+(OUT/"creator-pack.json").write_text(json.dumps({
+ "topic":topic,"content_angle":educational_title,"context":educational_fact,
+ "reels":[{"file":r["file"],"hook":r["hook"],"cover_text":r["cover_text"],"caption":r["caption"],"hashtags":r["hashtags"],"cta":r["cta"],"content_pillar":r["content_pillar"],"music":r["music"]} for r in manifest["reels"]]
+},ensure_ascii=False,indent=2))
 print(json.dumps({"topic":topic,"assets":len(assets),"reels":4,"angle":educational_title}))

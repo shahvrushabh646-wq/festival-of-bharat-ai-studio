@@ -1,8 +1,6 @@
 name: Daily 4 Reels
 # Production window: 02:00–06:00 IST. Morning review/edit cycle begins after the batch is ready.
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       topic:

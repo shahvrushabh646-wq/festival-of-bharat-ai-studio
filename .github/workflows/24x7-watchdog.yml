@@ -20,7 +20,15 @@ jobs:
         run: |
           set -euo pipefail
           DATE="$(TZ=Asia/Kolkata date +%Y-%m-%d)"
+          HOUR="$(TZ=Asia/Kolkata date +%H)"
           TAG="daily-${DATE}"
+
+          # Recovery is allowed only inside the planned overnight production window.
+          # 02:00–06:00 IST = 02 <= hour < 06.
+          if [ "$HOUR" -lt 2 ] || [ "$HOUR" -ge 6 ]; then
+            echo "Outside overnight production window (02:00–06:00 IST). No recovery dispatch."
+            exit 0
+          fi
 
           if gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
             echo "Today's four-Reel release already exists: ${TAG}"

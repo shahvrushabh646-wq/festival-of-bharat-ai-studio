@@ -114,6 +114,18 @@ for i,a in enumerate(assets[:8]):
         if dest.stat().st_size>10000: a["file"]=str(dest)
     except Exception as e: print("asset download failed:",a["title"],e)
 assets=[a for a in assets if a.get("file") and Path(a["file"]).stat().st_size>10000]
+
+def asset_score(a):
+    try:
+        q=subprocess.run(["ffprobe","-v","error","-show_entries","stream=width,height,duration","-of","json",a["file"]],capture_output=True,text=True)
+        j=json.loads(q.stdout); st=(j.get("streams") or [{}])[0]
+        w=int(st.get("width",0) or 0); h=int(st.get("height",0) or 0)
+        portrait=3 if h>=w else 0
+        resolution=min((w*h)/2073600,2.0)
+        return portrait + resolution + (1 if a.get("kind")=="video" else 0)
+    except Exception:
+        return 0
+assets=sorted(assets,key=asset_score,reverse=True)
 if len(assets)<3: raise SystemExit("Not enough usable licensed footage/photos were available today.")
 
 # Reorder so every Reel can start differently and use the strongest available source first.
@@ -135,13 +147,15 @@ def esc_textfile(p):
 FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_REG="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
-def ffmpeg_clip(src,out,dur,index,hook="",label=""):
+def ffmpeg_clip(src,out,dur,index,hook="",label="",context=""):
     ext=Path(src).suffix.lower()
     hook_file=RAW/f"hook_{index}.txt"
     hook_file.write_text(hook,encoding="utf-8")
     label_file=RAW/f"label_{index}.txt"
     label_file.write_text("FESTIVAL OF BHARAT  •  "+label,encoding="utf-8")
-    hf=esc_textfile(hook_file); lf=esc_textfile(label_file)
+    context_file=RAW/f"context_{index}.txt"
+    context_file.write_text(context,encoding="utf-8")
+    hf=esc_textfile(hook_file); lf=esc_textfile(label_file); cf=esc_textfile(context_file)
     base="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30,eq=contrast=1.06:saturation=1.08:brightness=0.01,unsharp=5:5:0.35:5:5:0"
     if ext in (".jpg",".jpeg",".png",".webp"):
         base="scale=1188:2112:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.0018,1.09)':d=81:s=1080x1920:fps=30,eq=contrast=1.06:saturation=1.08:brightness=0.01,unsharp=5:5:0.35:5:5:0"
@@ -154,7 +168,10 @@ def ffmpeg_clip(src,out,dur,index,hook="",label=""):
         f"shadowcolor=black@0.65:shadowx=2:shadowy=2,"
         f"drawtext=fontfile={FONT}:textfile='{hf}':fontcolor=white:fontsize=54:"
         f"x=64:y=h-390:box=1:boxcolor=black@0.48:boxborderw=24:"
-        f"line_spacing=8:shadowcolor=black@0.8:shadowx=3:shadowy=3"
+        f"line_spacing=8:shadowcolor=black@0.8:shadowx=3:shadowy=3,"
+        f"drawtext=fontfile={FONT_REG}:textfile='{cf}':fontcolor=white:fontsize=30:"
+        f"x=64:y=h-210:box=1:boxcolor=black@0.34:boxborderw=16:"
+        f"shadowcolor=black@0.65:shadowx=2:shadowy=2"
     )
     vf=base+","+draw
     cmd=["ffmpeg","-y","-loglevel","error",*inp,"-t",str(dur),"-vf",vf,
@@ -174,7 +191,7 @@ for n,(name,order,dur,label,direction) in enumerate(styles,1):
         a=assets[pos%len(assets)]
         seg=RAW/f"r{n}_{j}.mp4"
         seg_hook=hook_list[n-1] if j==0 else ""
-        ffmpeg_clip(a["file"],seg,dur,j+n*10,seg_hook,label)
+        ffmpeg_clip(a["file"],seg,dur,j+n*10,seg_hook,label,educational_fact if j==0 else "")
         segs.append(seg)
 
     transition=0.24
@@ -191,7 +208,12 @@ for n,(name,order,dur,label,direction) in enumerate(styles,1):
         current=outv
         elapsed += dur-transition
     total=dur*4-transition*3
-    filters.append(f"{current}fade=t=in:st=0:d=0.18,fade=t=out:st={total-0.18:.2f}:d=0.18,format=yuv420p[vout]")
+    end_text=RAW/f"end_{n}.txt"
+    end_text.write_text("SAVE • SHARE • FOLLOW  |  FESTIVAL OF BHARAT",encoding="utf-8")
+    ef=esc_textfile(end_text)
+    filters.append(f"{current}fade=t=in:st=0:d=0.18,format=yuv420p[pre]")
+    filters.append(f"color=c=black:s=1080x1920:r=30:d=1.2,drawtext=fontfile={FONT}:textfile='{ef}':fontcolor=white:fontsize=42:x=(w-text_w)/2:y=(h-text_h)/2:box=1:boxcolor=black@0.15:boxborderw=22[end]")
+    filters.append(f"[pre][end]xfade=transition=fade:duration=0.28:offset={total-0.28:.2f},format=yuv420p[vout]")
     out=OUT/f"festival-of-bharat-reel-{n}.mp4"
     subprocess.run(["ffmpeg","-y","-loglevel","error",*inputs,"-filter_complex",";".join(filters),
                      "-map","[vout]","-an","-c:v","libx264","-preset","veryfast","-crf","19",
@@ -227,7 +249,7 @@ for n,(name,order,dur,label,direction) in enumerate(styles,1):
         "hook":hook_list[n-1],"useful_context":educational_fact,"quality":quality,
         "cover_text":cover,"caption":caption,"hashtags":hashtags,"cta":"Save this Reel and share it with someone who loves Bharat.",
         "content_pillar":culture_name,
-        "editing":"Cinematic crop + subtle grade + branded upper strip + hook card + smooth crossfades + controlled pacing + 1080x1920/30fps.",
+        "editing":"Portrait-aware source scoring + cinematic crop/zoom + subtle grade + branded strip + hook/context overlays + smooth crossfades + branded CTA end card + 1080x1920/30fps.",
         "music":"Search Instagram for an eligible/trending audio that fits the mood; add it inside Instagram after approval."
     })
 

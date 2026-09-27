@@ -141,12 +141,38 @@ for i,item in enumerate(daily_topics,1):
         "visual_direction":"cinematic realistic Indian culture; original editorial treatment; no random montage"
     })
 assets_by_reel={}
-instagram_refs=[{"type":"explore","url":"https://www.instagram.com/explore/","use":"trend discovery"},{"type":"hashtag","url":"https://www.instagram.com/explore/tags/indianculture/","use":"culture patterns"},{"type":"hashtag","url":"https://www.instagram.com/explore/tags/indianfestivals/","use":"festival patterns"},{"type":"hashtag","url":"https://www.instagram.com/explore/tags/ganeshchaturthi/","use":"Ganpati patterns"}]
+instagram_refs=[
+ {"type":"explore","url":"https://www.instagram.com/explore/","use":"trend discovery"},
+ {"type":"hashtag","url":"https://www.instagram.com/explore/tags/indianculture/","use":"culture patterns"},
+ {"type":"hashtag","url":"https://www.instagram.com/explore/tags/indianfestivals/","use":"festival patterns"},
+ {"type":"hashtag","url":"https://www.instagram.com/explore/tags/ganeshchaturthi/","use":"Ganpati patterns"}
+]
+pinterest_refs=[
+ {"type":"search","url":"https://www.pinterest.com/search/pins/?q=indian%20culture%20reels","use":"visual composition and cultural inspiration"},
+ {"type":"search","url":"https://www.pinterest.com/search/pins/?q=indian%20festival%20aesthetic","use":"festival visual language"},
+ {"type":"search","url":"https://www.pinterest.com/search/pins/?q=indian%20heritage%20design","use":"heritage design and typography"}
+]
+canva_refs=[
+ {"type":"source","url":"https://www.canva.com/","use":"eligible Reel layouts, typography and graphics"},
+ {"type":"license","url":"https://www.canva.com/en_in/policies/content-license-agreement/","use":"license verification before Canva content use"}
+]
+
 stage("05a-instagram-intelligence",{
     "status":"reference_only","platform":"Instagram","sources":instagram_refs,
     "analyze":["hook","opening visual","pacing","text","cover","topic angle","editing pattern","audio direction"],
     "rule":"Instagram references guide original production; arbitrary creator Reels are not downloaded or reused without permission/license."
 })
+stage("05b-visual-intelligence",{
+ "status":"reference_only",
+ "sources":{
+  "Instagram":["hooks","opening visual","pacing","text","cover","editing pattern","audio direction"],
+  "Pinterest":["composition","visual mood","colour","typography","cultural design references"],
+  "Canva":["eligible Reel layouts","typography","graphics","transitions","licensed Free/Pro content where applicable"]
+ },
+ "rule":"References guide original Festival of Bharat production; arbitrary creator media is not downloaded or reposted.",
+ "canva_license_gate":"Verify content source and applicable Canva license before use; Popular Music is outside the Canva Content License Agreement."
+})
+
 
 WATERMARK_RISK=re.compile(r"watermark|youtube|instagram|tiktok|facebook|vimeo|dailymotion|@\w+|©|www\.|https?://",re.I)
 def reject_source(title,author,page):

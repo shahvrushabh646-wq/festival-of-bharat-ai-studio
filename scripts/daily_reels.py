@@ -59,7 +59,7 @@ culture_name,educational_title,educational_fact=profile(topic)
 
 assets=[]
 
-def add_source_asset(title,url,license_name,author,page,file_path=None,kind="video"):
+WATERMARK_RISK=re.compile(r"watermark|logo|channel|creator|youtube|instagram|tiktok|facebook|reel|shorts|©|www\\.|https?://",re.I)\n\ndef reject_source(title, author, page):\n    text=" ".join([str(title or ""),str(author or ""),str(page or "")])\n    return bool(WATERMARK_RISK.search(text))\ndef add_source_asset(title,url,license_name,author,page,file_path=None,kind="video"):
     assets.append({
         "title":title,"url":url,"license":license_name or "License not displayed",
         "author":author,"page":page,"kind":kind,"rights_review":True,**({"file":file_path} if file_path else {})

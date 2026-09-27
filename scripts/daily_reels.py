@@ -2,10 +2,12 @@
 import json, os, re, subprocess, urllib.parse, urllib.request, xml.etree.ElementTree as ET
 from pathlib import Path
 from datetime import datetime, timezone
+import textwrap
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/"daily-output"; RAW=ROOT/"daily-raw"
 OUT.mkdir(exist_ok=True); RAW.mkdir(exist_ok=True)
+# Clear previous generated media/stage files so stale batches can never be published.\nfor p in OUT.glob('*.mp4'): p.unlink(missing_ok=True)\nif (OUT/'stages').exists():\n    for p in (OUT/'stages').glob('*.json'): p.unlink(missing_ok=True)
 UA="FestivalOfBharatCreatorOS/3.0"
 
 def fetch(url, timeout=60):
@@ -15,7 +17,7 @@ def run(cmd, check=True):
     return subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,check=check)
 def esc(s):
     return str(s or "").replace("\\","\\\\").replace(":","\\:").replace("'","\\'").replace("%","\\%").replace("[","\\[").replace("]","\\]")
-def clean(s): return re.sub("<[^>]+>"," ",str(s or "")).strip()
+def clean(s): return re.sub("<[^>]+>"," ",str(s or "")).strip()\ndef fit_text(s,width=30): return '\\n'.join(textwrap.wrap(str(s or ''),width=width,break_long_words=False,break_on_hyphens=False))
 def probe(path):
     try:
         d=json.loads(run(["ffprobe","-v","error","-show_streams","-show_format","-of","json",str(path)]).stdout)
@@ -36,7 +38,7 @@ def trends():
 USEFUL_RULE=("Every Reel must teach, explain, preserve, or give practical cultural context about an Indian "
 "festival, tradition, place, craft, food, history, or cultural practice. Avoid fabricated facts, empty trend-chasing, copied creator content, and generic filler.")
 user_topic=os.getenv("TOPIC","").strip()
-trend_topic=trends()
+trend_topic=trends()\ntoday_key=datetime.now(timezone.utc).strftime('%Y-%m-%d')
 
 topic_profiles=[
 (r"ganesh|ganpati|bappa","Ganpati / Ganesh festival","Why Ganpati celebrations end with Visarjan","Ganesh Chaturthi celebrates Lord Ganesha and the festival concludes with immersion according to local tradition.",["ganesh chaturthi","ganpati visarjan","ganesh festival india","ganpati procession"]),
@@ -76,7 +78,7 @@ def choose_four_topics():
         "Indian folk art",
         "Indian architecture"
     ]
-    candidates += [x for x in evergreen if normalized_key(x) not in [normalized_key(y) for y in candidates]]
+    offset=int(today_key.replace('-','')) % len(evergreen)\n    rotated=evergreen[offset:]+evergreen[:offset]\n    candidates += [x for x in rotated if normalized_key(x) not in [normalized_key(y) for y in candidates]]
     chosen=[]
     used_names=set()
     for c in candidates:
@@ -121,6 +123,11 @@ stage("02-strategy",{
     "cta":"save/share/follow"
 })
 for i,item in enumerate(daily_topics,1):
+    stage(f"03-research-{i:02d}",{
+        'status':'research_gate','reel':i,'topic':item['topic'],'fact':item['fact'],
+        'verification_required':True,
+        'rule':'Verify factual cultural claims before publishing; preserve supporting source records.'
+    })
     stage(f"03-idea-{i:02d}",{
         "status":"complete","reel":i,"topic":item["topic"],"pillar":item["pillar"],
         "title":item["title"],"core_idea":item["fact"],"rule":"one clear cultural idea per Reel"
@@ -266,7 +273,7 @@ def render_reel(idx,style,item,assets):
     for j,(ai,d) in enumerate(zip(order,durations)):
         raw=OUT/f"_raw{idx}_{j}.mp4"; styled=OUT/f"_cut{idx}_{j}.mp4"
         make_clip(assets[ai%len(assets)]["file"],raw,d)
-        main=esc(texts[j]); role=esc(roles[j])
+        main=esc(fit_text(texts[j],30 if j in [2,3,4] else 25)); role=esc(roles[j])
         if j in [2,3,4]:
             draw=f"drawtext=fontfile={FONT}:text='{role}':fontcolor=white:fontsize=28:borderw=3:bordercolor=black@.75:x=55:y=1510,drawtext=fontfile={FONT}:text='{main}':fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1555"
         elif j==5:
@@ -321,7 +328,7 @@ stage("15-learning",{"status":"complete" if analytics else "baseline_ready",
       "test":"opening visual, pacing, cover text, CTA","do_not_copy":"creator content or copyrighted clips"}})
 
 manifest={
-"generated_at":datetime.now(timezone.utc).isoformat(),
+"generated_at":datetime.now(timezone.utc).isoformat(),\n"daily_key":today_key,\n"reference_intelligence":{"instagram":instagram_refs,"pinterest":pinterest_refs,"canva":canva_refs},
 "topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)],
 "format":"1080x1920 9:16 Instagram Reel",
 "production":"four independent professional short-form edits — each Reel has a different topic and pillar",
@@ -330,7 +337,7 @@ manifest={
 "story_engine":{"beats":["hook","visual proof","context","detail","meaning","CTA"],"rule":"One clear cultural idea per Reel; no random clip montage."},
 "editorial_scorecard":{"hook":"immediate","visual_change":"high","information_density":"one clear idea per Reel","ending":"clean CTA"},
 "asset_screening":{"creator_name_risk":"reject","platform_mark_risk":"reject","visual_watermark_risk":"sampled-frame OCR reject","third_party_content":"reject","attribution":"preserve in rights record"},
-"rights_review_required":True,
+"rights_review_required":True,\n"user_supplied_source":{"provided":bool(source_url),"rights_assumption":"user must confirm ownership/permission before use" if source_url else None},
 "reels":reels}
 (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2,ensure_ascii=False))
 (OUT/"README.txt").write_text("Festival of Bharat — professional daily Reel batch\nSix-beat edit: hook → visual proof → context → detail → meaning → CTA.\n1080x1920, 30fps, no embedded commercial music. Add eligible/trending Instagram audio after approval.\nRisky creator/platform/watermarked sources are rejected rather than stripped. Verify rights before posting.\n")

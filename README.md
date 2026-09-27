@@ -20,7 +20,8 @@ V25 connects V24 local performance memory to the creative director. Historical r
 ## Automation
 The Daily 4 Reels workflow runs at 06:00 IST and can also be started manually from GitHub Actions. It supports an optional topic and an optional public MP4 source URL. The pipeline downloads/processes source footage, creates four 1080x1920/30fps MP4 variants, runs a quality gate with one self-re-encode fallback, and uploads the final files plus a production manifest as a 7-day Actions artifact. Instagram audio is added in Instagram after human approval.
 
-
 Studio Day 1 launch trigger: 2026-09-27 — automated 4-Reel production started.
 
 Production retry trigger: 2026-09-27 — fresh 4-Reel batch requested using latest rights/rate-limit fixes.
+
+Vercel deployment trigger: 2026-09-27 — latest AI employee production telemetry build.

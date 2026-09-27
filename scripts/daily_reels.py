@@ -122,9 +122,56 @@ daily_topics=choose_four_topics()
 source_url=os.getenv("SOURCE_URL","").strip()
 
 STAGES=OUT/"stages"; STAGES.mkdir(exist_ok=True)
+
+# Live production telemetry is written to a dedicated GitHub "status" branch.
+# This keeps the dashboard accurate without pushing status commits to main
+# (which would otherwise trigger another production run).
+STATUS_API="https://api.github.com"
+REPO=os.getenv("GITHUB_REPOSITORY","shahvrushabh646-wq/festival-of-bharat-ai-studio")
+GH_TOKEN=os.getenv("GITHUB_TOKEN","").strip()
+STATUS_BRANCH="status"
+
+def publish_status(percent, team, employee, task, phase, departments=None, reel=None):
+    if not GH_TOKEN:
+        return
+    payload={
+        "date":today_key,
+        "run_id":os.getenv("GITHUB_RUN_ID",""),
+        "run_number":os.getenv("GITHUB_RUN_NUMBER",""),
+        "overall_percent":percent,
+        "phase":phase,
+        "current_team":team,
+        "current_employee":employee,
+        "current_task":task,
+        "reel":reel,
+        "departments":departments or {}
+    }
+    try:
+        data=json.dumps(payload,ensure_ascii=False).encode()
+        headers={"Authorization":f"Bearer {GH_TOKEN}","Accept":"application/vnd.github+json",
+                 "X-GitHub-Api-Version":"2022-11-28","User-Agent":UA}
+        path="/repos/"+REPO+"/contents/status/status.json"
+        # Read the current status file on the status branch to obtain its SHA.
+        req=urllib.request.Request(STATUS_API+path+"?ref="+STATUS_BRANCH,headers=headers)
+        sha=None
+        try:
+            with urllib.request.urlopen(req,timeout=20) as r:
+                old=json.loads(r.read().decode())
+                sha=old.get("sha")
+        except Exception:
+            pass
+        body={"message":f"live status: {employee}","content":__import__("base64").b64encode(data).decode(),
+              "branch":STATUS_BRANCH}
+        if sha: body["sha"]=sha
+        req=urllib.request.Request(STATUS_API+path,data=json.dumps(body).encode(),headers={**headers,"Content-Type":"application/json"},method="PUT")
+        with urllib.request.urlopen(req,timeout=20) as r: r.read()
+    except Exception as e:
+        print("status telemetry skipped:",e)
+
 def stage(name,data):
     (STAGES/f"{name}.json").write_text(json.dumps(data,indent=2,ensure_ascii=False))
 
+publish_status(10,"Strategy & Research","Trend Researcher","Selecting a culturally relevant India trend","trend",{"Strategy & Research":"working","Creative & Story":"waiting","Production":"waiting","Quality & Growth":"waiting"})
 stage("01-trend",{
     "status":"complete",
     "daily_plan":"four_distinct_topics",
@@ -133,6 +180,7 @@ stage("01-trend",{
     "trend_topic":trend_topic,
     "topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)]
 })
+publish_status(18,"Strategy & Research","Content Manager","Building the four-topic daily strategy","strategy",{"Strategy & Research":"working","Creative & Story":"waiting","Production":"waiting","Quality & Growth":"waiting"})
 stage("02-strategy",{
     "status":"complete",
     "objective":"Create four useful Indian-culture Reels with four different topics and pillars",
@@ -142,6 +190,7 @@ stage("02-strategy",{
     "cta":"save/share/follow"
 })
 for i,item in enumerate(daily_topics,1):
+    publish_status(20+i*4,"Strategy & Research","Cultural Researcher",f"Researching Reel {i}: {item["topic"]}","research",{"Strategy & Research":"working","Creative & Story":"waiting","Production":"waiting","Quality & Growth":"waiting"},i)
     stage(f"03-research-{i:02d}",{
         'status':'research_gate','reel':i,'topic':item['topic'],'fact':item['fact'],
         'verification_required':True,
@@ -167,6 +216,7 @@ for i,item in enumerate(daily_topics,1):
         "visual_direction":"cinematic realistic Indian culture; original editorial treatment; no random montage"
     })
 assets_by_reel={}
+publish_status(38,"Creative & Story","Creative Director","Turning four researched topics into distinct Reel stories","creative",{"Strategy & Research":"complete","Creative & Story":"working","Production":"waiting","Quality & Growth":"waiting"})
 instagram_refs=[
  {"type":"explore","url":"https://www.instagram.com/explore/","use":"trend discovery"},
  {"type":"hashtag","url":"https://www.instagram.com/explore/tags/indianculture/","use":"culture patterns"},
@@ -259,6 +309,7 @@ def visual_risk(path):
     except Exception: return False
 
 for reel_no,item in enumerate(daily_topics,1):
+    publish_status(40+reel_no*7,"Production","Footage Scout",f"Scouting clean licensed visuals for Reel {reel_no}","footage",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"working","Quality & Growth":"waiting"},reel_no)
     pool=scout_topic(item,reel_no)
     pool=[a for a in pool if not visual_risk(a["file"])]
     if len(pool)<4:
@@ -335,8 +386,10 @@ def music_direction(item):
 
 reels=[]
 for i,(item,style) in enumerate(zip(daily_topics,styles),1):
+    publish_status(68+i*5,"Production","Video Editor",f"Editing and rendering Reel {i}","edit",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"working","Quality & Growth":"waiting"},i)
     reels.append(render_reel(i,style,item,assets_by_reel[i]))
 
+publish_status(90,"Quality & Growth","Quality Manager","Checking all four final exports before approval","quality",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"complete","Quality & Growth":"working"})
 for i,(item,reel) in enumerate(zip(daily_topics,reels),1):
     stage(f"08-edit-{i:02d}",{"status":"complete","reel":i,"topic":item["topic"],"format":"1080x1920","fps":30,"audio":"none","result":reel})
     stage(f"09-quality-{i:02d}",{"status":"complete","reel":i,"topic":item["topic"],"quality":reel["quality"]})
@@ -350,6 +403,7 @@ for i,(item,reel) in enumerate(zip(daily_topics,reels),1):
 stage("12-four-reels",{"status":"complete","count":4,"distinct_topics":[x["topic"] for x in daily_topics],
       "distinct_pillars":[x["pillar"] for x in daily_topics],"files":[r["file"] for r in reels],
       "rule":"Four different topics; four independent production tracks."})
+publish_status(96,"Quality & Growth","AI Manager","Four Reels complete — waiting for human approval","approval",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"complete","Quality & Growth":"working"})
 stage("13-approval",{"status":"pending_human","rule":"No automatic publishing; human approval required."})
 analytics_file=os.getenv("ANALYTICS_JSON","").strip()
 analytics={}
@@ -378,6 +432,7 @@ manifest={
 "music_policy":MUSIC_POLICY,
 "user_supplied_source":{"provided":bool(source_url),"rights_assumption":"user must confirm ownership/permission before use" if source_url else None},
 "reels":reels}
+publish_status(100,"Quality & Growth","Learning Manager","Batch complete — ready for human approval","complete",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"complete","Quality & Growth":"complete"})
 (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2,ensure_ascii=False))
 (OUT/"README.txt").write_text("Festival of Bharat — professional daily Reel batch\nSix-beat edit: hook → visual proof → context → detail → meaning → CTA.\n1080x1920, 30fps, no embedded commercial music. Add eligible/trending Instagram audio after approval.\nRisky creator/platform/watermarked sources are rejected rather than stripped. Verify rights before posting.\n")
 (OUT/"creator-pack.json").write_text(json.dumps({"topics":[x["topic"] for x in daily_topics],"caption_direction":"Lead with the useful cultural fact, then invite a save/share.","music_direction":"Use eligible/trending Instagram audio inside Instagram; do not embed commercial music in the master.","posting_note":"Human approval required before publishing."},indent=2))

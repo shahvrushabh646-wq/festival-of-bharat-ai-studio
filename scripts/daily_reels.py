@@ -496,6 +496,13 @@ def quality_check(path):
     return {"pass":all(checks.values()),"checks":checks,"duration":round(dur,2),"width":w,"height":h,"codec":codec}
 
 def render_reel(idx,style,item,assets):
+    # Final hard safety guard: render_reel must never receive an empty asset list.
+    # This is intentionally redundant with visual sourcing so a future sourcing change
+    # cannot reintroduce the assets[... % len(assets)] crash.
+    if not assets:
+        fallback=make_local_fallback_asset(item,idx)
+        assets=[fallback,fallback,fallback,fallback]
+        print(f"Reel {idx}: render guard created an original fallback asset.")
     name,label,order,durations,tempo=style
     texts=[f"STOP SCROLLING: {item['title']}",f"LOOK CLOSER • {item['pillar']}",item["fact"],
            "This is the detail most quick videos skip.","Now you know what you're actually seeing.",

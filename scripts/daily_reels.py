@@ -657,26 +657,6 @@ stage("15-learning",{"status":"complete" if analytics else "baseline_ready",
       "next_batch_adjustments":{"retain":"strong hooks + visual change + one useful idea",
       "test":"opening visual, pacing, cover text, CTA","do_not_copy":"creator content or copyrighted clips"}})
 
-manifest={
-"generated_at":datetime.now(timezone.utc).isoformat(),
-"daily_key":today_key,
-"reference_intelligence":{"instagram":instagram_refs,"pinterest":pinterest_refs,"canva":canva_refs},
-"topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)],
-"employee_roster":EMPLOYEE_ROSTER,
-"departments":["Strategy & Research","Creative & Story","Production","Quality & Growth"],
-"format":"1080x1920 9:16 Instagram Reel",
-"production":"four independent professional short-form edits — each Reel has a different topic and pillar; visual direction informed by Instagram, Pinterest, Google and Canva",
-"production_window":"02:00–06:00 IST overnight production; morning human review and edit pass follows.",
-"edit_request":edit_request or None,
-"content_rule":USEFUL_RULE,
-"diversity_rule":"No two Reels in the same daily batch may use the same topic or editorial pillar.",
-"story_engine":{"beats":["hook","visual proof","context","detail","meaning","CTA"],"rule":"One clear cultural idea per Reel; no random clip montage."},
-"editorial_scorecard":{"hook":"immediate","visual_change":"high","information_density":"one clear idea per Reel","ending":"clean CTA"},
-"asset_screening":{"creator_name_risk":"reject","platform_mark_risk":"reject","visual_watermark_risk":"sampled-frame OCR reject","third_party_content":"reject","attribution":"preserve in rights record"},
-"rights_review_required":True,
-"music_policy":MUSIC_POLICY,
-"user_supplied_source":{"provided":bool(source_url),"rights_assumption":"user must confirm ownership/permission before use" if source_url else None},
-"reels":reels}
 EMPLOYEE_ROSTER=[
  {"department":"Strategy & Research","employee":"Content Manager"},
  {"department":"Strategy & Research","employee":"Trend Researcher"},
@@ -701,6 +681,27 @@ EMPLOYEE_ROSTER=[
  {"department":"Quality & Growth","employee":"Learning Manager"},
  {"department":"Quality & Growth","employee":"AI Manager / CEO"}
 ]
+
+manifest={
+"generated_at":datetime.now(timezone.utc).isoformat(),
+"daily_key":today_key,
+"reference_intelligence":{"instagram":instagram_refs,"pinterest":pinterest_refs,"canva":canva_refs},
+"topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)],
+"employee_roster":EMPLOYEE_ROSTER,
+"departments":["Strategy & Research","Creative & Story","Production","Quality & Growth"],
+"format":"1080x1920 9:16 Instagram Reel",
+"production":"four independent professional short-form edits — each Reel has a different topic and pillar; visual direction informed by Instagram, Pinterest, Google and Canva",
+"production_window":"02:00–06:00 IST overnight production; morning human review and edit pass follows.",
+"edit_request":edit_request or None,
+"content_rule":USEFUL_RULE,
+"diversity_rule":"No two Reels in the same daily batch may use the same topic or editorial pillar.",
+"story_engine":{"beats":["hook","visual proof","context","detail","meaning","CTA"],"rule":"One clear cultural idea per Reel; no random clip montage."},
+"editorial_scorecard":{"hook":"immediate","visual_change":"high","information_density":"one clear idea per Reel","ending":"clean CTA"},
+"asset_screening":{"creator_name_risk":"reject","platform_mark_risk":"reject","visual_watermark_risk":"sampled-frame OCR reject","third_party_content":"reject","attribution":"preserve in rights record"},
+"rights_review_required":True,
+"music_policy":MUSIC_POLICY,
+"user_supplied_source":{"provided":bool(source_url),"rights_assumption":"user must confirm ownership/permission before use" if source_url else None},
+"reels":reels}
 
 employee_handoff(100,"Quality & Growth","Learning Manager","Record baseline learning and prepare next-batch adjustments","learning")
 (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2,ensure_ascii=False))

@@ -47,6 +47,40 @@ jobs:
           SOURCE_URL: ${{ github.event.inputs.source_url }}
           EDIT_REQUEST: ${{ github.event.inputs.edit_request }}
         run: python3 scripts/daily_reels.py
+      - name: Record failed production status
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHA="$(gh api "repos/${GITHUB_REPOSITORY}/contents/status/status.json?ref=status" --jq '.sha' 2>/dev/null || true)"
+          python3 - <<'PY' > /tmp/failure-status.json
+          import json, os, datetime
+          now=datetime.datetime.now(datetime.timezone.utc).isoformat()
+          ist=datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+          print(json.dumps({
+            "date": datetime.datetime.now(ist).date().isoformat(),
+            "run_id": os.environ.get("GITHUB_RUN_ID"),
+            "run_number": os.environ.get("GITHUB_RUN_NUMBER"),
+            "overall_percent": 54,
+            "phase": "failed",
+            "current_team": "Production",
+            "current_employee": "AI Manager / CEO",
+            "current_task": "Production failed. Open Run to view the error and recovery status.",
+            "reel": None,
+            "departments": {"Strategy & Research":"complete","Creative & Story":"complete","Production":"failed","Quality & Growth":"waiting"},
+            "updated_at": now,
+            "elapsed_seconds": None,
+            "history": [],
+            "error": "Production workflow failed. Check the GitHub Actions run logs."
+          }))
+          PY
+          CONTENT="$(base64 -w0 /tmp/failure-status.json)"
+          if [ -n "$SHA" ]; then
+            gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/status/status.json" -f message="Record failed production status" -f content="$CONTENT" -f branch="status" -f sha="$SHA" >/dev/null
+          else
+            gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/status/status.json" -f message="Record failed production status" -f content="$CONTENT" -f branch="status" >/dev/null
+          fi
+
       - name: Upload four MP4 Reels
         uses: actions/upload-artifact@v4
         with:

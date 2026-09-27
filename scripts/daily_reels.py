@@ -68,7 +68,7 @@ stage("04-script",{"status":"complete","beats":[{"time":"0-2s","role":"HOOK","te
 stage("05-storyboard",{"status":"complete","format":"9:16 vertical","beats":["hook","proof","context","detail","meaning","CTA"],"visual_direction":"cinematic realistic Indian culture; no random montage"})
 assets=[]
 
-WATERMARK_RISK=re.compile(r"watermark|youtube|instagram|tiktok|facebook|reel|shorts|channel|creator|@\w+|©|www\.|https?://",re.I)
+WATERMARK_RISK=re.compile(r"watermark|youtube|instagram|tiktok|facebook|vimeo|dailymotion|@\w+|©|www\.|https?://",re.I)
 def reject_source(title,author,page):
     return bool(WATERMARK_RISK.search(" ".join([str(title or ""),str(author or ""),str(page or "")])))
 def add_source_asset(title,url,license_name,author,page,file_path=None,kind="video"):
@@ -117,7 +117,7 @@ def visual_risk(path):
         if not tmp.exists():return False
         try:out=run(["tesseract",str(tmp),"stdout","--psm","11"],False).stdout
         finally:tmp.unlink(missing_ok=True)
-        return bool(re.search(r"youtube|instagram|tiktok|facebook|@\w+|www\.|\.com\b",out,re.I))
+        return bool(re.search(r"youtube|instagram|tiktok|facebook|vimeo|dailymotion|@\w+|www\.|\.com\b",out,re.I))
     except Exception:return False
 assets=[a for a in assets if not visual_risk(a["file"])]
 if len(assets)<6:raise RuntimeError("Visual watermark/platform screening left fewer than six clean assets.")

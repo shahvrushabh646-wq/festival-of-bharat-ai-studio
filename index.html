@@ -43,7 +43,7 @@ button,input,textarea{font:inherit}.app{min-height:100vh;display:grid;grid-templ
       <div class="eyebrow">Start production</div><h3>Make today's four Reels</h3>
       <p class="mini">The browser only starts the cloud workflow. FFmpeg and visual sourcing run in GitHub Actions.</p>
       <input id="topic" class="input" placeholder="Optional topic — leave blank for filtered India trend">
-      <div class="controls"><button class="btn primary" id="makeBtn">MAKE REELS NOW</button></div>
+      <div class="controls"><button class="btn primary" id="makeBtn">MAKE REELS NOW</button><button class="btn" id="planBtn">PLAN ONLY</button></div>
       <div id="startMsg" class="notice" style="margin-top:10px">Human approval remains required before publishing.</div>
     </div>
   </div>
@@ -157,11 +157,11 @@ $("sendEdit").onclick=async()=>{
  $("sendEdit").disabled=true;$("editMsg").textContent="Dispatching targeted re-edit…";
  try{const r=await fetch("/api/run-reels",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({edit_request:`Reel ${selectedEdit}: ${notes}`})});const j=await r.json();if(!r.ok)throw new Error(j.error||"Dispatch failed");$("editMsg").textContent="Re-edit dispatched. Other Reels are unchanged.";setTimeout(closeEdit,900)}catch(e){$("editMsg").textContent=e.message}finally{$("sendEdit").disabled=false}
 };
-async function start(){
- const btn=$("makeBtn");btn.disabled=true;$("startMsg").textContent="Dispatching GitHub Actions production…";
- try{const r=await fetch("/api/run-reels",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({topic:$("topic").value.trim()})});const j=await r.json();if(!r.ok)throw new Error(j.error||"Could not start");$("startMsg").textContent=j.message||"Production started. Open Production Runs to watch it.";getStatus()}catch(e){$("startMsg").textContent=e.message}finally{btn.disabled=false}
+async function start(planOnly=false){
+ const btn=planOnly?$("planBtn"):$("makeBtn");btn.disabled=true;$("startMsg").textContent="Dispatching GitHub Actions production…";
+ try{const r=await fetch("/api/run-reels",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({topic:$("topic").value.trim(),plan_only:planOnly})});const j=await r.json();if(!r.ok)throw new Error(j.error||"Could not start");$("startMsg").textContent=j.message||"Production started. Open Production Runs to watch it.";getStatus()}catch(e){$("startMsg").textContent=e.message}finally{btn.disabled=false}
 }
-$("makeBtn").onclick=start;
+$("makeBtn").onclick=()=>start(false);$("planBtn").onclick=()=>start(true);
 
 function renderTeam(){
  const deps=status?.departments||{};

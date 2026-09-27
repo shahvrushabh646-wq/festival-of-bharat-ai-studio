@@ -37,6 +37,25 @@ function v100Run(mode){
   </div>
   <div style="margin-top:10px;font-size:10px;color:#748396">The workflow runs in the cloud, so your browser does not need to stay open.</div><div id="instantProductionStatus" style="margin-top:9px;font-size:10px;color:#67a8ff"></div>
 </section>
+<section class="card" id="morningReview" style="margin-top:18px;border-color:#6a5529;background:linear-gradient(135deg,#17140d,#0c1118)">
+  <div class="eyebrow">06:00 IST • MORNING HUMAN REVIEW</div>
+  <h2>Review the 4 Reels → Tell the team what to change</h2>
+  <p class="small">The overnight team works during the 02:00–06:00 IST production window. When the batch is ready, watch the four MP4s below, write your changes, and send the instruction back to the production team.</p>
+  <div class="briefgrid" style="margin-top:10px">
+    <div class="brief"><b>02:00–06:00</b><span class="small">Strategy → research → creative → footage → rights → editing → quality.</span></div>
+    <div class="brief"><b>06:00 onward</b><span class="small">You review. Nothing is posted automatically.</span></div>
+  </div>
+  <div id="morningReviewStatus" class="notice">Checking latest finished batch…</div>
+  <div id="morningReviewVideos" class="clips" style="margin-top:12px"></div>
+  <div style="margin-top:14px">
+    <b style="font-size:12px">What should the team change?</b>
+    <textarea id="editRequest" rows="5" placeholder="Example: Reel 1: make the hook stronger and faster. Reel 2: remove the text overlays. Reel 3: slow the middle section. Keep Reel 4 unchanged." style="width:100%;margin-top:7px;background:#090e15;color:#fff;border:1px solid #334354;border-radius:9px;padding:11px;resize:vertical"></textarea>
+    <div class="controls">
+      <button class="btn gold" id="sendEditRequest">SEND TO AI TEAM FOR RE-EDIT</button>
+      <span id="editRequestStatus" class="small"></span>
+    </div>
+  </div>
+</section>
 <section class="card" id="liveProductionProgress" style="margin-top:18px;border-color:#33485f">
   <div class="eyebrow">AI PRODUCTION TEAM</div>
   <h2>Today's 4-Reel Production</h2>
@@ -188,6 +207,34 @@ loadLiveProduction();setInterval(loadLiveProduction,10000);
   <div id="dailyAutoCards" style="margin-top:12px"></div>
 </section>
 <script>
+let LATEST_BATCH=null;
+async function loadMorningReview(){
+  const s=document.getElementById('morningReviewStatus'),o=document.getElementById('morningReviewVideos');
+  try{
+    const r=await fetch('/api/latest-reels?cache='+Date.now()); const d=await r.json();
+    if(!r.ok||!d.ready){s.textContent='No completed overnight batch is available yet. The team will publish the finished batch after the production run.';o.innerHTML='';return;}
+    LATEST_BATCH=d;
+    s.textContent='Batch ready: '+new Date(d.date).toLocaleString('en-IN')+' • '+d.assets.length+' Reel files available for your review.';
+    o.innerHTML=d.assets.map((a,i)=>'<div class="clip"><video src="'+a.download_url+'" controls playsinline></video><div class="meta">REEL '+(i+1)+' • '+a.name+'<br><a target="_blank" rel="noopener" href="'+a.download_url+'">Open full MP4</a></div></div>').join('');
+  }catch(e){s.textContent='Could not load the morning review batch yet.';}
+}
+async function sendEditRequest(){
+  const box=document.getElementById('editRequest'),s=document.getElementById('editRequestStatus');
+  const edit_request=box.value.trim();
+  if(!edit_request){s.textContent='Write at least one change for the team.';return;}
+  const btn=document.getElementById('sendEditRequest');btn.disabled=true;s.textContent='Sending the instruction to the AI production team…';
+  try{
+    const r=await fetch('/api/run-reels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({edit_request})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'Could not start re-edit');
+    s.textContent='Re-edit run started. The team will apply your instruction and prepare a revised batch.';
+    box.value='';
+    loadLiveProduction();
+  }catch(e){s.textContent='Re-edit could not start: '+e.message}
+  finally{btn.disabled=false}
+}
+document.getElementById('sendEditRequest').onclick=sendEditRequest;
+loadMorningReview();
 async function loadLatestDailyReels(){
   const s=document.getElementById('dailyAutoStatus'),o=document.getElementById('dailyAutoCards');
   s.textContent='Checking latest completed batch…';

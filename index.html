@@ -7,7 +7,7 @@
 <section style="margin:18px 0;padding:18px;border:1px solid #2d3748;border-radius:16px;background:linear-gradient(135deg,#111827,#0b1220)">
   <div style="font-size:12px;letter-spacing:.12em;color:#94a3b8">V100 • FESTIVAL OF BHARAT AI CREATOR OS</div>
   <h2 style="margin:6px 0 8px">Full Creator Autopilot</h2>
-  <p style="margin:0 0 14px;color:#cbd5e1">Trend → Strategy → Idea → Script → Storyboard → Footage → Rights → Edit → Quality → Re-edit → Caption/Cover → 4 Reels → Approval → Analytics → Learning</p>
+  <p style="margin:0 0 14px;color:#cbd5e1">Trend → Strategy → Idea → Script → Storyboard → Visual Sources → Rights → Edit → Quality → Re-edit → Caption/Cover → 4 Reels → Approval → Analytics → Learning</p>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button onclick="v100Run('Daily strategy')">Run Daily Strategy</button>
     <button onclick="v100Run('Build 4 reels')">Build 4-Reel Plan</button>
@@ -40,7 +40,7 @@ function v100Run(mode){
 <section class="card" id="morningReview" style="margin-top:18px;border-color:#6a5529;background:linear-gradient(135deg,#17140d,#0c1118)">
   <div class="eyebrow">06:00 IST • MORNING HUMAN REVIEW</div>
   <h2>Review the 4 Reels → Tell the team what to change</h2>
-  <p class="small">The overnight team works during the 02:00–06:00 IST production window. When the batch is ready, watch the four MP4s below, write your changes, and send the instruction back to the production team.</p>
+  <p class="small">The overnight team works during the 02:00–06:00 IST production window. When the batch is ready, watch all four MP4s below, approve any Reel you are happy with, or select any Reel for targeted re-edit.</p>
   <div class="briefgrid" style="margin-top:10px">
     <div class="brief"><b>02:00–06:00</b><span class="small">Strategy → research → creative → footage → rights → editing → quality.</span></div>
     <div class="brief"><b>06:00 onward</b><span class="small">You review. Nothing is posted automatically.</span></div>
@@ -220,22 +220,22 @@ function renderReviewSequence(){
   const total=LATEST_BATCH.assets.length, decided=Object.keys(REVIEW_STATE.decisions).length;
   o.innerHTML=LATEST_BATCH.assets.map((a,i)=>{
     const decision=REVIEW_STATE.decisions[i]||'', editing=REVIEW_STATE.editing===i;
-    const stateText=decision==='approved'?'APPROVED ✓':decision==='edit'?'REJECTED — EDIT REQUEST SENT':editing?'NEEDS EDIT — WRITE CHANGES BELOW':'WAITING FOR YOUR DECISION';
+    const stateText=decision==='approved'?'APPROVED ✓':decision==='edit'?'RE-EDIT IN PROGRESS':editing?'NEEDS EDIT — WRITE CHANGES BELOW':'WAITING FOR YOUR DECISION';
     const stateClass=decision==='approved'?'ok':decision==='edit'?'warn':editing?'blue':'gold';
     return '<div class="clip" style="border-color:'+(decision==='approved'?'#275f42':decision==='edit'?'#6a5529':editing?'#3b6fa8':'#202a35')+'">'+
       '<video src="'+a.download_url+'" controls playsinline></video>'+
       '<div class="meta"><b>REEL '+(i+1)+'</b> • '+a.name+'<br><a target="_blank" rel="noopener" href="'+a.download_url+'">Open full MP4</a>'+
       '<div class="'+stateClass+'" style="margin-top:7px;font-size:9px;font-weight:900">'+stateText+'</div>'+
       '<div class="controls" style="margin-top:8px">'+
-      '<button class="btn" '+(decision||editing?'disabled':'')+' onclick="approveMorningReel('+i+')">✓ APPROVED</button>'+
-      '<button class="btn gold" '+(decision||editing?'disabled':'')+' onclick="requestMorningReelEdit('+i+')">✕ REJECT / EDIT</button>'+
+      '<button class="btn" '+(decision?'disabled':'')+' onclick="approveMorningReel('+i+')">✓ APPROVED</button>'+\
+      '<button class="btn gold" '+(decision?'disabled':'')+' onclick="requestMorningReelEdit('+i+')">✕ REJECT / EDIT</button>'+
       '</div></div></div>';
   }).join('');
   if(decided>=total){
-    status.textContent='ALL 4 REELS REVIEWED. Approved Reels are kept; rejected Reels are sent for re-edit.';
+    status.textContent='ALL 4 REELS DECIDED. Approved Reels stay approved; rejected Reels are re-edited separately.';
     status.className='notice ok';
   }else if(REVIEW_STATE.editing!=null){
-    status.textContent='REEL '+(REVIEW_STATE.editing+1)+' is selected for editing. Write the exact changes below.';
+    status.textContent='REEL '+(REVIEW_STATE.editing+1)+' is selected for editing. You can continue reviewing the other Reels.';
     status.className='notice';
   }else{
     status.textContent=(total-decided)+' Reel(s) still waiting for your decision. You can review all four together in any order.';
@@ -243,7 +243,7 @@ function renderReviewSequence(){
   }
 }
 function approveMorningReel(i){
-  if(REVIEW_STATE.decisions[i]||REVIEW_STATE.editing!=null)return;
+  if(REVIEW_STATE.decisions[i])return;
   REVIEW_STATE.decisions[i]='approved';
   saveReviewState();
   renderReviewSequence();
@@ -251,7 +251,7 @@ function approveMorningReel(i){
 function requestMorningReelEdit(i){
   if(REVIEW_STATE.decisions[i])return;
   REVIEW_STATE.editing=i;
-  document.getElementById('selectedReelForEdit').textContent='Editing REEL '+(i+1)+'. Write only the changes you want for this Reel.';
+  document.getElementById('selectedReelForEdit').textContent='Editing REEL '+(i+1)+'. You can still approve or review the other Reels.';
   document.getElementById('editRequest').focus();
   saveReviewState();
   renderReviewSequence();

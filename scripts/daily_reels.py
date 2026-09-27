@@ -121,6 +121,7 @@ def choose_four_topics():
 
 daily_topics=choose_four_topics()
 source_url=os.getenv("SOURCE_URL","").strip()
+edit_request=os.getenv("EDIT_REQUEST","").strip()
 
 STAGES=OUT/"stages"; STAGES.mkdir(exist_ok=True)
 
@@ -212,6 +213,8 @@ stage("01-trend",{
     "daily_plan":"four_distinct_topics",
     "trend_source":"Google Trends India RSS",
     "user_topic":user_topic or None,
+    "edit_request":edit_request or None,
+    "production_window":"02:00–06:00 IST",
     "trend_topic":trend_topic,
     "topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)]
 })
@@ -374,6 +377,17 @@ def render_reel(idx,style,item,assets):
     texts=[f"STOP SCROLLING: {item['title']}",f"LOOK CLOSER • {item['pillar']}",item["fact"],
            "This is the detail most quick videos skip.","Now you know what you're actually seeing.",
            "SAVE THIS • FOLLOW FESTIVAL OF BHARAT"]
+    # Apply concrete human feedback during the morning re-edit pass.
+    req=edit_request.lower()
+    if req:
+        if any(x in req for x in ["remove text","no text","without text"]):
+            texts=[""]*6
+        if "hook" in req and "strong" in req:
+            texts[0]=f"YOU NEED TO KNOW: {item['title']}"
+        if any(x in req for x in ["faster","fast pace","quick"]):
+            durations=[max(1.2,d*0.82) for d in durations]
+        if any(x in req for x in ["slower","slow pace"]):
+            durations=[d*1.15 for d in durations]
     roles=["HOOK","VISUAL PROOF","CONTEXT","DETAIL","MEANING","CTA"]; clips=[]
     for j,(ai,d) in enumerate(zip(order,durations)):
         raw=OUT/f"_raw{idx}_{j}.mp4"; styled=OUT/f"_cut{idx}_{j}.mp4"
@@ -399,7 +413,7 @@ def render_reel(idx,style,item,assets):
         return render_reel(idx,alt,item,assets)
     dur,w,h,codec=probe(final)
     result={"file":final.name,"reel":idx,"topic":item["topic"],"pillar":item["pillar"],"title":item["title"],
-            "style":label,"tempo":tempo,"duration":round(dur,2),"quality":q}
+            "style":label,"tempo":tempo,"duration":round(dur,2),"quality":q,"edit_request_applied":edit_request or None}
     for p in clips+[OUT/f"_raw{idx}_{j}.mp4" for j in range(6)]: p.unlink(missing_ok=True)
     return result
 
@@ -439,7 +453,7 @@ stage("12-four-reels",{"status":"complete","count":4,"distinct_topics":[x["topic
       "distinct_pillars":[x["pillar"] for x in daily_topics],"files":[r["file"] for r in reels],
       "rule":"Four different topics; four independent production tracks."})
 publish_status(96,"Quality & Growth","AI Manager","Four Reels complete — waiting for human approval","approval",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"complete","Quality & Growth":"working"})
-stage("13-approval",{"status":"pending_human","rule":"No automatic publishing; human approval required."})
+stage("13-approval",{"status":"pending_human","review_window":"Morning review after overnight 02:00–06:00 IST production","rule":"No automatic publishing; human approval required.","edit_request_received":bool(edit_request),"edit_request":edit_request or None})
 analytics_file=os.getenv("ANALYTICS_JSON","").strip()
 analytics={}
 if analytics_file and Path(analytics_file).exists():
@@ -458,6 +472,8 @@ manifest={
 "topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)],
 "format":"1080x1920 9:16 Instagram Reel",
 "production":"four independent professional short-form edits — each Reel has a different topic and pillar",
+"production_window":"02:00–06:00 IST overnight production; morning human review and edit pass follows.",
+"edit_request":edit_request or None,
 "content_rule":USEFUL_RULE,
 "diversity_rule":"No two Reels in the same daily batch may use the same topic or editorial pillar.",
 "story_engine":{"beats":["hook","visual proof","context","detail","meaning","CTA"],"rule":"One clear cultural idea per Reel; no random clip montage."},

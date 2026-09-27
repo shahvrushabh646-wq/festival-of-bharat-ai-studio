@@ -30,7 +30,7 @@ def trends():
         culture=re.compile(r"ganesh|ganpati|bappa|festival|diwali|holi|navratri|garba|krishna|janmashtami|shiva|mahadev|temple|india|bharat|pooja|puja|utsav|mela|heritage|culture",re.I)
         for t in titles:
             if culture.search(t): return t
-        return titles[0] if titles else "Indian culture"
+        return "Indian culture"
     except Exception:return "Indian culture"
 
 USEFUL_RULE=("Every Reel must teach, explain, preserve, or give practical cultural context about an Indian "
@@ -41,7 +41,7 @@ source_url=os.getenv("SOURCE_URL","").strip()
 styles=[
 ("moment","THE MOMENT",[0,1,2,3,4,5],[2.2,1.9,2.0,2.0,1.8,1.8],"emotion-first"),
 ("detail","THE DETAIL",[2,4,1,5,0,3],[1.6,1.7,1.8,1.8,1.9,2.0],"detail-first"),
-("energy","THE ENERGY",[1,3,5,0,4,2],[1.15,1.25,1.35,1.45,1.55,1.65],"fast-cut"),
+("energy","THE ENERGY",[1,3,5,0,4,2],[1.6,1.6,1.6,1.6,1.6,1.6],"fast-cut"),
 ("meaning","THE MEANING",[3,2,0,5,4,1],[2.0,2.1,2.2,2.1,2.0,2.0],"documentary")]
 
 topic_profiles=[
@@ -68,9 +68,11 @@ stage("04-script",{"status":"complete","beats":[{"time":"0-2s","role":"HOOK","te
 stage("05-storyboard",{"status":"complete","format":"9:16 vertical","beats":["hook","proof","context","detail","meaning","CTA"],"visual_direction":"cinematic realistic Indian culture; no random montage"})
 assets=[]
 
-WATERMARK_RISK=re.compile(r"watermark|youtube|instagram|tiktok|facebook|vimeo|dailymotion|@\w+|©|www\.|https?://",re.I)
-def reject_source(title,author,page):
-    return bool(WATERMARK_RISK.search(" ".join([str(title or ""),str(author or ""),str(page or "")])))
+WATERMARK_RISK=re.compile(r"watermark|\b(?:youtube|instagram|tiktok|facebook|vimeo|dailymotion)\b|@\w+|©|\bwww\b|https?://",re.I)
+def reject_source(title,author,page=""):
+    # Commons page URLs are provenance, not evidence of an overlaid watermark.
+    return bool(WATERMARK_RISK.search(" ".join([str(title or ""),str(author or "")])))
+
 def add_source_asset(title,url,license_name,author,page,file_path=None,kind="video"):
     if reject_source(title,author,page):
         print("REJECTED creator/platform risk:",title); return False
@@ -111,14 +113,22 @@ if len(assets)<6:scout_wikimedia()
 if len(assets)<6:raise RuntimeError("Not enough clean, rights-reviewable footage; risky/random sources were rejected.")
 
 def visual_risk(path):
-    try:
-        tmp=RAW/(Path(path).stem+"_ocr.jpg")
-        run(["ffmpeg","-y","-ss","0.8","-i",str(path),"-frames:v","1","-q:v","3",str(tmp)],False)
-        if not tmp.exists():return False
-        try:out=run(["tesseract",str(tmp),"stdout","--psm","11"],False).stdout
+    # Fail closed if a frame cannot be sampled or OCR is unavailable.
+    duration,_,_,_=probe(path)
+    samples=sorted(set([0.5,max(0.5,duration*0.5),max(0.5,duration-0.5)]))
+    risk=re.compile(r"\b(?:youtube|instagram|tiktok|facebook|vimeo|dailymotion)\b|@\w+|www\.|\.com\b|https?://",re.I)
+    for stamp in samples:
+        tmp=RAW/(Path(path).stem+"_ocr_"+str(int(stamp*10))+".jpg")
+        try:
+            seek=[] if Path(path).suffix.lower() in [".jpg",".jpeg",".png",".webp"] else ["-ss",str(stamp)]
+            sampled=run(["ffmpeg","-v","error","-y",*seek,"-i",str(path),"-frames:v","1","-q:v","3",str(tmp)],False)
+            if sampled.returncode or not tmp.exists():raise RuntimeError("OCR frame sampling failed")
+            result=run(["tesseract",str(tmp),"stdout","--psm","11"],False)
+            if result.returncode:raise RuntimeError("Tesseract OCR is required for rights screening")
+            if risk.search(result.stdout):return True
         finally:tmp.unlink(missing_ok=True)
-        return bool(re.search(r"youtube|instagram|tiktok|facebook|vimeo|dailymotion|@\w+|www\.|\.com\b",out,re.I))
-    except Exception:return False
+    return False
+
 assets=[a for a in assets if not visual_risk(a["file"])]
 if len(assets)<6:raise RuntimeError("Visual watermark/platform screening left fewer than six clean assets.")
 
@@ -134,10 +144,16 @@ def make_clip(src,out,dur):
 
 def quality_check(path):
     dur,w,h,codec=probe(path)
-    checks={"resolution":w==1080 and h==1920,"duration":9<=dur<=16.5,"codec":codec=="h264"}
-    return {"pass":all(checks.values()),"checks":checks,"duration":round(dur,2),"width":w,"height":h,"codec":codec}
+    details=json.loads(run(["ffprobe","-v","error","-select_streams","v:0","-show_entries","stream=avg_frame_rate,pix_fmt","-of","json",str(path)]).stdout)
+    video=(details.get("streams") or [{}])[0]
+    rate=str(video.get("avg_frame_rate","0/1")).split("/")
+    fps=(float(rate[0])/float(rate[1])) if len(rate)==2 and float(rate[1] or 0) else 0
+    audio=json.loads(run(["ffprobe","-v","error","-select_streams","a","-show_entries","stream=index","-of","json",str(path)]).stdout).get("streams",[])
+    has_audio=bool(audio)
+    checks={"resolution":w==1080 and h==1920,"duration":9<=dur<=16.5,"codec":codec=="h264","fps":abs(fps-30)<0.01,"pixel_format":video.get("pix_fmt")=="yuv420p","music_free":not has_audio}
+    return {"pass":all(checks.values()),"checks":checks,"duration":round(dur,2),"width":w,"height":h,"codec":codec,"fps":round(fps,3),"pixel_format":video.get("pix_fmt"),"audio_present":has_audio}
 
-def render_reel(idx,style):
+def render_reel(idx,style,attempt=0):
     name,label,order,durations,tempo=style
     texts=[f"STOP SCROLLING: {educational_title}",f"LOOK CLOSER • {culture_name}",educational_fact,"This is the detail most quick videos skip.","Now you know what you're actually seeing.","SAVE THIS • FOLLOW FESTIVAL OF BHARAT"]
     roles=["HOOK","VISUAL PROOF","CONTEXT","DETAIL","MEANING","CTA"]; clips=[]
@@ -162,8 +178,8 @@ def render_reel(idx,style):
     if not q["pass"]:
         print("QUALITY FAIL -> AUTO RE-EDIT",idx,q)
         alt=styles[idx%len(styles)]
-        if alt[1]==label: raise RuntimeError("Automatic re-edit exhausted")
-        return render_reel(idx,alt)
+        if attempt>=1 or alt[1]==label: raise RuntimeError("Automatic re-edit exhausted after one alternate treatment")
+        return render_reel(idx,alt,attempt+1)
     return_value={"file":final.name,"style":label,"tempo":tempo,"duration":round(dur,2),"quality":q}
     for p in clips+[OUT/f"_raw{idx}_{j}.mp4" for j in range(6)]:p.unlink(missing_ok=True)
     return return_value

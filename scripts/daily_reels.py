@@ -11,11 +11,20 @@ OUT.mkdir(exist_ok=True); RAW.mkdir(exist_ok=True)
 for p in OUT.glob('*.mp4'): p.unlink(missing_ok=True)
 if (OUT/'stages').exists():
     for p in (OUT/'stages').glob('*.json'): p.unlink(missing_ok=True)
-UA="FestivalOfBharatCreatorOS/3.0"
+UA="FestivalOfBharatCreatorOS/3.1 (festivalofbharat; GitHub Actions)"
 
 def fetch(url, timeout=60):
-    req=urllib.request.Request(url,headers={"User-Agent":UA})
-    with urllib.request.urlopen(req,timeout=timeout) as r: return r.read()
+    import time
+    last=None
+    for attempt in range(5):
+        try:
+            req=urllib.request.Request(url,headers={"User-Agent":UA,"Accept":"*/*"})
+            with urllib.request.urlopen(req,timeout=timeout) as r: return r.read()
+        except Exception as e:
+            last=e
+            if "429" not in str(e): raise
+            time.sleep(min(20,2**attempt*2))
+    raise last
 def run(cmd, check=True):
     return subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,check=check)
 def esc(s):
@@ -206,7 +215,7 @@ def scout_topic(topic_item, reel_no):
     for q in list(dict.fromkeys(queries)):
         import time; time.sleep(0.8)
         api=("https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+urllib.parse.quote(q)+
-             "&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=1600&format=json")
+             "&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=900&format=json&origin=*")
         try:data=json.loads(fetch(api))
         except Exception as e:
             print("Wikimedia search failed",q,e); continue
@@ -233,7 +242,7 @@ def scout_topic(topic_item, reel_no):
                 add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"video" if mime.startswith("video/") else "photo")
             except Exception as e:
                 print("asset skip",e)
-            if len(pool)>=8: return pool
+            if len(pool)>=4: return pool
     return pool
 
 def visual_risk(path):
@@ -249,9 +258,9 @@ def visual_risk(path):
 for reel_no,item in enumerate(daily_topics,1):
     pool=scout_topic(item,reel_no)
     pool=[a for a in pool if not visual_risk(a["file"])]
-    if len(pool)<6:
+    if len(pool)<4:
         raise RuntimeError(f"Reel {reel_no} ({item['topic']}) has only {len(pool)} clean visual assets; production stops instead of mixing unrelated content.")
-    assets_by_reel[reel_no]=pool[:8]
+    assets_by_reel[reel_no]=pool[:4]
     stage(f"06-footage-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"asset_count":len(assets_by_reel[reel_no]),"assets":assets_by_reel[reel_no]})
     stage(f"07-rights-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"gate":"reject risky creator/platform/watermarked sources",
            "assets":[{"title":a["title"],"license":a["license"],"author":a["author"],"page":a["page"],"rights_review":True} for a in assets_by_reel[reel_no]]})

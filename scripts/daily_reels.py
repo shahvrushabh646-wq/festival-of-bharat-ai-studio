@@ -310,14 +310,54 @@ def add_source_asset(pool,title,url,license_name,author,page,file_path=None,kind
                  "page":page,"kind":kind,"rights_review":True,**({"file":file_path} if file_path else {})})
     return True
 
-def scout_topic(topic_item, reel_no):
+def scout_openverse_topic(topic_item, reel_no):
+    """Fallback/primary CC-media source that avoids a single Wikimedia-host rate limit."""
     pool=[]
-    queries=topic_item["queries"]
     seen=set()
+    for q in list(dict.fromkeys(topic_item["queries"])):
+        api=("https://api.openverse.org/v1/images/?q="+urllib.parse.quote(q)+
+             "&license=cc0,by,by-sa&per_page=12&page=1")
+        try:
+            data=json.loads(fetch(api,60))
+        except Exception as e:
+            print("Openverse search failed",q,e)
+            continue
+        for item in data.get("results",[]):
+            url=item.get("url") or item.get("thumbnail")
+            title=clean(item.get("title") or q)
+            lic=clean(item.get("license") or "")
+            author=clean(item.get("creator") or "")
+            pageurl=item.get("foreign_landing_url") or item.get("detail_url") or ""
+            if not url or url in seen: continue
+            if str(item.get("license","")).lower() not in {"cc0","by","by-sa"}: continue
+            if reject_source(title,author,pageurl): continue
+            seen.add(url)
+            dest=RAW/(f"reel{reel_no}_asset{len(pool):02d}.jpg")
+            try:
+                dest.write_bytes(fetch(url,60))
+                dur,w,h,codec=probe(dest)
+                if dest.stat().st_size<15000 or w<400 or h<400:
+                    dest.unlink(missing_ok=True); continue
+                add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"photo")
+            except Exception as e:
+                dest.unlink(missing_ok=True)
+                print("Openverse asset skip",e)
+            if len(pool)>=4: return pool
+    return pool
+
+def scout_topic(topic_item, reel_no):
+    # Use Openverse first so a temporary Wikimedia/Commons rate limit cannot stop
+    # the whole production. Wikimedia remains a secondary CC/public-domain source.
+    pool=scout_openverse_topic(topic_item,reel_no)
+    if len(pool)>=4:
+        return pool
+    print(f"Openverse supplied {len(pool)} assets; trying Wikimedia Commons fallback.")
+    queries=topic_item["queries"]
+    seen={a.get("url") for a in pool}
     for q in list(dict.fromkeys(queries)):
-        import time; time.sleep(0.8)
+        import time; time.sleep(1.2)
         api=("https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+urllib.parse.quote(q)+
-             "&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=900&format=json&origin=*")
+             "&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=600&format=json&origin=*")
         try:data=json.loads(fetch(api))
         except Exception as e:
             print("Wikimedia search failed",q,e); continue
@@ -343,7 +383,7 @@ def scout_topic(topic_item, reel_no):
                     dest.unlink(missing_ok=True); continue
                 add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"video" if mime.startswith("video/") else "photo")
             except Exception as e:
-                print("asset skip",e)
+                print("Wikimedia asset skip",e)
             if len(pool)>=4: return pool
     return pool
 

@@ -122,6 +122,7 @@ manifest={
  "date":datetime.now(timezone.utc).isoformat(),"topic":topic,"content_rule":USEFUL_RULE,
  "content_angle":educational_title,"educational_context":educational_fact,
  "virality_strategy":"Trend-led topic + immediate hook + four distinct openings + fast first seconds + useful cultural context; virality is not guaranteed.",
+ "creator_pack":{"posting_order":["Moment","Detail","Energy","Meaning"],"approval_required":True,"audio_policy":"Add eligible/trending Instagram audio inside Instagram after rights review."},
  "rights_note":"Only footage/photos whose displayed license matches an allowed open/public license pattern are imported. Verify each individual file's license, attribution, share-alike and third-party rights before posting.",
  "rights_review_required":True,"assets":[],"reels":[]
 }
@@ -166,10 +167,20 @@ for n,(name,order,dur,label,direction) in enumerate(styles,1):
         f"Before you scroll: one useful fact about {culture_name}.",
         f"What this tradition means — in one quick Reel."
     ]
+    caption = f"{educational_title} — a quick cultural context from Bharat. Save this Reel for later and share it with someone who loves Indian culture."
+    hashtags = ["#FestivalOfBharat","#Bharat","#IndianCulture", "#IndianTraditions"]
+    if re.search(r"ganesh|ganpati|bappa", topic, re.I): hashtags += ["#Ganpati","#GaneshChaturthi","#Mumbai"]
+    elif re.search(r"holi", topic, re.I): hashtags += ["#Holi","#HoliFestival"]
+    elif re.search(r"diwali|deepavali", topic, re.I): hashtags += ["#Diwali","#Deepavali"]
+    elif re.search(r"navratri|garba", topic, re.I): hashtags += ["#Navratri","#Garba"]
+    elif re.search(r"janmashtami|krishna", topic, re.I): hashtags += ["#Janmashtami","#Krishna"]
+    elif re.search(r"shiva|mahadev", topic, re.I): hashtags += ["#Mahadev","#Mahashivratri"]
+    cover = [educational_title, "LOOK CLOSER", "ONE USEFUL FACT", "THE MEANING"][n-1]
     manifest["reels"].append({
         "file":out.name,"style":name,"creative_label":label,"direction":direction,
         "hook":hooks[n-1],"useful_context":educational_fact,"quality":quality,
-        "music":"Add eligible/trending Instagram audio inside Instagram after approval."
+        "cover_text":cover,"caption":caption,"hashtags":hashtags,"cta":"Save this Reel and share it with someone who loves Bharat.",
+        "content_pillar":culture_name,"music":"Search Instagram for an eligible/trending audio that fits the mood; add it inside Instagram after approval."
     })
 
 (OUT/"README.txt").write_text(f"""Festival of Bharat — Daily 4-Reel Autopilot

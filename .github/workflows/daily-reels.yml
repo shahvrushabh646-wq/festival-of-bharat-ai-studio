@@ -15,7 +15,7 @@ on:
   schedule:
     - cron: "30 0 * * *"
 permissions:
-  contents: read
+  contents: write
   actions: write
 concurrency:
   group: daily-reels
@@ -39,3 +39,13 @@ jobs:
           name: festival-of-bharat-4-reels-${{ github.run_number }}
           path: daily-output/
           retention-days: 7
+
+      - name: Publish daily MP4 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DATE="$(date -u +%Y-%m-%d)"
+          TAG="daily-${DATE}"
+          gh release delete "${TAG}" --yes 2>/dev/null || true
+          git push --delete origin "${TAG}" 2>/dev/null || true
+          gh release create "${TAG}" daily-output/*.mp4 daily-output/manifest.json daily-output/README.txt             --target "${GITHUB_SHA}"             --title "Festival of Bharat — 4 Reels — ${DATE}"             --notes "Automated daily batch. Useful cultural content + four creative cuts. Virality is optimized for, not guaranteed. Verify each source license before posting; add eligible Instagram audio after approval."

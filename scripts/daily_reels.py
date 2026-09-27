@@ -120,6 +120,17 @@ def choose_four_topics():
     return chosen[:4]
 
 daily_topics=choose_four_topics()
+# A morning re-edit keeps the exact same four topics from the completed batch.
+if user_topic.startswith("EDITTOPICS:"):
+    try:
+        locked=json.loads(user_topic[len("EDITTOPICS:"):])
+        if len(locked)==4:
+            daily_topics=[]
+            for t in locked:
+                name,title,fact,queries=profile(t)
+                daily_topics.append({"topic":t,"pillar":name,"title":title,"fact":fact,"queries":queries})
+    except Exception as e:
+        print("Could not lock previous topics for re-edit:",e)
 source_url=os.getenv("SOURCE_URL","").strip()
 edit_request=os.getenv("EDIT_REQUEST","").strip()
 

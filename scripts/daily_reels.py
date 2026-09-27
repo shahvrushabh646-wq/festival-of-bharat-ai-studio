@@ -262,7 +262,7 @@ for i,item in enumerate(daily_topics,1):
     stage(f"05-storyboard-{i:02d}",{
         "status":"complete","reel":i,"topic":item["topic"],"format":"9:16 vertical",
         "beats":["hook","proof","context","detail","meaning","CTA"],
-        "visual_direction":"cinematic realistic Indian culture; original editorial treatment; no random montage"
+        "visual_direction":"cinematic realistic Indian culture; original editorial treatment; source intelligence from Instagram, Pinterest, Google and Canva; no random montage"
     })
 assets_by_reel={}
 publish_status(38,"Creative & Story","Creative Director","Turning four researched topics into distinct Reel stories","creative",{"Strategy & Research":"complete","Creative & Story":"working","Production":"waiting","Quality & Growth":"waiting"})
@@ -358,13 +358,13 @@ def visual_risk(path):
     except Exception: return False
 
 for reel_no,item in enumerate(daily_topics,1):
-    publish_status(40+reel_no*7,"Production","Footage Scout",f"Scouting clean licensed visuals for Reel {reel_no}","footage",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"working","Quality & Growth":"waiting"},reel_no)
+    publish_status(40+reel_no*7,"Production","Visual Source Director",f"Combining Instagram, Pinterest, Google and Canva visual intelligence for Reel {reel_no}","footage",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"working","Quality & Growth":"waiting"},reel_no)
     pool=scout_topic(item,reel_no)
     pool=[a for a in pool if not visual_risk(a["file"])]
     if len(pool)<4:
         raise RuntimeError(f"Reel {reel_no} ({item['topic']}) has only {len(pool)} clean visual assets; production stops instead of mixing unrelated content.")
     assets_by_reel[reel_no]=pool[:4]
-    stage(f"06-footage-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"asset_count":len(assets_by_reel[reel_no]),"assets":assets_by_reel[reel_no]})
+    stage(f"06-visual-sources-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"asset_count":len(assets_by_reel[reel_no]),"assets":assets_by_reel[reel_no],"source_intelligence":{"Instagram":"trend/hook/pacing reference","Pinterest":"composition and visual mood reference","Google":"topic/image research reference","Canva":"eligible design/layout/asset reference"}})
     stage(f"07-rights-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"gate":"reject risky creator/platform/watermarked sources",
            "assets":[{"title":a["title"],"license":a["license"],"author":a["author"],"page":a["page"],"rights_review":True} for a in assets_by_reel[reel_no]]})
 
@@ -485,7 +485,7 @@ manifest={
 "reference_intelligence":{"instagram":instagram_refs,"pinterest":pinterest_refs,"canva":canva_refs},
 "topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)],
 "format":"1080x1920 9:16 Instagram Reel",
-"production":"four independent professional short-form edits — each Reel has a different topic and pillar",
+"production":"four independent professional short-form edits — each Reel has a different topic and pillar; visual direction informed by Instagram, Pinterest, Google and Canva",
 "production_window":"02:00–06:00 IST overnight production; morning human review and edit pass follows.",
 "edit_request":edit_request or None,
 "content_rule":USEFUL_RULE,

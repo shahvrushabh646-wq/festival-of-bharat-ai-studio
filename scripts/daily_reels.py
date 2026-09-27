@@ -24,6 +24,27 @@ def trends():
         return "Indian culture festival"
 
 topic=os.getenv("TOPIC","").strip() or trends()
+source_url=os.getenv("SOURCE_URL","").strip()
+
+# Optional direct MP4 input: the workflow can process one public MP4 URL instead of scouting footage.
+# This keeps MP4 as a first-class automation input while retaining the free licensed-footage fallback.
+assets=[]
+if source_url:
+    dest=RAW/"source_0.mp4"
+    try:
+        with urllib.request.urlopen(urllib.request.Request(source_url,headers={"User-Agent":"FestivalOfBharatCreatorOS/1.0"}),timeout=120) as r:
+            with open(dest,"wb") as f:
+                while True:
+                    b=r.read(1024*1024)
+                    if not b: break
+                    f.write(b)
+        if dest.stat().st_size>10000:
+            assets.append({"title":"Provided MP4","url":source_url,"license":"User-provided source — verify rights","author":"","page":source_url,"file":str(dest)})
+    except Exception as e:
+        print("SOURCE_URL download failed:",e)
+
+# If no direct MP4 was supplied, scout openly licensed video from Wikimedia Commons.
+
 queries=[topic,topic+" temple devotion",topic+" festival India",topic+" culture India"]
 seen=set(); assets=[]
 for q in queries:

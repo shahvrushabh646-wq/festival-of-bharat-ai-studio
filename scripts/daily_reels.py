@@ -134,6 +134,7 @@ manifest={
  "date":datetime.now(timezone.utc).isoformat(),"topic":topic,"content_rule":USEFUL_RULE,
  "content_angle":educational_title,"educational_context":educational_fact,
  "virality_strategy":"Trend-led topic + immediate hook + four distinct openings + fast first seconds + useful cultural context; virality is not guaranteed.",
+ "story_engine":{"beats":["0-2s hook","2-5s visual proof","5-9s context","9-12s meaning/CTA"],"rule":"One clear cultural idea per Reel; avoid filler."},
  "creator_pack":{"posting_order":["Moment","Detail","Energy","Meaning"],"approval_required":True,"audio_policy":"Add eligible/trending Instagram audio inside Instagram after rights review."},
  "rights_note":"Only footage/photos whose displayed license matches an allowed open/public license pattern are imported. Verify each individual file's license, attribution, share-alike and third-party rights before posting.",
  "rights_review_required":True,"assets":[],"reels":[]
@@ -182,10 +183,10 @@ def ffmpeg_clip(src,out,dur,index,hook="",label="",context=""):
 for n,(name,order,dur,label,direction) in enumerate(styles,1):
     segs=[]
     hook_list=[
-        f"{educational_title}.",
-        f"Look closer: {culture_name} has more to the story.",
-        f"Before you scroll: one useful fact about {culture_name}.",
-        f"What this tradition means — in one quick Reel."
+        f"Why does {culture_name} do this?",
+        f"You may have seen this — but missed the detail.",
+        f"One useful fact about {culture_name}.",
+        f"Here is what this tradition means."
     ]
     for j,pos in enumerate(order):
         a=assets[pos%len(assets)]
@@ -250,6 +251,7 @@ for n,(name,order,dur,label,direction) in enumerate(styles,1):
         "cover_text":cover,"caption":caption,"hashtags":hashtags,"cta":"Save this Reel and share it with someone who loves Bharat.",
         "content_pillar":culture_name,
         "editing":"Portrait-aware source scoring + cinematic crop/zoom + subtle grade + branded strip + hook/context overlays + smooth crossfades + branded CTA end card + 1080x1920/30fps.",
+        "editorial_scorecard":{"hook":"immediate","visual_change":"high","information_density":"one clear idea","ending":"clean CTA"},
         "music":"Search Instagram for an eligible/trending audio that fits the mood; add it inside Instagram after approval."
     })
 

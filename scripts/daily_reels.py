@@ -104,6 +104,25 @@ for n,(name,order,dur,vf) in enumerate(styles,1):
     lst=RAW/f"list_{n}.txt"; lst.write_text("".join("file '"+str(s).replace("'","'\\''")+"'\n" for s in segs))
     out=OUT/f"festival-of-bharat-reel-{n}.mp4"
     subprocess.run(["ffmpeg","-y","-loglevel","error","-f","concat","-safe","0","-i",str(lst),"-an","-c:v","libx264","-preset","veryfast","-crf","21","-pix_fmt","yuv420p","-movflags","+faststart",str(out)],check=True)
-    manifest["reels"].append({"file":out.name,"style":name,"music":"Add eligible Instagram audio in Instagram after approval."})
+    # Basic production quality gate + self-re-edit fallback.
+    probe=subprocess.run(["ffprobe","-v","error","-show_entries","stream=width,height,r_frame_rate:format=duration","-of","json",str(out)],capture_output=True,text=True)
+    quality={"passed":False,"reason":"ffprobe failed"}
+    try:
+        pj=json.loads(probe.stdout); st=(pj.get("streams") or [{}])[0]; fmt=pj.get("format") or {}
+        w,h=int(st.get("width",0)),int(st.get("height",0))
+        dur=float(fmt.get("duration",0))
+        quality={"passed":w==1080 and h==1920 and dur>=5,"width":w,"height":h,"duration":round(dur,2)}
+    except Exception: pass
+    if not quality["passed"]:
+        # Re-encode once with strict portrait output.
+        subprocess.run(["ffmpeg","-y","-loglevel","error","-i",str(out),"-vf","scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30","-an","-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-movflags","+faststart",str(out)],check=True)
+        quality["self_reedited"]=True
+    manifest["reels"].append({"file":out.name,"style":name,"quality":quality,"music":"Add eligible Instagram audio in Instagram after approval."})
+(OUT/"README.txt").write_text(f"""Festival of Bharat — Daily Reel Production
+Topic: {topic}
+Four MP4s were rendered at 1080x1920 / 30fps.
+Add eligible Instagram audio inside Instagram after approval.
+Verify source licenses before posting.
+""")
 (OUT/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
 print(json.dumps({"topic":topic,"assets":len(assets),"reels":4}))

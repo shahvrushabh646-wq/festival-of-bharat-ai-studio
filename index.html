@@ -210,51 +210,46 @@ loadLiveProduction();setInterval(loadLiveProduction,10000);
 </section>
 <script>
 let LATEST_BATCH=null;
-let REVIEW_STATE={approved:[],editing:null};
+let REVIEW_STATE={decisions:{},editing:null};
 function reviewStorageKey(){return 'fob-morning-review-'+(LATEST_BATCH?.tag||LATEST_BATCH?.date||'current');}
 function saveReviewState(){try{localStorage.setItem(reviewStorageKey(),JSON.stringify(REVIEW_STATE))}catch(e){}}
 function loadReviewState(){try{const x=JSON.parse(localStorage.getItem(reviewStorageKey())||'null');if(x)REVIEW_STATE=x}catch(e){}}
-function reviewActiveIndex(){
-  for(let i=0;i<(LATEST_BATCH?.assets||[]).length;i++) if(!REVIEW_STATE.approved.includes(i)) return i;
-  return 4;
-}
 function renderReviewSequence(){
   const o=document.getElementById('morningReviewVideos'),status=document.getElementById('reviewSequenceStatus');
   if(!o||!LATEST_BATCH?.assets?.length)return;
-  const active=reviewActiveIndex();
+  const total=LATEST_BATCH.assets.length, decided=Object.keys(REVIEW_STATE.decisions).length;
   o.innerHTML=LATEST_BATCH.assets.map((a,i)=>{
-    const approved=REVIEW_STATE.approved.includes(i), locked=i>active, editing=REVIEW_STATE.editing===i;
-    const stateText=approved?'APPROVED ✓':locked?'LOCKED — approve previous Reel first':editing?'NEEDS EDIT — waiting for your instruction':'READY FOR REVIEW';
-    const stateClass=approved?'ok':locked?'warn':editing?'blue':'gold';
-    return '<div class="clip" style="'+(locked?'opacity:.52':'')+';border-color:'+(approved?'#275f42':editing?'#3b6fa8':i===active?'#6a5529':'#202a35')+'">'+
-      '<video src="'+a.download_url+'" controls playsinline '+(locked?'style="filter:grayscale(.25)"':'')+'></video>'+
+    const decision=REVIEW_STATE.decisions[i]||'', editing=REVIEW_STATE.editing===i;
+    const stateText=decision==='approved'?'APPROVED ✓':decision==='edit'?'REJECTED — EDIT REQUEST SENT':editing?'NEEDS EDIT — WRITE CHANGES BELOW':'WAITING FOR YOUR DECISION';
+    const stateClass=decision==='approved'?'ok':decision==='edit'?'warn':editing?'blue':'gold';
+    return '<div class="clip" style="border-color:'+(decision==='approved'?'#275f42':decision==='edit'?'#6a5529':editing?'#3b6fa8':'#202a35')+'">'+
+      '<video src="'+a.download_url+'" controls playsinline></video>'+
       '<div class="meta"><b>REEL '+(i+1)+'</b> • '+a.name+'<br><a target="_blank" rel="noopener" href="'+a.download_url+'">Open full MP4</a>'+
       '<div class="'+stateClass+'" style="margin-top:7px;font-size:9px;font-weight:900">'+stateText+'</div>'+
       '<div class="controls" style="margin-top:8px">'+
-      '<button class="btn" '+(locked||approved||editing?'disabled':'')+' onclick="approveMorningReel('+i+')">✓ APPROVED</button>'+
-      '<button class="btn gold" '+(locked||approved?'disabled':'')+' onclick="requestMorningReelEdit('+i+')">✕ NEEDS EDIT</button>'+
+      '<button class="btn" '+(decision||editing?'disabled':'')+' onclick="approveMorningReel('+i+')">✓ APPROVED</button>'+
+      '<button class="btn gold" '+(decision||editing?'disabled':'')+' onclick="requestMorningReelEdit('+i+')">✕ REJECT / EDIT</button>'+
       '</div></div></div>';
   }).join('');
-  if(active>=4){
-    status.textContent='ALL 4 REELS APPROVED. The batch is ready for your final human publishing decision.';
+  if(decided>=total){
+    status.textContent='ALL 4 REELS REVIEWED. Approved Reels are kept; rejected Reels are sent for re-edit.';
     status.className='notice ok';
   }else if(REVIEW_STATE.editing!=null){
-    status.textContent='REEL '+(REVIEW_STATE.editing+1)+' needs changes. Write the changes below and send this Reel to the AI team.';
+    status.textContent='REEL '+(REVIEW_STATE.editing+1)+' is selected for editing. Write the exact changes below.';
     status.className='notice';
   }else{
-    status.textContent='REEL '+(active+1)+' is waiting for your decision. Approve it to unlock Reel '+(active+2)+', or choose Needs Edit.';
+    status.textContent=(total-decided)+' Reel(s) still waiting for your decision. You can review all four together in any order.';
     status.className='notice';
   }
 }
 function approveMorningReel(i){
-  if(i!==reviewActiveIndex()||REVIEW_STATE.editing!=null)return;
-  if(!REVIEW_STATE.approved.includes(i))REVIEW_STATE.approved.push(i);
-  REVIEW_STATE.approved.sort((a,b)=>a-b);
+  if(REVIEW_STATE.decisions[i]||REVIEW_STATE.editing!=null)return;
+  REVIEW_STATE.decisions[i]='approved';
   saveReviewState();
   renderReviewSequence();
 }
 function requestMorningReelEdit(i){
-  if(i!==reviewActiveIndex()||REVIEW_STATE.approved.includes(i))return;
+  if(REVIEW_STATE.decisions[i])return;
   REVIEW_STATE.editing=i;
   document.getElementById('selectedReelForEdit').textContent='Editing REEL '+(i+1)+'. Write only the changes you want for this Reel.';
   document.getElementById('editRequest').focus();
@@ -268,27 +263,27 @@ async function loadMorningReview(){
     if(!r.ok||!d.ready){s.textContent='No completed overnight batch is available yet. The team will publish the finished batch after the production run.';o.innerHTML='';return;}
     LATEST_BATCH=d;
     loadReviewState();
-    s.textContent='Batch ready: '+new Date(d.date).toLocaleString('en-IN')+' • '+d.assets.length+' Reel files available for your review.';
+    s.textContent='Batch ready: '+new Date(d.date).toLocaleString('en-IN')+' • '+d.assets.length+' Reel files available. Review all four together.';
     renderReviewSequence();
   }catch(e){s.textContent='Could not load the morning review batch yet.';}
 }
 async function sendEditRequest(){
   const box=document.getElementById('editRequest'),s=document.getElementById('editRequestStatus');
-  const idx=REVIEW_STATE.editing;
-  const change=box.value.trim();
-  if(idx==null){s.textContent='First choose NEEDS EDIT on the Reel you want to change.';return;}
+  const idx=REVIEW_STATE.editing, change=box.value.trim();
+  if(idx==null){s.textContent='Choose REJECT / EDIT on the Reel you want to change.';return;}
   if(!change){s.textContent='Write at least one change for Reel '+(idx+1)+'.';return;}
   const btn=document.getElementById('sendEditRequest');btn.disabled=true;
-  s.textContent='Sending Reel '+(idx+1)+' to the AI production team…';
+  s.textContent='Sending Reel '+(idx+1)+' to the AI team…';
   try{
     const edit_request='Reel '+(idx+1)+': '+change;
     const r=await fetch('/api/run-reels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({edit_request})});
     const d=await r.json();
     if(!r.ok)throw new Error(d.error||'Could not start re-edit');
-    s.textContent='Reel '+(idx+1)+' re-edit run started. Review the revised batch when it finishes.';
-    box.value='';
+    REVIEW_STATE.decisions[idx]='edit';
     REVIEW_STATE.editing=null;
     saveReviewState();
+    box.value='';
+    s.textContent='Reel '+(idx+1)+' re-edit started. The AI team will work on that rejected Reel.';
     renderReviewSequence();
     loadLiveProduction();
   }catch(e){s.textContent='Re-edit could not start: '+e.message}

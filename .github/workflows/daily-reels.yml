@@ -15,6 +15,10 @@ on:
         description: "Morning human edit instructions for the next re-edit pass"
         required: false
         default: ""
+      plan_only:
+        description: "Build strategy/research without rendering MP4s"
+        required: false
+        default: "false"
   schedule:
     # 02:00 IST = 20:30 UTC on the previous day
     - cron: "30 20 * * *"
@@ -49,6 +53,8 @@ jobs:
           TOPIC: ${{ github.event.inputs.topic }}
           SOURCE_URL: ${{ github.event.inputs.source_url }}
           EDIT_REQUEST: ${{ github.event.inputs.edit_request }}
+          PLAN_ONLY: ${{ github.event.inputs.plan_only }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
         run: python3 scripts/daily_reels.py
       - name: Record failed production status
         if: failure()

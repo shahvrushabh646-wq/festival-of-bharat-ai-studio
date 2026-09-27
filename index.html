@@ -1,1046 +1,189 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b10"><title>Festival of Bharat — Studio Pro Free</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0907">
+<title>Festival of Bharat — Creator OS</title>
 <style>
-:root{--bg:#07090d;--panel:#0d1118;--panel2:#111722;--line:#222b36;--text:#f5f7fa;--muted:#8e9baa;--gold:#e2b65a;--green:#51d78a;--blue:#67a8ff;--red:#ff7083;--shadow:0 18px 50px #0008}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(900px 500px at 75% -10%,#1e2a3b 0,#07090d 58%);color:var(--text);font:14px Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial}.app{display:flex;min-height:100vh}.side{position:sticky;top:0;height:100vh;width:245px;border-right:1px solid var(--line);padding:22px 14px;background:#090c12;display:flex;flex-direction:column}.brand{font-size:17px;font-weight:900;letter-spacing:.4px;padding:4px 9px 24px}.brand small{display:block;margin-top:5px;color:#6f7d8d;font-size:9px;letter-spacing:2px}.nav{display:grid;gap:3px}.nav a{color:#91a0b0;text-decoration:none;padding:11px 12px;border-radius:9px}.nav a:hover,.nav a.active{background:#162131;color:#fff}.sidebottom{margin-top:auto;padding:12px 9px;color:#687789;font-size:10px;line-height:1.55}.main{width:min(1500px,100%);padding:28px 30px;margin:auto}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.eyebrow{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:800}.title{font-size:32px;font-weight:900;letter-spacing:-.7px;margin-top:6px}.sub{max-width:850px;color:var(--muted);line-height:1.55;margin-top:7px}.badge{border:1px solid #3a4654;border-radius:999px;padding:8px 11px;color:#cbd5df;font-size:10px;white-space:nowrap}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:22px}.card{background:linear-gradient(180deg,#111720,#0c1118);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);padding:17px}.stat .label{font-size:9px;color:#8493a3;letter-spacing:1.2px}.stat .value{font-size:22px;font-weight:900;margin-top:7px}.stat .hint{font-size:10px;color:#718092;margin-top:4px}.green{color:var(--green)}.blue{color:var(--blue)}.gold{color:var(--gold)}.section{margin-top:16px}.section h2{font-size:16px;margin:0 0 12px}.two{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}.team{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.agent{display:flex;justify-content:space-between;align-items:center;padding:11px;border:1px solid #202a35;border-radius:10px;background:#0b1017}.agent b{font-size:12px}.online{font-size:9px;color:var(--green);border:1px solid #275f42;border-radius:999px;padding:4px 7px}.briefgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.brief{padding:12px;border:1px solid #202a35;border-radius:10px;background:#0b1017}.brief b{display:block;margin-bottom:5px}.small{font-size:11px;color:#8493a3;line-height:1.5}.notice{border-left:3px solid var(--gold);background:#18140b;color:#d7c58e;border-radius:7px;padding:11px 12px;margin-top:12px;line-height:1.5;font-size:11px}.factory{display:grid;grid-template-columns:360px 1fr;gap:18px}.drop{min-height:250px;border:1px dashed #405062;background:#090e15;border-radius:13px;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;cursor:pointer}.drop.drag{border-color:var(--blue);background:#0b1727}.drop b{display:block;font-size:15px}.clips{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:11px}.clip{overflow:hidden;border:1px solid #202a35;border-radius:10px;background:#080d13}.clip video{width:100%;aspect-ratio:9/16;object-fit:cover;background:#000;display:block}.clip .meta{padding:7px;font-size:9px;color:#8190a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}.btn{appearance:none;border:1px solid #334354;background:#131d28;color:#e6edf4;padding:9px 12px;border-radius:8px;font-weight:800;font-size:11px;cursor:pointer;text-decoration:none}.btn:hover{filter:brightness(1.14)}.btn.primary{background:linear-gradient(90deg,#216fd8,#388fff);border:0;color:#fff}.btn.gold{background:#1a160d;border-color:#6a5529;color:#f0cf7e}.btn:disabled{opacity:.45;cursor:not-allowed}.presetgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.preset{cursor:pointer;border:1px solid #25313d;border-radius:10px;padding:12px;background:#0b1017}.preset.active{border-color:#5c9cff;background:#0e1c2d}.preset b{display:block;font-size:12px;margin-bottom:4px}.queue{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.reelcard{overflow:hidden}.thumb{aspect-ratio:9/16;border-radius:10px;background:#000;border:1px solid #25313d;overflow:hidden;position:relative}.thumb video{width:100%;height:100%;object-fit:cover}.number{position:absolute;top:8px;left:8px;background:#000b;border:1px solid #fff3;padding:5px 7px;border-radius:6px;font-size:9px}.reelcard h3{font-size:13px;margin:9px 0 4px}.tags span{display:inline-block;border:1px solid #334355;color:#aebdcb;border-radius:999px;padding:4px 6px;font-size:8px;margin:2px}.shotgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.shot{border:1px solid #24303b;background:#0a1017;border-radius:9px;padding:10px}.shot em{font-size:9px;color:var(--gold);font-style:normal}.shot b{display:block;font-size:10px;margin:4px 0}.shot span{font-size:9px;color:#7e8e9e;line-height:1.4}.output{display:grid;grid-template-columns:250px 1fr;gap:18px}.preview{background:#000;border-radius:12px;overflow:hidden;border:1px solid #2a3542;aspect-ratio:9/16;max-height:560px}.preview video{width:100%;height:100%;object-fit:cover}.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.check{border:1px solid #22303b;border-radius:9px;padding:11px;background:#0a1017}.check b{display:block;font-size:11px}.ok{color:var(--green)}.warn{color:var(--gold)}.progress{height:7px;background:#1a2530;border-radius:999px;overflow:hidden;flex:1;min-width:180px}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3a8fff,#5ddc9a)}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.day{padding:10px;border:1px solid #202a35;border-radius:9px;background:#0b1017}.day b{display:block;font-size:10px}.day span{font-size:9px;color:#748396}.footer{color:#687789;font-size:10px;line-height:1.5;padding:18px 2px 35px}@media(max-width:1180px){.stats{grid-template-columns:repeat(3,1fr)}.factory{grid-template-columns:1fr}.queue{grid-template-columns:repeat(2,1fr)}.shotgrid{grid-template-columns:repeat(3,1fr)}}@media(max-width:900px){.side{display:none}.main{padding:18px}.two,.output{grid-template-columns:1fr}.clips{grid-template-columns:repeat(2,1fr)}.calendar{grid-template-columns:repeat(4,1fr)}}@media(max-width:560px){.stats,.team,.briefgrid,.presetgrid,.queue,.checks,.shotgrid,.calendar{grid-template-columns:1fr}.hero{display:block}.badge{display:inline-block;margin-top:12px}.title{font-size:26px}}
-.employee-detail{border:1px solid #202a35;border-radius:10px;background:#0b1017;padding:11px}.employee-detail b{font-size:11px}.employee-detail .meta{font-size:9px;color:#8493a3;margin-top:4px;line-height:1.5}.history-row{border-top:1px solid #202a35;padding:10px 0}.history-row:first-child{border-top:0}.history-row .who{font-weight:800;font-size:11px}.history-row .task{font-size:10px;color:#aebdcb;margin-top:3px}.history-row .meta{font-size:9px;color:#748396;margin-top:4px}.live-click{cursor:pointer}.live-click:hover{border-color:#5c9cff!important;background:#0e1825!important}.detail-modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}.detail-modal.open{display:flex}.detail-panel{width:min(1000px,96vw);max-height:88vh;overflow:auto;background:#0c1118;border:1px solid #334354;border-radius:16px;box-shadow:0 25px 80px #000c;padding:20px}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}@media(max-width:700px){.detail-grid{grid-template-columns:1fr}}</style></head>
+:root{--bg:#090807;--panel:#11100e;--panel2:#171411;--line:#2b2722;--text:#f4eee6;--muted:#9b9187;--sub:#6e665f;--accent:#d99a4e;--green:#55d38a;--blue:#75aefc;--red:#ef727c;--shadow:0 18px 55px #0009}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(1000px 500px at 80% -10%,#2a2118 0,#090807 58%);color:var(--text);font:14px Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial}
+button,input,textarea{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:235px 1fr}.side{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);padding:25px 15px;background:#0b0908}.brand{padding:4px 10px 25px}.eyebrow{font-size:10px;letter-spacing:.2em;color:var(--accent);font-weight:800;text-transform:uppercase}.brand h1{font:600 31px Georgia,serif;margin:8px 0}.brand p{font-size:11px;color:var(--muted);line-height:1.55}.nav{display:grid;gap:4px}.nav button{border:0;background:transparent;color:var(--muted);text-align:left;padding:11px 12px;border-radius:8px;cursor:pointer}.nav button:hover,.nav button.active{background:#1a1714;color:var(--text)}.sidefoot{position:absolute;bottom:20px;padding:0 10px;font-size:10px;line-height:1.6;color:var(--sub)}main{width:min(1420px,100%);margin:auto;padding:30px 34px 70px}.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.top h2{font:600 42px Georgia,serif;margin:5px 0}.top p{max-width:820px;color:var(--muted);line-height:1.6;margin:0}.pill{border:1px solid #40382f;border-radius:999px;padding:8px 11px;color:#c9bfb4;font-size:10px;white-space:nowrap}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:22px 0}.card{background:linear-gradient(180deg,#15120f,#0f0d0b);border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:var(--shadow)}.stat b{display:block;font-size:9px;color:var(--sub);letter-spacing:.14em;text-transform:uppercase}.stat strong{display:block;font-size:23px;margin-top:7px}.section{margin-top:17px}.section>h3{font:600 25px Georgia,serif;margin:0 0 11px}.grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.teamgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.employee{border:1px solid #25211d;border-radius:9px;background:#0e0c0a;padding:11px;cursor:pointer}.employee:hover{border-color:#4c433a}.employee b{font-size:12px}.employee span{display:block;color:var(--sub);font-size:9px;margin-top:5px;line-height:1.4}.state{float:right;border:1px solid #315a43;color:var(--green);border-radius:999px;padding:3px 6px;font-size:8px}.progress{height:8px;border-radius:999px;background:#27221d;overflow:hidden}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#bd7a35,#65d797);transition:width .3s}.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.btn{border:1px solid #3a332c;background:#171411;color:var(--text);border-radius:8px;padding:9px 12px;font-size:11px;font-weight:800;cursor:pointer;text-decoration:none}.btn:hover{filter:brightness(1.15)}.btn.primary{background:#246fc9;border-color:#246fc9}.btn.gold{border-color:#70542c;color:#e5bd7c}.btn.danger{border-color:#6d343b;color:#ff9aa3}.btn:disabled{opacity:.45;cursor:not-allowed}.input,.textarea{width:100%;background:#0b0a09;border:1px solid #332e29;border-radius:8px;color:var(--text);padding:10px;outline:none}.textarea{min-height:90px;resize:vertical}.mini{font-size:10px;color:var(--muted);line-height:1.5}.notice{padding:11px 12px;border-left:3px solid var(--accent);background:#19140d;border-radius:6px;color:#d8c6a8;font-size:10px;line-height:1.5}.pipeline{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}.stage{padding:9px;border:1px solid #27231f;border-radius:8px;background:#0e0c0a;font-size:9px;color:var(--muted)}.stage b{display:block;color:var(--text);margin-bottom:3px}.reels{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.reel{overflow:hidden}.video{aspect-ratio:9/16;background:#000;border-radius:9px;overflow:hidden;border:1px solid #28231e}.video video{width:100%;height:100%;object-fit:cover}.reel h4{font:600 17px Georgia,serif;margin:9px 0 4px}.tags{font-size:9px;color:var(--muted)}.decision{display:flex;gap:6px;margin-top:9px}.decision .btn{flex:1}.hidden{display:none!important}.tab{display:none}.tab.active{display:block}.list{display:grid;gap:8px}.row{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:center;border-bottom:1px solid #25211d;padding:10px 0}.row:last-child{border-bottom:0}.mono{font:10px ui-monospace,monospace;color:var(--sub)}.right{color:var(--green)}.warn{color:#e3b86d}.error{color:var(--red)}.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:18px;z-index:20}.modal.open{display:flex}.modalbox{width:min(760px,96vw);max-height:88vh;overflow:auto;background:#11100e;border:1px solid #443c34;border-radius:14px;padding:20px}.close{float:right}.empty{padding:25px;text-align:center;color:var(--sub);border:1px dashed #332d27;border-radius:10px}.metricgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metricgrid input{min-width:0}
+@media(max-width:1150px){.stats{grid-template-columns:repeat(3,1fr)}.reels{grid-template-columns:repeat(2,1fr)}.pipeline{grid-template-columns:repeat(4,1fr)}}@media(max-width:850px){.app{display:block}.side{display:none}main{padding:20px 15px}.grid2,.grid3{grid-template-columns:1fr}.teamgrid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.pipeline{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.stats,.reels{grid-template-columns:1fr}.top{display:block}.top h2{font-size:33px}.metricgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
 <body>
-<section style="margin:18px 0;padding:18px;border:1px solid #2d3748;border-radius:16px;background:linear-gradient(135deg,#111827,#0b1220)">
-  <div style="font-size:12px;letter-spacing:.12em;color:#94a3b8">V100 • FESTIVAL OF BHARAT AI CREATOR OS</div>
-  <h2 style="margin:6px 0 8px">Full Creator Autopilot</h2>
-  <p style="margin:0 0 14px;color:#cbd5e1">Trend → Strategy → Idea → Script → Storyboard → Visual Sources → Rights → Edit → Quality → Re-edit → Caption/Cover → 4 Reels → Approval → Analytics → Learning</p>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button onclick="v100Run('Daily strategy')">Run Daily Strategy</button>
-    <button onclick="v100Run('Build 4 reels')">Build 4-Reel Plan</button>
-    <button onclick="v100Run('Quality + re-edit')">Quality + Re-edit</button>
+<div class="app">
+<aside class="side">
+  <div class="brand"><div class="eyebrow">Festival of Bharat</div><h1>Creator OS</h1><p>Four Reels a day. Licensed footage. Human approval before Instagram.</p></div>
+  <nav class="nav">
+    <button class="active" data-tab="command">Command</button>
+    <button data-tab="review">Morning Review</button>
+    <button data-tab="team">Production Team</button>
+    <button data-tab="scout">Footage Scout</button>
+    <button data-tab="rights">Rights Gate</button>
+    <button data-tab="pack">Creator Pack</button>
+    <button data-tab="learning">Analytics & Learning</button>
+  </nav>
+  <div class="sidefoot">Masters are music-free.<br>Add eligible Instagram audio after approval.<br>Nothing posts automatically.</div>
+</aside>
+<main>
+<section id="command" class="tab active">
+  <div class="top"><div><div class="eyebrow">AI production desk</div><h2>Command Center</h2><p>Trend → Strategy → Research → Script → Storyboard → Visual Sources → Rights → Edit → Quality → Re-edit → Cover → 4 Reels → Human Approval → Learning.</p></div><div class="pill" id="connection">Checking production status…</div></div>
+  <div class="stats">
+    <div class="card stat"><b>Daily target</b><strong>4 Reels</strong></div><div class="card stat"><b>Format</b><strong>1080×1920</strong></div><div class="card stat"><b>Master audio</b><strong>Silent</strong></div><div class="card stat"><b>Production window</b><strong>02–06 IST</strong></div><div class="card stat"><b>Publish gate</b><strong>Human</strong></div>
   </div>
-  <div id="v100Status" style="margin-top:12px;color:#94a3b8">Human approval remains required before publishing.</div>
-</section>
-<script>
-function v100Run(mode){
- const el=document.getElementById('v100Status');
- const map={
-  'Daily strategy':'Strategy ready: trend signals → topic → four differentiated creative directions.',
-  'Build 4 reels':'Production plan ready: four distinct Reel structures with separate shot priorities.',
-  'Quality + re-edit':'Quality gate ready: judge → flag weak cuts → re-edit → judge again.'
- };
- el.textContent=map[mode]||'Ready.';
-}
-</script>
-<section id="instantProduction" style="margin:18px 0;padding:20px;border:1px solid #3b4d63;border-radius:16px;background:linear-gradient(135deg,#101a28,#0a1018)">
-  <div style="font-size:10px;letter-spacing:2px;color:#e2b65a;font-weight:800">INSTANT PRODUCTION</div>
-  <h2 style="margin:6px 0 8px">Make Today's 4 Reels</h2>
-  <p style="margin:0 0 14px;color:#aebdcb;line-height:1.5">Start the real cloud production workflow: India topic/trend → licensed footage → FFmpeg → four 1080×1920 MP4 Reels → downloadable artifact.</p>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn primary" onclick="startCloudReels(document.getElementById('autoTopic')?.value)">⚡ MAKE REELS NOW</button>
-    <a class="btn" target="_blank" rel="noopener" href="https://github.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/workflows/daily-reels.yml">Manual Workflow</a>
-    <a class="btn" target="_blank" rel="noopener" href="https://github.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions">Open Production Runs</a>
-  </div>
-  <div style="margin-top:10px;font-size:10px;color:#748396">The workflow runs in the cloud, so your browser does not need to stay open.</div><div id="instantProductionStatus" style="margin-top:9px;font-size:10px;color:#67a8ff"></div>
-</section>
-<section class="card" id="morningReview" style="margin-top:18px;border-color:#6a5529;background:linear-gradient(135deg,#17140d,#0c1118)">
-  <div class="eyebrow">06:00 IST • MORNING HUMAN REVIEW</div>
-  <h2>Review the 4 Reels → Tell the team what to change</h2>
-  <p class="small">The overnight team works during the 02:00–06:00 IST production window. When the batch is ready, watch all four MP4s below, approve any Reel you are happy with, or select any Reel for targeted re-edit.</p>
-  <div class="briefgrid" style="margin-top:10px">
-    <div class="brief"><b>02:00–06:00</b><span class="small">Strategy → research → creative → footage → rights → editing → quality.</span></div>
-    <div class="brief"><b>06:00 onward</b><span class="small">You review. Nothing is posted automatically.</span></div>
-  </div>
-  <div id="morningReviewStatus" class="notice">Checking latest finished batch…</div>
-  <div id="morningReviewVideos" class="clips" style="margin-top:12px"></div>
-  <div id="reviewSequenceStatus" class="notice" style="margin-top:12px">REEL 1 is waiting for your decision.</div>
-  <div style="margin-top:14px">
-    <b style="font-size:12px">What should the team change?</b>
-    <div id="selectedReelForEdit" class="small" style="margin-top:5px">Select “NEEDS EDIT” on a Reel to edit that Reel.</div>
-    <textarea id="editRequest" rows="5" placeholder="Example: make the hook stronger, remove text, change pacing…" style="width:100%;margin-top:7px;background:#090e15;color:#fff;border:1px solid #334354;border-radius:9px;padding:11px;resize:vertical"></textarea>
-    <div class="controls">
-      <button class="btn gold" id="sendEditRequest">SEND THIS REEL TO AI TEAM FOR RE-EDIT</button>
-      <span id="editRequestStatus" class="small"></span>
+  <div class="grid2 section">
+    <div class="card">
+      <div class="eyebrow">Live production</div><h3 id="currentEmployee">AI Manager / CEO</h3><p class="mini" id="currentTask">Waiting for a production run.</p>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:15px"><div class="progress"><i id="overallBar"></i></div><b id="overallPct">0%</b></div>
+      <div class="grid3" id="departments" style="margin-top:13px"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Start production</div><h3>Make today's four Reels</h3>
+      <p class="mini">The browser only starts the cloud workflow. FFmpeg and visual sourcing run in GitHub Actions.</p>
+      <input id="topic" class="input" placeholder="Optional topic — leave blank for filtered India trend">
+      <div class="controls"><button class="btn primary" id="makeBtn">MAKE REELS NOW</button><button class="btn" id="planBtn">PLAN ONLY</button></div>
+      <div id="startMsg" class="notice" style="margin-top:10px">Human approval remains required before publishing.</div>
     </div>
   </div>
+  <div class="card section"><div class="eyebrow">Pipeline</div><h3>Overnight handoffs</h3><div class="pipeline" id="pipeline"></div></div>
+  <div class="card section"><div class="eyebrow">Current batch</div><h3>Latest four Reels</h3><div id="commandReels" class="reels"><div class="empty">No finished batch yet.</div></div></div>
 </section>
-<section class="card" id="liveProductionProgress" style="margin-top:18px;border-color:#33485f">
-  <div class="eyebrow">AI PRODUCTION TEAM</div>
-  <h2>Today's 4-Reel Production</h2>
-  <div style="display:flex;align-items:center;gap:10px;margin:10px 0 7px">
-    <div class="progress" style="height:8px"><i id="liveProgressBar"></i></div><b id="liveProgressPct">0%</b>
-  </div>
-  <div id="liveProgressStatus" class="small">Checking latest run…</div>
-  <div style="margin-top:10px;padding:10px;border:1px solid #25313d;border-radius:9px;background:#0b1017">
-    <b id="liveCurrentEmployee">Checking…</b>
-    <div id="liveCurrentWork" class="small" style="margin-top:3px">Checking current stage…</div>
-  </div>
-  <div class="briefgrid" id="liveProductionEmployees" style="margin-top:10px"></div>
-  <div class="controls">
-    <button class="btn gold" onclick="loadLiveProduction()">↻ Refresh</button>
-    <a class="btn" target="_blank" rel="noopener" href="https://github.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/workflows/daily-reels.yml">Open Run</a>
-  </div>
+
+<section id="review" class="tab">
+  <div class="top"><div><div class="eyebrow">06:00 IST · Human review</div><h2>Watch, then decide</h2><p>Approve any Reel that is ready. Reject only the Reel that needs work; the targeted edit goes back to GitHub Actions.</p></div><div class="pill" id="reviewCount">0/4 decided</div></div>
+  <div id="reviewReels" class="reels section"><div class="empty">Checking latest finished batch…</div></div>
 </section>
-<div id="employeeDetailModal" class="detail-modal" onclick="if(event.target===this)closeEmployeeDetails()">
-  <div class="detail-panel">
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
-      <div><div class="eyebrow">EMPLOYEE WORK LOG</div><h2 id="detailTitle" style="margin:5px 0">Department details</h2><div id="detailSubtitle" class="small"></div></div>
-      <button class="btn" onclick="closeEmployeeDetails()">CLOSE</button>
-    </div>
-    <div id="detailSummary" class="briefgrid" style="margin-top:14px"></div>
-    <div id="detailEmployees" class="detail-grid" style="margin-top:12px"></div>
-    <div style="margin-top:18px"><h3 style="margin:0 0 8px">Actual activity timeline</h3><div id="detailHistory"></div></div>
-  </div>
+
+<section id="team" class="tab">
+  <div class="eyebrow">Production team</div><h2 style="font:600 42px Georgia,serif;margin:5px 0">Roles that actually ran</h2><p class="mini">One orchestrated production desk with specialised handoffs. A role is recorded only when the run reports that stage.</p>
+  <div class="card section"><div style="display:flex;justify-content:space-between"><div><h3 id="teamEmployee">Idle</h3><p class="mini" id="teamTask">No live handoff.</p></div><b id="teamPct">0%</b></div><div class="progress" style="margin-top:12px"><i id="teamBar"></i></div></div>
+  <div id="teamGrid" class="grid2 section"></div>
+  <div class="card section"><div class="eyebrow">Activity timeline</div><h3>Recorded handoffs</h3><div id="history" class="list"></div></div>
+</section>
+
+<section id="scout" class="tab">
+  <div class="eyebrow">Visual Source Director</div><h2 style="font:600 42px Georgia,serif;margin:5px 0">Footage Scout</h2><p class="mini">Search public/open visual references before production. Rights must still be checked before posting.</p>
+  <div class="card section"><div style="display:flex;gap:8px"><input id="scoutQuery" class="input" value="Indian festival India"><button class="btn primary" id="scoutBtn">SCOUT</button></div><div id="scoutResults" class="list" style="margin-top:12px"></div></div>
+</section>
+
+<section id="rights" class="tab">
+  <div class="eyebrow">Rights & Copyright Manager</div><h2 style="font:600 42px Georgia,serif;margin:5px 0">Rights Gate</h2><p class="mini">The pipeline rejects risky/watermarked sources. Use the source, author and license records as the approval evidence.</p>
+  <div id="rightsBox" class="card section"><div class="empty">Load the latest batch to inspect its rights records.</div></div>
+</section>
+
+<section id="pack" class="tab">
+  <div class="eyebrow">Caption · Cover · Music</div><h2 style="font:600 42px Georgia,serif;margin:5px 0">Creator Pack</h2><p class="mini">Publishing copy and cover direction. Masters remain silent; add eligible Instagram/Edits audio after approval.</p>
+  <div id="packBox" class="grid2 section"><div class="empty">No creator pack loaded.</div></div>
+</section>
+
+<section id="learning" class="tab">
+  <div class="eyebrow">Analytics Manager · Learning Manager</div><h2 style="font:600 42px Georgia,serif;margin:5px 0">Analytics & Learning</h2><p class="mini">Enter Instagram results manually after publishing. These numbers stay in this browser and are used as planning signals.</p>
+  <div id="analyticsBox" class="section"></div>
+</section>
+</main>
 </div>
-<script>
-const FOB_TEAMS=[
- ['1. Strategy & Research','Content Manager · Trend Researcher · Cultural Researcher'],
- ['2. Creative & Story','Script Writer · Creative Director · Storyboard Director'],
- ['3. Production','Visual Source Director · Rights · Video Director · Editor · Motion · Captions · Music · Voiceover · Colorist'],
- ['4. Quality & Growth','Quality · Self-ReEditor · Cover · Caption · Analytics · Learning · AI Manager']
-];
-const TEAM_NAMES={'Strategy & Research':'1. Strategy & Research','Creative & Story':'2. Creative & Story','Production':'3. Production','Quality & Growth':'4. Quality & Growth'};
-let LIVE_STATUS_DATA=null;
-const EMPLOYEE_ROLES={
- "Strategy & Research":[
-  ["Content Manager","Build the daily four-topic strategy and diversity rule."],
-  ["Trend Researcher","Select a culturally relevant India trend and reject unrelated trends."],
-  ["Cultural Researcher","Research each Reel topic, cultural fact and verification requirement."]
- ],
- "Creative & Story":[
-  ["Script Writer","Create the six-beat Reel script: hook, proof, context, detail, meaning, CTA."],
-  ["Creative Director","Turn the four researched topics into distinct story treatments."],
-  ["Storyboard Director","Define the visual beat order and cinematic 9:16 direction."]
- ],
- "Production":[
-  ["Visual Source Director","Find clean licensed/open-license visuals matching each Reel topic."],
-  ["Rights & Copyright Manager","Screen source, author, licence and platform/watermark risks."],
-  ["Video Director","Apply the selected visual order and cinematic direction."],
-  ["Video Editor","Render the six-beat cuts and final 1080×1920 MP4."],
-  ["Motion Graphics Designer","Apply readable text overlays and motion treatment."],
-  ["Caption Designer","Prepare on-screen hook/context/CTA text."],
-  ["Music & Sound Designer","Set music direction while keeping the master music-free."],
-  ["Voiceover Director","Check whether voiceover is required; current master does not require one."],
-  ["Colorist","Apply the final contrast, saturation, crop and sharpening treatment."]
- ],
- "Quality & Growth":[
-  ["Quality Manager","Check resolution, duration, codec and final export quality."],
-  ["Self-ReEditor","Trigger an alternate edit if quality checks fail."],
-  ["Cover Designer","Prepare Reel cover text from the final topic/title."],
-  ["Caption Writer","Prepare the publish caption and hashtags."],
-  ["Analytics Manager","Prepare the analytics stage for provided Instagram results."],
-  ["Learning Manager","Record baseline learning and next-batch adjustments."],
-  ["AI Manager / CEO","Coordinate the run and hold the human approval gate."]
- ]};
-function teamCard(n,m,s,current){
- const x=s==='complete'?['COMPLETED','ok']:s==='working'?['WORKING NOW','blue']:s==='failed'?['BLOCKED','red']:['WAITING','warn'];
- const key=n.replace(/^\d+\. /,'');
- return '<div class="brief live-click" onclick="openEmployeeDetails(\''+key.replace(/'/g,"\\'")+'\')" style="'+(s==='working'?'border-color:#3b6fa8;box-shadow:0 0 0 1px #3b6fa833 inset':'')+'"><b>'+n+'</b><div class="small" style="margin-top:4px">'+m+'</div><div class="'+x[1]+'" style="margin-top:6px;font-size:9px">'+x[0]+(s==='working'?' • '+(current||'ACTIVE'):'')+'</div><div class="small" style="margin-top:7px;color:#67a8ff">Click for employee work log →</div></div>'
-}
-function fmtSeconds(s){s=Number(s)||0;if(s<60)return s.toFixed(1)+' sec';if(s<3600)return Math.floor(s/60)+'m '+Math.round(s%60)+'s';return Math.floor(s/3600)+'h '+Math.floor((s%3600)/60)+'m'}
-function escHtml(v){return String(v??'').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]))}
-function openEmployeeDetails(team){
- const st=LIVE_STATUS_DATA||{}, modal=document.getElementById('employeeDetailModal');
- const events=(st.history||[]).filter(e=>e.team===team);
- const roles=EMPLOYEE_ROLES[team]||[];
- document.getElementById('detailTitle').textContent=team;
- document.getElementById('detailSubtitle').textContent='Run #'+(st.run_number||'—')+' • '+(st.date||'—')+' • Total elapsed: '+fmtSeconds(st.elapsed_seconds);
- document.getElementById('detailSummary').innerHTML=[
-  ['Department',''+team],['Employees',''+roles.length],['Recorded events',''+events.length],
-  ['Department status',(st.departments||{})[team]||'waiting']
- ].map(x=>'<div class="brief"><b>'+x[0]+'</b><div class="small" style="margin-top:5px">'+escHtml(x[1])+'</div></div>').join('');
- document.getElementById('detailEmployees').innerHTML=roles.map(([name,task])=>{
-   const ev=events.filter(e=>e.employee===name || (name==='AI Manager / CEO'&&e.employee==='AI Manager'));
-   const last=ev[ev.length-1];
-   const recorded=!!last;
-   const topic=last?.topic||'Multiple / department-wide';
-   const duration=last?.duration_seconds!=null?fmtSeconds(last.duration_seconds):'Currently active / final event';
-   return '<div class="employee-detail"><b>'+escHtml(name)+'</b><div class="meta">'+escHtml(task)+'</div><div class="meta"><strong>'+ (recorded?'RECORDED IN RUN':'ROLE COVERED')+'</strong> • Topic: '+escHtml(topic)+' • Time in logged stage: '+escHtml(duration)+'</div></div>';
- }).join('');
- document.getElementById('detailHistory').innerHTML=events.length?events.map((e,i)=>{
-   const d=e.duration_seconds!=null?fmtSeconds(e.duration_seconds):(i===events.length-1?'Current stage':'—');
-   return '<div class="history-row"><div class="who">'+escHtml(e.employee)+' <span class="small">• '+escHtml(e.phase||'stage')+'</span></div><div class="task">'+escHtml(e.task)+'</div><div class="meta">Reel '+escHtml(e.reel||'All')+' • Topic: '+escHtml(e.topic||'Department-wide')+' • Duration: '+escHtml(d)+' • Progress: '+escHtml(e.percent)+'%</div></div>';
- }).join(''):'<div class="notice">Detailed telemetry will appear here when this run records its first production events. Older runs may only have basic status data.</div>';
- modal.classList.add('open');
-}
-function closeEmployeeDetails(){document.getElementById('employeeDetailModal').classList.remove('open')}
 
-function setLiveStatus(pct,status,employee,work,teams){
- $('liveProgressBar').style.width=Math.max(0,Math.min(100,pct))+'%';
- $('liveProgressPct').textContent=Math.round(pct)+'%';
- $('liveProgressStatus').textContent=status;
- $('liveCurrentEmployee').textContent=employee;
- $('liveCurrentWork').textContent=work;
- $('liveProductionEmployees').innerHTML=FOB_TEAMS.map(([n,m])=>{
-   const key=n.replace(/^\d+\. /,''); return teamCard(n,m,teams?.[key]||'waiting',employee);
- }).join('');
-}
-async function loadLiveProduction(){
- try{
-  const raw=await fetch('https://raw.githubusercontent.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/status/status/status.json?cache='+Date.now());
-  if(raw.ok){
-   const st=await raw.json();
-   LIVE_STATUS_DATA=st;
-   const teams=st.departments||{};
-   setLiveStatus(st.overall_percent||0,'Run #'+(st.run_number||'—')+' • '+(st.phase||'live'),st.current_employee||'Production Team',st.current_task||'Working…',teams);
-   return;
-  }
- }catch(e){}
- try{
-  const rr=await fetch('https://api.github.com/repos/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/runs?per_page=20');
-  const d=await rr.json(),run=(d.workflow_runs||[]).filter(x=>x.path==='.github/workflows/daily-reels.yml')[0];
-  LIVE_STATUS_DATA={run_number:run?.run_number,date:new Date().toISOString().slice(0,10),departments:{}};
-  if(!run){setLiveStatus(0,'No production run found','AI Manager / CEO','Waiting for production.',{});return;}
-  if(run.status==='queued'||run.status==='waiting'||run.status==='requested'){
-   setLiveStatus(8,'Run #'+run.run_number+' • '+run.status,'AI Manager / CEO','Preparing production.',{});return;
-  }
-  if(run.status==='completed'){
-   const ok=run.conclusion==='success';
-   setLiveStatus(ok?100:0,'Run #'+run.run_number+' • '+run.conclusion,ok?'Learning Manager':'AI Manager / CEO',ok?'Batch ready for human approval.':'Production stopped — open the run for the error.',ok?{'Strategy & Research':'complete','Creative & Story':'complete','Production':'complete','Quality & Growth':'complete'}:{});
-   return;
-  }
-  setLiveStatus(12,'Run #'+run.run_number+' • '+run.status,'AI Manager / CEO','Production telemetry is starting…',{});
- }catch(e){setLiveStatus(0,'Status unavailable','AI Manager / CEO','Refresh to retry.',{});}
-}
-loadLiveProduction();setInterval(loadLiveProduction,10000);
-</script>
-<section class="card" id="dailyAutoOutput" style="margin-top:18px">
-  <div class="eyebrow">DAILY 4-REEL AUTOPILOT</div>
-  <h2>Latest automatic MP4 batch</h2>
-  <p class="small">The daily runner publishes four finished 1080×1920 MP4s. This panel always points to the newest completed batch.</p>
-  <div class="controls">
-    <button class="btn gold" onclick="loadLatestDailyReels()">↻ CHECK LATEST BATCH</button>
-    <span id="dailyAutoStatus" class="small">Checking…</span>
-  </div>
-  <div id="dailyAutoCards" style="margin-top:12px"></div>
-</section>
-<script>
-let LATEST_BATCH=null;
-let REVIEW_STATE={decisions:{},editing:null};
-function reviewStorageKey(){return 'fob-morning-review-'+(LATEST_BATCH?.tag||LATEST_BATCH?.date||'current');}
-function saveReviewState(){try{localStorage.setItem(reviewStorageKey(),JSON.stringify(REVIEW_STATE))}catch(e){}}
-function loadReviewState(){try{const x=JSON.parse(localStorage.getItem(reviewStorageKey())||'null');if(x)REVIEW_STATE=x}catch(e){}}
-function renderReviewSequence(){
-  const o=document.getElementById('morningReviewVideos'),status=document.getElementById('reviewSequenceStatus');
-  if(!o||!LATEST_BATCH?.assets?.length)return;
-  const total=LATEST_BATCH.assets.length, decided=Object.keys(REVIEW_STATE.decisions).length;
-  o.innerHTML=LATEST_BATCH.assets.map((a,i)=>{
-    const decision=REVIEW_STATE.decisions[i]||'', editing=REVIEW_STATE.editing===i;
-    const stateText=decision==='approved'?'APPROVED ✓':decision==='edit'?'RE-EDIT IN PROGRESS':editing?'NEEDS EDIT — WRITE CHANGES BELOW':'WAITING FOR YOUR DECISION';
-    const stateClass=decision==='approved'?'ok':decision==='edit'?'warn':editing?'blue':'gold';
-    return '<div class="clip" style="border-color:'+(decision==='approved'?'#275f42':decision==='edit'?'#6a5529':editing?'#3b6fa8':'#202a35')+'">'+
-      '<video src="'+a.download_url+'" controls playsinline></video>'+
-      '<div class="meta"><b>REEL '+(i+1)+'</b> • '+a.name+'<br><a target="_blank" rel="noopener" href="'+a.download_url+'">Open full MP4</a>'+
-      '<div class="'+stateClass+'" style="margin-top:7px;font-size:9px;font-weight:900">'+stateText+'</div>'+
-      '<div class="controls" style="margin-top:8px">'+
-      '<button class="btn" '+(decision?'disabled':'')+' onclick="approveMorningReel('+i+')">✓ APPROVED</button>'+
-      '<button class="btn gold" '+(decision?'disabled':'')+' onclick="requestMorningReelEdit('+i+')">✕ REJECT / EDIT</button>'+
-      '</div></div></div>';
-  }).join('');
-  if(decided>=total){
-    status.textContent='ALL 4 REELS DECIDED. Approved Reels stay approved; rejected Reels are re-edited separately.';
-    status.className='notice ok';
-  }else if(REVIEW_STATE.editing!=null){
-    status.textContent='REEL '+(REVIEW_STATE.editing+1)+' is selected for editing. You can continue reviewing the other Reels.';
-    status.className='notice';
-  }else{
-    status.textContent=(total-decided)+' Reel(s) still waiting for your decision. You can review all four together in any order.';
-    status.className='notice';
-  }
-}
-function approveMorningReel(i){
-  if(REVIEW_STATE.decisions[i])return;
-  REVIEW_STATE.decisions[i]='approved';
-  saveReviewState();
-  renderReviewSequence();
-}
-function requestMorningReelEdit(i){
-  if(REVIEW_STATE.decisions[i])return;
-  REVIEW_STATE.editing=i;
-  document.getElementById('selectedReelForEdit').textContent='Editing REEL '+(i+1)+'. You can still approve or review the other Reels.';
-  document.getElementById('editRequest').focus();
-  saveReviewState();
-  renderReviewSequence();
-}
-async function loadMorningReview(){
-  const s=document.getElementById('morningReviewStatus'),o=document.getElementById('morningReviewVideos');
-  try{
-    const r=await fetch('/api/latest-reels?cache='+Date.now()); const d=await r.json();
-    if(!r.ok||!d.ready){s.textContent='No completed overnight batch is available yet. The team will publish the finished batch after the production run.';o.innerHTML='';return;}
-    LATEST_BATCH=d;
-    loadReviewState();
-    s.textContent='Batch ready: '+new Date(d.date).toLocaleString('en-IN')+' • '+d.assets.length+' Reel files available. Review all four together.';
-    renderReviewSequence();
-  }catch(e){s.textContent='Could not load the morning review batch yet.';}
-}
-async function sendEditRequest(){
-  const box=document.getElementById('editRequest'),s=document.getElementById('editRequestStatus');
-  const idx=REVIEW_STATE.editing, change=box.value.trim();
-  if(idx==null){s.textContent='Choose REJECT / EDIT on the Reel you want to change.';return;}
-  if(!change){s.textContent='Write at least one change for Reel '+(idx+1)+'.';return;}
-  const btn=document.getElementById('sendEditRequest');btn.disabled=true;
-  s.textContent='Sending Reel '+(idx+1)+' to the AI team…';
-  try{
-    const edit_request='Reel '+(idx+1)+': '+change;
-    const r=await fetch('/api/run-reels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({edit_request})});
-    const d=await r.json();
-    if(!r.ok)throw new Error(d.error||'Could not start re-edit');
-    REVIEW_STATE.decisions[idx]='edit';
-    REVIEW_STATE.editing=null;
-    saveReviewState();
-    box.value='';
-    s.textContent='Reel '+(idx+1)+' re-edit started. The AI team will work on that rejected Reel.';
-    renderReviewSequence();
-    loadLiveProduction();
-  }catch(e){s.textContent='Re-edit could not start: '+e.message}
-  finally{btn.disabled=false}
-}
-document.getElementById('sendEditRequest').onclick=sendEditRequest;
-loadMorningReview();
-async function loadLatestDailyReels(){
-  const s=document.getElementById('dailyAutoStatus'),o=document.getElementById('dailyAutoCards');
-  s.textContent='Checking latest completed batch…';
-  try{
-    const r=await fetch('/api/latest-reels'); const d=await r.json();
-    if(!r.ok||!d.ready) {s.textContent='No completed daily batch yet.';o.innerHTML='';return;}
-    s.textContent='Latest batch: '+new Date(d.date).toLocaleString('en-IN');
-    o.innerHTML='<div class="briefgrid">'+d.assets.map((a,i)=>'<div class="brief"><b>REEL '+(i+1)+'</b><span class="small">'+a.name+' • '+Math.round(a.size/1024/1024*10)/10+' MB</span><div class="controls"><a class="btn primary" target="_blank" rel="noopener" href="'+a.download_url+'">DOWNLOAD MP4</a></div></div>').join('')+'</div><div class="notice" style="margin-top:10px">Batch is generated automatically. Review the rights manifest and approve before posting. Add eligible/trending Instagram audio inside Instagram.</div>';
-  }catch(e){s.textContent='Latest batch check failed.';}
-}
-loadLatestDailyReels();
-</script><div class="app"><aside class="side"><div class="brand">FESTIVAL OF BHARAT<small>STUDIO PRO • AUTO DIRECTOR 4.0</small></div><nav class="nav"><a class="active" href="#home">⌂ Command Center</a><a href="#team">✦ AI Production Team</a><a href="#scout">◎ Free Visual Source Director</a><a href="#autopilot">⚡ Auto Pilot</a><a href="#factory">◉ Reel Factory</a><a href="#batch">▣ Batch 4 Reels</a><a href="#creatorKit">✦ Creator Pack</a><a href="#pack">▣ Today's 4-Reel Pack</a><a href="#shots">◌ Shot Planner</a><a href="#v50">✦ V30–V50 Master OS</a><a href="#v70">✦ V51–V70 Autopilot</a><a href="#instagramIntel">◎ Instagram Intelligence</a><a href="#rights">✓ Rights Gate</a></nav><div class="sidebottom">Professional real-footage workflow.<br>AI Creative Director • 4 unique story angles.<br>Auto source scout • local rendering • no paid video API.<br><br>Human approval stays ON.</div></aside>
-<main class="main" id="home"><div class="hero"><div><div class="eyebrow">FESTIVAL OF BHARAT / CREATOR OPERATING SYSTEM</div><div class="title">Studio Pro — Auto Director 4.0 • AI Creative Director</div><div class="sub">A clean production workflow for serious Instagram Reels: real footage, cinematic pacing, 1080×1920 export, minimal typography, rights checks and a four-Reel daily plan. The free mode avoids paid cloud video-generation credits and can auto-scout multiple licensed-footage searches before editing.</div></div><div class="badge">1080×1920 • 9:16 • HUMAN APPROVAL</div></div>
-<div class="stats"><div class="card stat"><div class="label">DAILY TARGET</div><div class="value green">04</div><div class="hint">professional Reels</div></div><div class="card stat"><div class="label">FINAL FORMAT</div><div class="value blue">9:16</div><div class="hint">1080 × 1920</div></div><div class="card stat"><div class="label">EDITING COST</div><div class="value">₹0</div><div class="hint">local browser render*</div></div><div class="card stat"><div class="label">STYLE</div><div class="value gold">REAL</div><div class="hint">footage-first</div></div><div class="card stat"><div class="label">POST GATE</div><div class="value">YOU</div><div class="hint">approve before posting</div></div></div>
-<div class="section two"><div class="card" style="margin-top:12px"><div style="font-weight:800">GITHUB_TOKEN SETUP</div><div style="margin-top:6px;font-size:12px;color:#9aa8b8">To make MAKE REELS NOW start cloud production directly, add a Vercel environment variable named <b>GITHUB_TOKEN</b> with GitHub Actions read/write permission for this repository. Never paste the token into the app or chat.</div><div style="margin-top:8px;font-size:11px;color:#748396">After saving the variable, redeploy the Vercel project. The button will then trigger the 4-Reel cloud workflow.</div></div><section class="card" id="team"><h2>AI Production Team</h2><div class="team" id="teamGrid"></div><div class="notice"><b>Professional rule:</b> the team can plan and structure the content, but the final Reel is not allowed to pretend a cartoon/AI slideshow is real footage. Supply footage you own or are licensed to use.</div></section><section class="card"><h2>Today's operating brief</h2><div class="briefgrid"><div class="brief"><b>1. Research</b><span class="small">Pick a cultural story, festival moment or Bharat detail.</span></div><div class="brief"><b>2. Hook</b><span class="small">Open with one clear sentence or visual moment.</span></div><div class="brief"><b>3. Edit</b><span class="small">Use varied shot sizes, clean cuts and natural motion.</span></div><div class="brief"><b>4. Publish</b><span class="small">Add eligible Instagram audio in Instagram, then post after approval.</span></div></div></section></div>
-<div class="section card" id="scout"><h2>Free Visual Source Director — no footage? Start here</h2><div class="small" style="margin-bottom:10px">Search open-license/public-domain video sources. The app records the source and license beside imported clips. It does not scrape creator Reels, movies or random Google/Pinterest copies.</div><div class="controls"><input id="scoutQuery" value="Ganesh festival India" style="flex:1;min-width:220px;background:#0a1017;color:#fff;border:1px solid #334354;border-radius:8px;padding:9px 10px"><button class="btn primary" id="scoutBtn">Scout free footage</button><a class="btn" target="_blank" rel="noopener" href="https://www.pexels.com/search/videos/indian%20festival/">Open Pexels video search</a><a class="btn" target="_blank" rel="noopener" href="https://mixkit.co/free-stock-video/">Open Mixkit</a></div><div id="scoutStatus" class="small" style="margin-top:8px"></div><div id="scoutResults" class="briefgrid" style="margin-top:10px"></div><div class="notice"><b>Rights rule:</b> only import footage whose displayed license permits your intended use. Wikimedia Commons files can have different license requirements, including attribution/share-alike, so the app keeps the license and source link for review.</div></div>
-<div class="section card" id="autopilot"><h2>Auto Pilot — Source → Edit → 4 Reels</h2><div class="small">One workflow for a no-footage day: choose a topic, scout multiple open-license searches, try to import the strongest candidates automatically, then build four different professional cuts. If a source blocks browser import, the app keeps the source link for manual download.</div><div class="controls"><input id="autoTopic" value="Ganesh festival Mumbai India" style="flex:1;min-width:240px;background:#0a1017;color:#fff;border:1px solid #334354;border-radius:8px;padding:9px 10px"><button class="btn gold" id="autoPilot">⚡ AUTO PILOT — FIND FOOTAGE + BUILD 4 REELS</button></div><div class="small" id="autoPilotStatus" style="margin-top:8px"></div><div id="autoPilotResults" class="briefgrid" style="margin-top:10px"></div></div><div class="section card" id="factory"><h2>Professional Reel Factory</h2><div class="factory"><div><div class="drop" id="drop"><div><b>Drop 3–8 real clips</b><div class="small" style="margin-top:7px">MP4 / MOV / WebM<br>Vertical or horizontal is okay.<br><br>Use footage you own or have permission to use.</div></div><input id="files" type="file" accept="video/*" multiple hidden></div><div class="controls"><button class="btn primary" id="choose">Choose Footage</button><button class="btn" id="clear">Clear</button><span class="small" id="clipStatus">No footage loaded</span></div></div><div><div class="small" style="margin-bottom:8px">EDIT TREATMENT</div><div class="presetgrid" id="presets"><div class="preset active" data-p="cinematic"><b>Cinematic</b><span class="small">2.7s shots • balanced rhythm</span></div><div class="preset" data-p="festival"><b>Festival Energy</b><span class="small">1.9s cuts • high movement</span></div><div class="preset" data-p="devotion"><b>Devotional</b><span class="small">3.4s shots • emotional pace</span></div><div class="preset" data-p="heritage"><b>Heritage</b><span class="small">2.9s shots • documentary</span></div></div><div class="controls"><button class="btn primary" id="render">Render Professional Reel</button><button class="btn gold" id="autoBest">AUTO — Make Best Reel</button><button class="btn gold" id="renderNext">Render Next Daily Reel</button><button class="btn" id="renderAll">Build All 4 Reels</button><div class="progress"><i id="progress"></i></div><span class="small" id="renderStatus">Ready</span></div></div></div><div class="clips" id="clips"></div></div>
-<div class="section card" id="creativeDirector"><h2>AI Creative Director — 4 Unique Stories</h2><div class="small">Instead of making four variations of one idea, the Creative Director creates four distinct editorial angles from the same topic and available footage.</div><div class="controls"><input id="creativeTopic" value="Ganesh festival Mumbai India" style="flex:1;min-width:240px;background:#0a1017;color:#fff;border:1px solid #334354;border-radius:8px;padding:9px 10px"><button class="btn gold" id="creativePlan">✦ PLAN 4 UNIQUE REELS</button></div><div id="creativeStatus" class="small" style="margin-top:8px"></div><div id="creativeGrid" class="briefgrid" style="margin-top:10px"></div></div><div class="section card" id="autoDirector"><h2>Auto Director — Best Cut Engine</h2><div class="small">The Auto Director now builds a hook → build → detail → climax → closing structure, balances motion with exposure and framing, rotates the opening shot across the four daily Reels, and avoids making all four cuts feel identical. It is an editorial scoring system, not a claim that the computer understands the cultural meaning of every frame.</div><div class="controls"><button class="btn primary" id="analyze">Analyze & Score Footage</button><button class="btn gold" id="buildToday">AUTO BUILD TODAY — 4 REELS</button><span class="small" id="analysisStatus">Waiting for footage</span></div><div id="analysisResults" class="briefgrid" style="margin-top:10px"></div></div><div class="section card" id="batch"><h2>Batch Production — 4 Reels</h2><div class="small">Once 3–8 licensed clips are loaded, the Auto Director creates four different editorial cuts: Cinematic, Festival Energy, Devotional and Heritage. Each cut uses a different shot order and rhythm instead of simply changing one fixed duration.</div><div id="batchStatus" class="small" style="margin-top:8px"></div><div id="batchOutputs" class="briefgrid" style="margin-top:10px"></div></div><div class="section card" id="creatorKit"><h2>Creator Pack — captions, hooks, audio direction</h2><div class="small">The app prepares the publishing layer without embedding commercial Instagram music into the MP4. Add eligible/trending audio inside Instagram after approval.</div><div id="creatorKitGrid" class="briefgrid" style="margin-top:10px"></div><div class="controls"><button class="btn primary" id="copyKit">Copy Creator Pack</button><button class="btn" id="exportKit">Export Creator Pack JSON</button><span class="small" id="kitStatus"></span></div></div><div class="section card" id="pack"><h2>Today's 4-Reel Pack</h2><div class="queue" id="queue"></div><div class="controls"><button class="btn primary" id="generatePack">Prepare 4-Reel Production Pack</button><button class="btn" id="exportPack">Export Content Pack</button><span class="small" id="packStatus"></span></div></div>
-<div class="section card" id="shots"><h2>Shot Planner — what the editor should look for</h2><div class="shotgrid" id="shotsGrid"></div></div>
-<div class="section card"><h2>Rendered Master</h2><div class="output"><div class="preview"><video id="outVideo" controls playsinline></video></div><div><div class="checks"><div class="check"><b class="ok">✓ 1080×1920 master</b><span class="small">Instagram vertical canvas.</span></div><div class="check"><b class="ok">✓ Real footage only</b><span class="small">Output comes from your uploaded clips.</span></div><div class="check"><b class="ok">✓ Local rendering</b><span class="small">No paid video-generation API.</span></div><div class="check"><b class="warn">⚠ Music workflow</b><span class="small">Add eligible/trending audio inside Instagram rather than copying commercial audio into the MP4.</span></div></div><div class="controls"><a class="btn primary" id="download" style="display:none" download="festival-of-bharat-reel.mp4">Download MP4</a><button class="btn" id="resetOutput">Reset Output</button></div><div class="notice"><b>Quality gate:</b> no creator-Reel downloads, no movie scenes, no watermarks and no commercial song copied into the master. The footage should remain the visual hero.</div></div></div></div>
+<div class="modal" id="editModal"><div class="modalbox"><button class="btn close" onclick="closeEdit()">Close</button><div class="eyebrow">Targeted re-edit</div><h2 id="editTitle" style="font:600 30px Georgia,serif">Reel</h2><p class="mini">Only this Reel will be sent back to production. The other three stay unchanged.</p><textarea id="editNotes" class="textarea" placeholder="Example: remove the text overlay and make the first 2 seconds stronger"></textarea><div class="controls"><button class="btn danger" id="sendEdit">SEND RE-EDIT</button></div><div id="editMsg" class="mini" style="margin-top:8px"></div></div></div>
 
-<div class="section card" id="v50"><h2>V30 → V50 Master AI Creator OS</h2><div class="small">Twenty upgrade layers are organized into one operating pipeline. Modules marked local are browser/local workflow logic; live trend, analytics, publishing and cloud AI require the relevant service connection.</div><div id="v50Grid" class="briefgrid" style="margin-top:10px"></div><div class="controls"><button class="btn gold" id="v50Run">⚡ RUN V50 DAILY PIPELINE</button><button class="btn" id="v50Export">Export V30–V50 Blueprint</button><span class="small" id="v50Status"></span></div><div id="v50Log" class="notice" style="display:none"></div></div>
-<div class="section card" id="rights"><h2>Rights + Professional Quality Gate</h2><div class="briefgrid"><div class="brief"><b>Source</b><span class="small">Record where every clip came from. Use owned footage or a license that covers Instagram/commercial use.</span></div><div class="brief"><b>People</b><span class="small">For identifiable people, check whether releases or other permissions are needed for your intended use.</span></div><div class="brief"><b>Audio</b><span class="small">Use original/eligible audio in the master. Add current Instagram audio through Instagram where appropriate.</span></div><div class="brief"><b>Final review</b><span class="small">Check cultural accuracy, faces, text, spelling, crop, audio and rights before posting.</span></div></div></div>
-<div class="footer">*₹0 means this editing workflow does not require paid cloud video-generation credits. It does not promise unlimited free cloud photorealistic AI generation. The Auto Director is intentionally built around professional real footage + local editing.</div></main></div>
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
-const AGENTS=['AI Manager','Trend Researcher','Content Manager','Script Writer','Creative Director','Video Editor','Music Agent','Caption Writer','Quality Manager','Analytics Manager'];
-const PACK=[
-{title:'Mumbai That Never Stops',hook:'This is how Mumbai feels when Bharat comes alive.',visual:'Wide street → crowd movement → close-up details → final wide',edit:'Fast first 2 seconds, then 1.5–2.5s cuts',caption:'Some cities have energy. Mumbai has a heartbeat.',tags:'#Mumbai #FestivalOfBharat #Bharat'},
-{title:'Look Closer',hook:'The story is hiding in the smallest details.',visual:'Flowers → hands → diya → fabric → ritual detail',edit:'Macro-style sequence, clean match cuts, restrained text',caption:'Look closer. Tradition lives in the details.',tags:'#IndianCulture #Bharat #Tradition'},
-{title:'A Moment of Devotion',hook:'Some moments are better felt than explained.',visual:'Temple exterior → devotee → diya → crowd → closing wide',edit:'Slow opening, emotional middle, strong final frame',caption:'Faith, light and a moment worth remembering.',tags:'#Bhakti #IndianCulture #FestivalOfBharat'},
-{title:'Bharat, Still Alive',hook:'Heritage is not only history. It is today.',visual:'Architecture → craft → street → people → heritage wide',edit:'Documentary pacing, natural sound moments, minimal typography',caption:'A living heritage carried forward one generation at a time.',tags:'#IndianHeritage #Bharat #Culture'}];
-const SHOTS=[['01','HOOK','Strongest visual','0–1.5s'],['02','WIDE','Establish place','1.5–3s'],['03','DETAIL','Hands / texture / ritual','3–4.5s'],['04','PEOPLE','Natural human moment','4.5–6s'],['05','MOTION','Procession / movement','6–8s'],['06','CLOSE','Memorable final frame','8–10s']];
-let clips=[],clipMeta=[],preset='cinematic',ffmpeg=null,loaded=false,renderQueue=0,analysis=null,activePlan=null,creatorKit=[];
-const $=id=>document.getElementById(id);
-$('teamGrid').innerHTML=AGENTS.map(x=>`<div class="agent"><b>${x}</b><span class="online">READY</span></div>`).join('');
-$('shotsGrid').innerHTML=SHOTS.map(x=>`<div class="shot"><em>${x[0]}</em><b>${x[1]}</b><span>${x[2]}<br>${x[3]}</span></div>`).join('');
-function packHTML(){return PACK.map((x,i)=>`<div class="reelcard"><div class="thumb">${clips.length?`<video src="${URL.createObjectURL(clips[i%clips.length])}" muted playsinline></video>`:`<video src="/reels/reel-${i+1}.mp4" muted playsinline></video>`}<span class="number">REEL ${i+1}</span></div><h3>${x.title}</h3><div class="small"><b>Hook:</b> ${x.hook}<br><b>Visual:</b> ${x.visual}<br><b>Edit:</b> ${x.edit}<br><b>Caption:</b> ${x.caption}</div><div class="tags"><span>${x.tags.split(' ').join(' ')}</span></div></div>`).join('')}
-$('queue').innerHTML=packHTML();
-function addFiles(fs){for(const f of Array.from(fs)){if(clips.length>=8)break;clips.push(f);clipMeta.push({source:'User upload',license:'User-supplied footage — verify rights',author:'',url:''})}renderClips();$('queue').innerHTML=packHTML();$('packStatus').textContent=clips.length?'Daily pack mapped to your footage.':''}
-function renderClips(){ $('clips').innerHTML=clips.map((f,i)=>`<div class="clip"><video src="${URL.createObjectURL(f)}" muted controls playsinline></video><div class="meta">${i+1}. ${f.name}<br>${clipMeta[i]?.source||'User upload'}${clipMeta[i]?.license?' • '+clipMeta[i].license:''}</div></div>`).join('');$('clipStatus').textContent=clips.length?`${clips.length} clips loaded`:'No footage loaded'}
-$('choose').onclick=()=>$('files').click();$('drop').onclick=()=>$('files').click();$('files').onchange=e=>addFiles(e.target.files);$('drop').ondragover=e=>{e.preventDefault();$('drop').classList.add('drag')};$('drop').ondragleave=()=>$('drop').classList.remove('drag');$('drop').ondrop=e=>{e.preventDefault();$('drop').classList.remove('drag');addFiles(e.dataTransfer.files)};
-$('clear').onclick=()=>{clips=[];clipMeta=[];renderClips();$('queue').innerHTML=packHTML();$('packStatus').textContent=''};
-document.querySelectorAll('.preset').forEach(p=>p.onclick=()=>{preset=p.dataset.p;document.querySelectorAll('.preset').forEach(x=>x.classList.toggle('active',x===p))});
-$('generatePack').onclick=()=>{if(!clips.length){$('packStatus').textContent='Add footage first; the pack can be planned without it, but final Reels need footage.'}else{$('packStatus').textContent='4 distinct production recipes prepared ✓';$('queue').innerHTML=packHTML()}};
-$('exportPack').onclick=()=>{const data={brand:'Festival of Bharat',format:'1080x1920',dailyTarget:4,mode:'professional-real-footage',generatedAt:new Date().toISOString(),reels:PACK,sources:clipMeta};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='festival-of-bharat-content-pack.json';a.click();URL.revokeObjectURL(u)};
-async function scout(){
-  const q=$('scoutQuery').value.trim()||'Indian festival';
-  $('scoutBtn').disabled=true;
-  $('scoutStatus').textContent='Searching open-license video sources...';
-  $('scoutResults').innerHTML='';
-  try{
-    const r=await fetch('/api/scout?q='+encodeURIComponent(q));
-    const j=await r.json();
-    if(!j.results || !j.results.length){$('scoutStatus').textContent='No video results found. Try India temple, Mumbai festival or Ganesh festival.';return;}
-    $('scoutStatus').textContent='Found '+j.results.length+' candidate videos. Check the license shown before importing.';
-    $('scoutResults').innerHTML=j.results.map((x,i)=>'<div class="brief"><b>'+x.title+'</b><span class="small">'+(x.author||'Unknown author')+'<br><span class="ok">'+(x.license||'License not supplied')+'</span></span><div class="controls"><button class="btn gold" data-scout="'+i+'">Use in Reel</button><a class="btn" target="_blank" rel="noopener" href="'+x.pageUrl+'">Source / license</a></div></div>').join('');
-    window.__scout=j.results;
-    document.querySelectorAll('[data-scout]').forEach(b=>b.onclick=()=>importScout(Number(b.dataset.scout)));
-  }catch(e){console.error(e);$('scoutStatus').textContent='Scout failed. Open the source search links above and download permitted clips manually.'}
-  finally{$('scoutBtn').disabled=false}
-}
-async function importScout(i){
-  const x=window.__scout && window.__scout[i];
-  if(!x)return;
-  if(clips.length>=8){$('scoutStatus').textContent='Maximum 8 clips reached. Clear some clips first.';return;}
-  $('scoutStatus').textContent='Downloading selected free-license clip...';
-  try{
-    const r=await fetch(x.downloadUrl,{mode:'cors'});
-    if(!r.ok)throw new Error('download '+r.status);
-    const b=await r.blob();
-    if(!b.type.startsWith('video/'))throw new Error('not video');
-    const ext=(b.type.split('/')[1]||'mp4').split(';')[0];
-    const f=new File([b],'scout-'+(i+1)+'.'+ext,{type:b.type});
-    clips.push(f);clipMeta.push({source:'Wikimedia Commons',license:x.license||'',author:x.author||'',url:x.pageUrl});
-    renderClips();$('queue').innerHTML=packHTML();$('scoutStatus').textContent='Imported: '+x.title+' OK';
-  }catch(e){console.error(e);$('scoutStatus').innerHTML='Could not import automatically. <a target="_blank" rel="noopener" href="'+x.downloadUrl+'">Open/download the source file</a>, then drop it into Reel Factory.'}
-}
-$('scoutBtn').onclick=scout;
-async function autoPilot(){
-  const btn=$('autoPilot'); btn.disabled=true; $('autoPilotStatus').textContent='AUTO PILOT: scouting multiple searches…'; $('autoPilotResults').innerHTML='';
-  try{
-    if(clips.length>=8){$('autoPilotStatus').textContent='8 clips already loaded. Building 4 Reels…'; await buildToday(); return;}
-    let topic=$('autoTopic').value.trim();
-    if(!topic){
-      try{
-        const tr=await fetch('/api/trends'); const tj=await tr.json();
-        const culture=/ganesh|ganpati|bappa|festival|diwali|holi|navratri|garba|krishna|janmashtami|shiva|mahadev|temple|india|bharat/i;
-        const live=(tj.items||[]).find(x=>culture.test(x.title)) || (tj.items||[])[0];
-        topic=(live?.title||'Indian festival India')+' India';
-        $('autoTopic').value=topic;
-      }catch(e){topic='Indian festival India'}
-    }
-    topic=topic.slice(0,100);
-    $('autoPilotStatus').textContent='AUTO PILOT: live India trend selected → '+topic+' …';
-    // V19 shot-specific scouting: search the actual story requirements before generic topic searches.
-    const profile=typeof topicProfile==='function'?topicProfile(topic):null;
-    const shotQueries=(profile?.shots||[]).slice(0,5).map(s=>s+' '+topic);
-    const queries=[...shotQueries,topic,topic+' temple devotion',topic+' crowd street India',topic+' details culture India'];
-    const all=[]; const seen=new Set();
-    for(const q of queries){
-      try{const r=await fetch('/api/scout?q='+encodeURIComponent(q)); const j=await r.json(); for(const x of (j.results||[])){const key=x.downloadUrl||x.pageUrl||x.title;if(!seen.has(key)){seen.add(key);all.push(x)}}}catch(e){console.warn('scout query failed',q,e)}
-    }
-    const candidates=all.slice(0,16); $('autoPilotStatus').textContent=`Found ${candidates.length} licensed candidates. Auto-importing the strongest available clips…`;
-    let imported=0;
-    for(let i=0;i<candidates.length && clips.length<8;i++){
-      const x=candidates[i];
-      try{
-        const r=await fetch(x.downloadUrl,{mode:'cors'}); if(!r.ok)throw new Error('download '+r.status); const b=await r.blob();
-        if(!b.type.startsWith('video/'))throw new Error('not video');
-        const ext=(b.type.split('/')[1]||'mp4').split(';')[0]; const f=new File([b],`auto-${String(imported+1).padStart(2,'0')}.${ext}`,{type:b.type});
-        clips.push(f); clipMeta.push({source:'Wikimedia Commons',license:x.license||'',author:x.author||'',url:x.pageUrl}); imported++;
-        renderClips(); $('queue').innerHTML=packHTML();
-        $('autoPilotResults').innerHTML += `<div class="brief"><b>Imported ${imported}/8</b><span class="small">${x.title}<br><span class="ok">${x.license||'License shown at source'}</span></span></div>`;
-      }catch(e){ console.warn('auto import failed',x.title,e) }
-    }
-    if(imported<3){$('autoPilotStatus').textContent=`Auto-import got ${imported} clip(s). At least 3 are needed for a professional Reel. Use the Scout source links for manual downloads, then run Auto Pilot again.`; return;}
-    $('autoPilotStatus').textContent=`AUTO PILOT imported ${imported} clips. Now building 4 distinct Reels…`;
-    if($('creativeTopic')) $('creativeTopic').value=topic;
-    if(typeof renderCreativePlans==='function') renderCreativePlans();
-    await buildToday();
-    $('autoPilotStatus').textContent=`AUTO PILOT complete ✓ ${imported} clips → 4 Reels + Quality/Re-edit + Creator Pack. Review before posting.`;
-  }catch(e){console.error(e);$('autoPilotStatus').textContent='Auto Pilot stopped. Your imported clips are preserved; you can continue from Reel Factory.'}
-  finally{btn.disabled=false}
-}
-$('autoPilot').onclick=autoPilot;
-
-async function ensure(){
-  if(loaded)return;
-  $('renderStatus').textContent='Loading local editor... first load may take a little time';
-  ffmpeg=FFmpeg.createFFmpeg({log:false,corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'});
-  ffmpeg.setProgress(p=>{$('progress').style.width=Math.max(0,Math.min(1,p.ratio))*100+'%'});
-  await ffmpeg.load();loaded=true;
-}
-const settings={
-  cinematic:{clip:2.7,crf:20},
-  festival:{clip:1.7,crf:20},
-  devotion:{clip:3.1,crf:19},
-  heritage:{clip:2.6,crf:20}
+const PIPE=["Trend","Strategy","Research","Idea","Script","Storyboard","Footage","Rights","Edit","Quality","Re-edit","Caption","Cover","4 Reels","Human approval","Analytics","Learning"];
+const ROLES={
+"Strategy & Research":[["Trend Researcher","Select a culturally relevant India trend."],["Content Manager","Build four differentiated topics."],["Cultural Researcher","Verify facts and cultural context."]],
+"Creative & Story":[["Creative Director","Create four editorial treatments."],["Script Writer","Write the six-beat script."],["Storyboard Director","Define the 9:16 visual beat order."]],
+"Production":[["Visual Source Director","Find matching clean visuals."],["Rights & Copyright Manager","Screen author, license and watermark risk."],["Video Editor","Render the 1080×1920 master."],["Music & Sound Designer","Set music direction; keep master silent."]],
+"Quality & Growth":[["Quality Manager","Check export integrity."],["Self-ReEditor","Alternate edit after quality failure."],["Cover Designer","Prepare the cover still."],["Caption Writer","Prepare caption and hashtags."],["Analytics Manager","Record manual Instagram results."],["Learning Manager","Turn results into planning signals."],["AI Manager / CEO","Coordinate the human approval gate."]]
 };
+let status=null,batch=null,selectedEdit=null;
 
-async function loadInputs(){
-  let args=[];
-  for(let i=0;i<clips.length;i++){
-    const f=clips[i], ext=(f.name.split('.').pop()||'mp4').replace(/[^a-z0-9]/gi,'')||'mp4';
-    ffmpeg.FS('writeFile',`in${i}.${ext}`,await FFmpeg.fetchFile(f));
-    args.push('-i',`in${i}.${ext}`);
-  }
-  return args;
-}
+function $(id){return document.getElementById(id)}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function setTab(id){document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.id===id));document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.tab===id))}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+$("pipeline").innerHTML=PIPE.map((x,i)=>`<div class="stage"><b>${i+1}. ${x}</b><span>AI handoff</span></div>`).join("");
 
-function sampleFrame(video, time, canvas, ctx){
-  return new Promise(resolve=>{
-    const done=()=>{video.removeEventListener('seeked',done);try{ctx.drawImage(video,0,0,canvas.width,canvas.height);resolve(ctx.getImageData(0,0,canvas.width,canvas.height).data)}catch(e){resolve(null)}};
-    video.addEventListener('seeked',done,{once:true});
-    try{video.currentTime=Math.max(0,Math.min(time,Math.max(0,video.duration-0.05)))}catch(e){resolve(null)}
-  });
-}
-function frameStats(a,b){
-  if(!a)return {brightness:0.5,contrast:0.2,motion:0};
-  let sum=0,sq=0,diff=0,n=0;
-  for(let i=0;i<a.length;i+=4){const y=(a[i]*.2126+a[i+1]*.7152+a[i+2]*.0722)/255;sum+=y;sq+=y*y;if(b){const z=(b[i]*.2126+b[i+1]*.7152+b[i+2]*.0722)/255;diff+=Math.abs(y-z)}n++}
-  const avg=sum/n, variance=Math.max(0,sq/n-avg*avg);
-  return {brightness:avg,contrast:Math.sqrt(variance),motion:b?Math.min(1,(diff/n)*2.7):0};
-}
-async function analyzeOne(file,index){
-  const url=URL.createObjectURL(file);
-  const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='metadata';
-  const loadedMeta=new Promise((resolve,reject)=>{v.onloadedmetadata=resolve;v.onerror=reject});
-  v.src=url; await loadedMeta;
-  const duration=Number.isFinite(v.duration)?v.duration:0;
-  const w=v.videoWidth||0,h=v.videoHeight||0;
-  const canvas=document.createElement('canvas');canvas.width=64;canvas.height=36;const ctx=canvas.getContext('2d',{willReadFrequently:true});
-  const times=[Math.max(.05,duration*.15),Math.max(.08,duration*.5),Math.max(.1,duration*.85)];
-  const frames=[];for(const t of times)frames.push(await sampleFrame(v,t,canvas,ctx));
-  const st=frames.map((f,i)=>frameStats(f,i?frames[i-1]:null));
-  const bright=st.reduce((a,x)=>a+x.brightness,0)/st.length;
-  const contrast=st.reduce((a,x)=>a+x.contrast,0)/st.length;
-  const motion=st.slice(1).reduce((a,x)=>a+x.motion,0)/Math.max(1,st.length-1);
-  const exposure=Math.max(0,1-Math.min(1,Math.abs(bright-.52)/.48));
-  const vertical=Math.min(1,(h/Math.max(1,w))/1.777);
-  const resolution=Math.min(1,(w*h)/(1920*1080));
-  const durationFit=duration>=1.8&&duration<=12?1:Math.max(.25,1-Math.abs(duration-6)/12);
-  const score=Math.round(100*(.28*motion+.22*exposure+.18*Math.min(1,contrast/.22)+.18*vertical+.09*resolution+.05*durationFit));
-  URL.revokeObjectURL(url);
-  return {index,name:file.name,duration,w,h,brightness,contrast,motion,score};
-}
-async function analyzeFootage(){
-  if(clips.length<3){$('analysisStatus').textContent='Add at least 3 clips first.';return null}
-  $('analysisStatus').textContent='Analyzing framing, exposure, resolution and motion…';$('analysisResults').innerHTML='';
-  const rows=[];
-  for(let i=0;i<clips.length;i++){try{rows.push(await analyzeOne(clips[i],i))}catch(e){rows.push({index:i,name:clips[i].name,duration:0,w:0,h:0,brightness:.5,contrast:0,motion:0,score:40})}}
-  analysis=rows.sort((a,b)=>b.score-a.score);
-  $('analysisResults').innerHTML=analysis.map((x,i)=>`<div class="brief"><b>#${i+1} ${x.name}</b><span class="small">Score <strong>${x.score}/100</strong> • ${Math.round(x.duration*10)/10}s • ${x.w}×${x.h}<br>Motion ${Math.round(x.motion*100)}% • Exposure ${Math.round(x.brightness*100)}% • ${x.h>=x.w?'vertical':'horizontal'}</span></div>`).join('');
-  $('analysisStatus').textContent=`Auto Director ranked ${analysis.length} clips. Strongest shot: ${analysis[0].name} (${analysis[0].score}/100).`;
-  return analysis;
-}
-function makePlan(mode,variant=0,usedAcross=[]){
-  const a=(analysis||clips.map((f,i)=>({index:i,score:60-i*2,motion:.4,brightness:.52,contrast:.15}))).slice();
-  const v26=(window.v26Assignments&&window.v26Assignments[mode])||null;
-  if(v26&&v26.length){ const rank=new Map(v26.map((idx,n)=>[idx,n])); a.sort((x,y)=>(rank.get(x.index)??999)-(rank.get(y.index)??999)); }
-  const base=a.slice().sort((x,y)=>y.score-x.score);
-  let ordered=[];
-  if(mode==='cinematic') ordered=base;
-  else if(mode==='festival') ordered=base.slice().sort((x,y)=>(y.motion*.7+y.score/100*.3)-(x.motion*.7+x.score/100*.3));
-  else if(mode==='devotion') ordered=base.slice().sort((x,y)=>(y.score-y.motion*10)-(x.score-x.motion*10));
-  else ordered=base.slice().sort((x,y)=>Math.abs(x.motion-.34)-Math.abs(y.motion-.34));
-  // Different opening shot for each daily cut when enough clips exist.
-  const modeOffset={cinematic:0,festival:1,devotion:2,heritage:3}[mode]||0;
-  if(ordered.length>1){const idx=modeOffset%ordered.length;const opener=ordered.splice(idx,1)[0];ordered.unshift(opener);}
-  // Prefer variety: do not place two very similar motion profiles back-to-back.
-  const varied=[];
-  while(ordered.length){
-    if(!varied.length){varied.push(ordered.shift());continue;}
-    const last=varied[varied.length-1];
-    let pick=ordered.findIndex(x=>Math.abs((x.motion||0)-(last.motion||0))>.08);
-    if(pick<0)pick=0;
-    varied.push(ordered.splice(pick,1)[0]);
-  }
-  // V20 diversity engine: each Reel gets a different footage priority/order.
-  // With fewer than 8 source clips, rotation still changes the narrative sequence.
-  const rotation=varied.length?variant%varied.length:0;
-  if(rotation) varied=varied.slice(rotation).concat(varied.slice(0,rotation));
-  const unused=varied.filter(x=>!usedAcross.includes(x.index));
-  const preferred=unused.length>=Math.min(3,varied.length)?unused.concat(varied.filter(x=>usedAcross.includes(x.index))):varied;
-  const max=Math.min(6,preferred.length);
-  const chosen=preferred.slice(0,max);
-  return chosen.map((x,i)=>{
-    const baseDur=settings[mode].clip;
-    const dur=i===0?Math.max(1.25,baseDur-.55):i===chosen.length-1?Math.max(1.5,baseDur+.45):baseDur+(i%2?.25:-.12);
-    return {index:x.index,duration:Math.max(1.2,Math.min(baseDur+.7,dur)),score:x.score,motion:x.motion};
-  });
-}
-function buildCreatorKit(){
- const moods=['cinematic Indian culture','festival energy and celebration','quiet devotion and faith','living heritage and tradition'];
- const audio=['cinematic Indian instrumental / ambient tabla','upbeat Indian percussion / festival energy','devotional instrumental / temple ambience','Indian classical / heritage instrumental'];
- const topic=(($('creativeTopic')?.value||$('autoTopic')?.value||'Bharat culture').trim().replace(/\s+/g,' '))||'Bharat culture';
- const words=topic.replace(/[^a-zA-Z0-9 ]/g,' ').trim().split(/\s+/).filter(Boolean);
- const topicTags=words.slice(0,3).map(w=>'#'+w).filter(x=>x.length>1);
- const baseTags=['#FestivalOfBharat','#Bharat','#IndianCulture'];
- const dynamic=[
-  ['FEEL THE MOMENT — topic treatment',`When ${topic} comes alive, the feeling arrives before the explanation.`],
-  ['LOOK CLOSER',`Look closer at ${topic}. The smallest details carry the story.`],
-  ['FEEL THE ENERGY — topic treatment',`The movement, sound and people are what make ${topic} unforgettable.`],
-  ['STILL ALIVE',`${topic} is not only history — it is a living part of Bharat today.`]
- ];
- const profile=typeof topicProfile==='function'?topicProfile(topic):null;
- const hooks=profile?.hook?[profile.hook,profile.hook,profile.hook,profile.hook]:PACK.map(x=>x.hook);
- creatorKit=PACK.map((x,i)=>({reel:i+1,title:dynamic[i][0]+' — '+topic,hook:hooks[i],caption:dynamic[i][1],hashtags:[...new Set([...topicTags,...baseTags,'#'+['Moment','Detail','Energy','Heritage'][i]])],coverText:dynamic[i][0],creativeDirection:moods[i],audioDirection:'Search Instagram audio for: '+audio[i]+'; use audio eligible for your account and region.',approvalChecklist:['Check crop and faces','Verify source/license','Check caption spelling','Add eligible Instagram audio in Instagram','Approve before posting']}));
- $('creatorKitGrid').innerHTML=creatorKit.map(x=>`<div class="brief"><b>REEL ${String(x.reel).padStart(2,'0')} — ${x.title}</b><span class="small"><b>Hook:</b> ${x.hook}<br><b>Cover:</b> ${x.coverText}<br><b>Caption:</b> ${x.caption}<br><b>Audio direction:</b> ${x.audioDirection}<br><b>Hashtags:</b> ${x.hashtags.join(' ')}</span></div>`).join('');
- return creatorKit;
-}
-async function renderCore(name,p,args,plan){
-  const s=settings[p];const usePlan=plan||clips.map((_,i)=>({index:i,duration:s.clip}));
-  const fs=usePlan.map((shot,k)=>`[${shot.index}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2,setsar=1,fps=30,trim=duration=${shot.duration.toFixed(2)},setpts=PTS-STARTPTS,eq=contrast=1.03:saturation=1.04:brightness=0.01[v${k}]`).join(';');
-  const c=usePlan.map((_,k)=>`[v${k}]`).join('')+`concat=n=${usePlan.length}:v=1:a=0[outv]`;
-  const outfile=`${name}.mp4`;
-  await ffmpeg.run(...args,'-filter_complex',fs+';'+c,'-map','[outv]','-an','-c:v','libx264','-preset','veryfast','-crf',String(s.crf),'-pix_fmt','yuv420p','-movflags','+faststart',outfile);
-  const data=ffmpeg.FS('readFile',outfile);return URL.createObjectURL(new Blob([data.buffer],{type:'video/mp4'}));
-}
-async function render(){
-  if(clips.length<3){$('renderStatus').textContent='Use at least 3 clips for a professional cut.';return}
-  const btn=$('render');btn.disabled=true;$('download').style.display='none';$('progress').style.width='0%';
-  try{await ensure();if(!analysis)await analyzeFootage();const args=await loadInputs();const plan=makePlan(preset);activePlan=plan;const url=await renderCore('professional-reel',preset,args,plan);$('outVideo').src=url;$('download').href=url;$('download').download='festival-of-bharat-professional-reel.mp4';$('download').style.display='inline-flex';$('renderStatus').textContent=`Auto-edited ${plan.length} strongest shots • ${preset} • 1080×1920 ✓`;$('progress').style.width='100%'}catch(e){console.error(e);$('renderStatus').textContent='Browser render failed. Try Chrome/Edge with 3–5 short clips.'}finally{btn.disabled=false}
-}
-async function autoBest(){
-  if(clips.length<3){$('renderStatus').textContent='Add at least 3 clips first.';return}
-  const btn=$('autoBest');btn.disabled=true;$('progress').style.width='0%';
-  try{await ensure();await analyzeFootage();const args=await loadInputs();const plan=makePlan('cinematic');activePlan=plan;const url=await renderCore('festival-of-bharat-best-auto-reel','cinematic',args,plan);$('outVideo').src=url;$('download').href=url;$('download').download='festival-of-bharat-best-auto-reel.mp4';$('download').style.display='inline-flex';$('renderStatus').textContent=`BEST REEL ready • ${plan.length} strongest shots • 1080×1920 ✓`;$('progress').style.width='100%'}catch(e){console.error(e);$('renderStatus').textContent='Auto edit failed. Try Chrome/Edge with 3–5 short clips.'}finally{btn.disabled=false}
-}
-async function renderAll(){
-  if(clips.length<3){$('batchStatus').textContent='Add at least 3 licensed clips first.';return}
-  const btn=$('renderAll');btn.disabled=true;$('batchOutputs').innerHTML='';$('batchStatus').textContent='Auto Director is analyzing the footage…';$('progress').style.width='0%';
-  try{await ensure();await analyzeFootage();const args=await loadInputs();const variants=[['01','Cinematic Auto Cut','cinematic'],['02','Festival Energy Auto Cut','festival'],['03','Devotional Auto Cut','devotion'],['04','Heritage Auto Cut','heritage']];const links=[];window.lastBatch=links;for(let n=0;n<variants.length;n++){const [num,label,key]=variants[n];$('batchStatus').textContent=`Auto-editing ${num}/04 — ${label}…`;$('progress').style.width=(n/4*100)+'%';const plan=makePlan(key,n,links.flatMap(x=>x.planIndexes||[]));const url=await renderCore(`festival-of-bharat-reel-${num}`,key,args,plan);links.push({num,label,key,url,planIndexes:plan.map(x=>x.index),shots:plan.length,score:Math.round(plan.reduce((a,x)=>a+(x.score||0),0)/Math.max(1,plan.length))});$('batchOutputs').innerHTML=links.map(x=>`<div class="brief"><b>REEL ${x.num} — ${x.label}</b><span class="small">1080×1920 • 30fps • ${x.shots} shots • Auto quality ${x.score}/100<br>Footage pool: ${x.planIndexes.map(i=>`#${i+1}`).join(' → ')}</span><div class="controls"><a class="btn primary" href="${x.url}" download="festival-of-bharat-reel-${x.num}.mp4">Download MP4</a><a class="btn" href="${x.url}" target="_blank" rel="noopener">Preview</a></div></div>`).join('')}buildCreatorKit();$('batchStatus').textContent='All 4 auto-edited Reels + Creator Pack are ready ✓ — review and approve before posting.';$('progress').style.width='100%'}catch(e){console.error(e);$('batchStatus').textContent='Batch auto-edit failed. Try Chrome/Edge with 3–5 short clips.'}finally{btn.disabled=false}
-}
-async function buildToday(){
-  if(clips.length<3){$('analysisStatus').textContent='Add at least 3 clips first.';return}
-  const b=$('buildToday');b.disabled=true;$('analysisStatus').textContent='AUTO BUILD TODAY: analyzing → selecting → rendering 4 Reels → preparing Creator Pack…';
-  try{
-    await renderAll();
-    buildCreatorKit();
-    $('analysisStatus').textContent='4 Reels rendered ✓ — running Quality Judge…';
-    if(typeof runJudge==='function'){await runJudge();}
-    $('analysisStatus').textContent='Quality Judge complete ✓ — checking for weak cuts…';
-    if(typeof selfReEdit==='function'){await selfReEdit();}
-    buildCreatorKit();
-    $('analysisStatus').textContent='AUTO PILOT COMPLETE ✓ 4 Reels + Quality Check + Self-Re-Edit + Creator Pack ready. Human approval required.';
-    document.getElementById('batch').scrollIntoView({behavior:'smooth'});
-  }finally{b.disabled=false}
-}
-
-const creativeAngles=[
- ['01','The Moment','Open on the most visually powerful moment. Build emotion through faces, movement and one memorable closing frame.','Cinematic','Emotion-first'],
- ['02','The Detail','Start with a close detail people usually miss. Reveal the bigger festival world gradually.','Macro / documentary','Curiosity-first'],
- ['03','The Energy','Lead with movement, crowd rhythm and the strongest action shots. Keep cuts tight and energetic.','Festival energy','Momentum-first'],
- ['04','The Meaning','Use architecture, ritual, hands, light and people to tell a quiet cultural story.','Devotional / heritage','Meaning-first']
-];
-function makeCreativePlans(){const topic=($('creativeTopic').value||'Bharat culture').trim(); const base=topic.replace(/\s+/g,' '); return creativeAngles.map((a,i)=>({reel:a[0],title:`${a[1]} — ${base}`,hook:[`You can feel this moment before you can explain it.`,`Look closely. This is where the story begins.`,`This is the energy that makes the festival unforgettable.`,`This tradition is still alive, right here, right now.`][i],story:a[2],treatment:a[3],priority:a[4],cover:[`FEEL THE MOMENT — topic treatment`,`LOOK CLOSER`,`FEEL THE ENERGY — topic treatment`,`STILL ALIVE`][i],cta:'Save this moment. Share Bharat.'}));}
-function renderCreativePlans(){const plans=makeCreativePlans();$('creativeGrid').innerHTML=plans.map(x=>`<div class="brief"><b>REEL ${x.reel} — ${x.title}</b><span class="small"><b>Hook:</b> ${x.hook}<br><b>Story:</b> ${x.story}<br><b>Treatment:</b> ${x.treatment}<br><b>Priority:</b> ${x.priority}<br><b>Cover:</b> ${x.cover}<br><b>CTA:</b> ${x.cta}</span></div>`).join('');return plans;}
-$('creativePlan').onclick=()=>{renderCreativePlans();$('creativeStatus').textContent='4 unique creative directions prepared ✓ — Auto Director will use these angles for the daily cuts.'};
-
-$('analyze').onclick=analyzeFootage;$('buildToday').onclick=buildToday;$('autoBest').onclick=autoBest;$('copyKit').onclick=async()=>{buildCreatorKit();const txt=creatorKit.map(x=>`REEL ${x.reel} — ${x.title}\nHOOK: ${x.hook}\nCAPTION: ${x.caption}\nHASHTAGS: ${x.hashtags.join(' ')}\nAUDIO: ${x.audioDirection}`).join('\n\n');try{await navigator.clipboard.writeText(txt);$('kitStatus').textContent='Creator Pack copied ✓'}catch(e){$('kitStatus').textContent='Copy blocked by browser; use Export JSON.'}};
-$('exportKit').onclick=()=>{buildCreatorKit();const blob=new Blob([JSON.stringify({brand:'Festival of Bharat',format:'1080x1920',generatedAt:new Date().toISOString(),reels:creatorKit},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='festival-of-bharat-creator-pack.json';a.click();URL.revokeObjectURL(u);$('kitStatus').textContent='Creator Pack exported ✓'};
-$('analyze').onclick=analyzeFootage;$('autoBest').onclick=autoBest;</script>
-<section class="section card" id="diversity"><h2>V20 — 4-Reel Diversity Engine</h2><div class="small">The Director now treats the daily batch as four separate editorial products. It rotates opening shots, prioritizes unused footage, changes pacing by Reel, and reports the exact footage pool used in each cut.</div><div class="briefgrid" style="margin-top:10px"><div class="brief"><b>Reel 01</b><span class="small">Emotion / strongest visual</span></div><div class="brief"><b>Reel 02</b><span class="small">Detail / curiosity</span></div><div class="brief"><b>Reel 03</b><span class="small">Energy / movement</span></div><div class="brief"><b>Reel 04</b><span class="small">Meaning / heritage</span></div></div><div class="notice"><b>Important:</b> if you provide only 3 clips, four unique cuts can still be produced, but they cannot contain four completely non-overlapping footage pools. With 8+ good licensed clips, the diversity engine has much more room to separate the four Reels.</div></section>
-<section class="panel" id="topic-intelligence" style="margin-top:18px"><div class="panel-head"><div><div class="eyebrow">V19 SHOT-MATCHED SCOUT</div><h2>AI Topic + Shot Director</h2><p class="muted">Turn one topic into a story, then search separately for the exact shots the story needs.</p></div></div><div class="grid" style="grid-template-columns:1fr auto;gap:12px"><input id="topicInput" class="input" value="Ganpati festival Mumbai" placeholder="Enter topic, festival, place or cultural moment"><button class="primary" onclick="analyzeTopic()">Analyze Topic</button></div><div class="controls" style="margin-top:12px"><button class="gold" onclick="scoutByShot()">⚡ SCOUT FOOTAGE FOR EVERY SHOT</button><span id="shotScoutStatus" class="muted"></span></div><div id="topicResult" class="cards" style="margin-top:14px"></div><div id="shotScoutResults" class="cards" style="margin-top:14px"></div></section>
-<script>
-function topicProfile(t){const x=t.toLowerCase();let type='culture';if(/ganpati|ganesh|bappa/.test(x))type='ganpati';else if(/holi/.test(x))type='holi';else if(/diwali|deepavali/.test(x))type='diwali';else if(/navratri|garba/.test(x))type='navratri';else if(/janmashtami|krishna|dahi handi/.test(x))type='janmashtami';else if(/shiv|mahadev|mahashivratri/.test(x))type='shaiv';const maps={ganpati:{arc:'Arrival → devotion → crowd energy → darshan',shots:['Mumbai festival street arrival','Ganesh idol detail close-up','aarti or hands folded devotion','crowd movement and drums','quiet darshan / emotional closing'],hook:'Mumbai feels different when Bappa arrives.',guard:'Respect worshippers and sacred spaces; avoid fabricated rituals.'},holi:{arc:'Anticipation → colour burst → celebration → calm',shots:['Holi preparation details','natural colour powder close-up','people celebrating with consent','drums and street movement','quiet post-celebration scene'],hook:'This is what colour sounds like in Bharat.',guard:'Prefer natural expressions and avoid staged stereotypes.'},diwali:{arc:'Twilight → first light → community → night glow',shots:['Diwali market at twilight','diya close-up','rangoli or home detail','family/community celebration','night architecture and lights'],hook:'Before the fireworks, there is a light that begins at home.',guard:'Avoid unsafe firework depictions.'},navratri:{arc:'Preparation → rhythm → peak garba → closing emotion',shots:['garba preparation','traditional attire detail','dandiya movement','wide garba circle','closing devotional moment'],hook:'Nine nights. One rhythm.',guard:'Keep regional attire and context specific.'},janmashtami:{arc:'Build-up → celebration → human moment → devotion',shots:['Janmashtami temple detail','dahi handi preparation','crowd celebration','hands/expressions detail','devotional closing'],hook:'Some traditions are felt before they are explained.',guard:'Respect worshippers and avoid intrusive filming.'},shaiv:{arc:'Stillness → temple detail → devotion → release',shots:['temple at dawn/evening','bells or flowers detail','devotees in respectful distance','architecture wide shot','quiet closing frame'],hook:'Some places make the noise inside you go quiet.',guard:'Do not fabricate sacred rituals.'},culture:{arc:'Place → people → detail → meaning',shots:['location establishing shot','people in natural context','craft/food/object detail','street or landscape movement','meaningful closing frame'],hook:'Look closer. Bharat has a story in every detail.',guard:'Keep visuals specific to the chosen region and context.'}};return {type,...(maps[type]||maps.culture)};}
-function analyzeTopic(){const t=(document.getElementById('topicInput').value||'Bharat culture').trim();const a=topicProfile(t);document.getElementById('topicResult').innerHTML=[['Story arc',a.arc],['Shot requirements',a.shots.join(' • ')],['Hook',a.hook],['Creative guardrail',a.guard]].map(v=>`<div class="card"><div class="eyebrow">${v[0]}</div><strong>${v[1]}</strong></div>`).join('');return a;}
-async function scoutByShot(){const t=(document.getElementById('topicInput').value||'Bharat culture').trim();const a=analyzeTopic();const out=document.getElementById('shotScoutResults');const status=document.getElementById('shotScoutStatus');out.innerHTML='';status.textContent='Building shot-specific searches…';const seen=new Set();let total=0;for(let i=0;i<a.shots.length;i++){const q=(a.shots[i]+' '+t).slice(0,150);let results=[];try{const r=await fetch('/api/scout?q='+encodeURIComponent(q));const j=await r.json();results=j.results||[]}catch(e){results=[]}const unique=results.filter(x=>{const k=x.downloadUrl||x.pageUrl||x.title;if(seen.has(k))return false;seen.add(k);return true}).slice(0,3);total+=unique.length;out.innerHTML+=`<div class="card"><div class="eyebrow">SHOT ${String(i+1).padStart(2,'0')}</div><h3 style="margin:4px 0 8px">${a.shots[i]}</h3>${unique.length?unique.map((x,j)=>`<div class="brief" style="margin-top:8px"><b>${x.title}</b><span class="small">${x.author||'Unknown author'}<br><span class="ok">${x.license||'Check license at source'}</span></span><div class="controls"><button class="btn gold" onclick="importShotResult(${JSON.stringify({title:x.title,downloadUrl:x.downloadUrl,pageUrl:x.pageUrl,license:x.license||'',author:x.author||'',shot:a.shots[i]}).replace(/"/g,'&quot;')})">Use in Reel</button><a class="btn" target="_blank" rel="noopener" href="${x.pageUrl}">Source / license</a></div></div>`).join(''):'<span class="muted">No automated result — use the source links or try a shorter topic.</span>'}</div>`;status.textContent=`Shot scouting ${i+1}/${a.shots.length} complete • ${total} unique candidates`;}status.textContent=`Shot scouting complete ✓ ${total} unique candidates across ${a.shots.length} story shots.`;}
-async function importShotResult(x){if(clips.length>=8){document.getElementById('shotScoutStatus').textContent='Maximum 8 clips reached. Clear some clips first.';return}try{const r=await fetch(x.downloadUrl,{mode:'cors'});if(!r.ok)throw new Error('download '+r.status);const b=await r.blob();if(!b.type.startsWith('video/'))throw new Error('not video');const ext=(b.type.split('/')[1]||'mp4').split(';')[0];clips.push(new File([b],'shot-'+Date.now()+'.'+ext,{type:b.type}));clipMeta.push({source:'Wikimedia Commons',license:x.license,author:x.author,url:x.pageUrl,shot:x.shot});renderClips();document.getElementById('shotScoutStatus').textContent='Imported shot: '+x.shot+' ✓';}catch(e){document.getElementById('shotScoutStatus').innerHTML='Automatic import blocked. <a target="_blank" rel="noopener" href="'+x.downloadUrl+'">Open/download source</a>, then add it to Reel Factory.'}}
-</script>
-
-
-<section class="section card" id="qualityJudge"><h2>V21 — AI Reel Quality Judge & Approval Gate</h2><div class="small">Before publishing, the Judge runs a production preflight across the four cuts. It checks measurable edit signals such as shot variety, opening diversity, pacing, clip quality metadata, rights records and export settings. It is a heuristic production gate — it does not claim to understand every frame or guarantee copyright clearance.</div><div class="controls" style="margin-top:12px"><button class="btn gold" id="judgeBtn">✓ JUDGE TODAY'S 4 REELS</button><button class="btn" id="approveAllBtn">Approve All If Passed</button><span id="judgeStatus" class="small"></span></div><div id="judgeSummary" class="briefgrid" style="margin-top:12px"></div><div id="judgeResults" class="briefgrid" style="margin-top:12px"></div><div class="notice"><b>Approval rule:</b> a Reel with missing source/license metadata, fewer than 3 useful shots, repeated opening footage, or an export mismatch is flagged for review. Final posting remains a human decision.</div></section>
-<script>
-window.lastBatch=window.lastBatch||[]; window.judgeApprovals=window.judgeApprovals||{};
-function clipQualityScore(i){
- const c=clips[i]; if(!c)return 0;
- let s=50;
- if(c.size>250000)s+=15;if(c.size>1000000)s+=10;
- const m=clipMeta[i]||{};
- if(m.source)s+=8;if(m.license)s+=10;if(m.author)s+=4;if(m.url)s+=3;
- if(m.source==='Wikimedia Commons'&&m.license)s+=5;
- return Math.min(100,s);
-}
-function judgeOne(x,idx){
- const plan=x.planIndexes||[]; const unique=new Set(plan).size; const variety=Math.min(100,50+unique*10);
- const opening=plan.length?plan[0]:-1; const prior=(window.lastBatch||[]).slice(0,idx).map(r=>r.planIndexes?.[0]); const openingDiversity=opening>=0&&!prior.includes(opening)?100:45;
- const pacing={cinematic:88,festival:94,devotion:86,heritage:90}[x.key]||80;
- const exportScore=/1080x1920/i.test('1080x1920')?100:0;
- const rights=plan.length?Math.round(plan.reduce((a,i)=>a+clipQualityScore(i),0)/plan.length):0;
- const score=Math.round(variety*.22+openingDiversity*.15+pacing*.18+exportScore*.20+rights*.25);
- const flags=[];
- if(plan.length<3)flags.push('Too few shots');
- if(openingDiversity<60)flags.push('Repeated opening shot');
- if(rights<70)flags.push('Rights/source metadata incomplete');
- const sourceChecks=plan.map(i=>clipMeta[i]||{});
- const missingRights=sourceChecks.filter(m=>!m.license||!m.url).length;
- if(missingRights)flags.push(missingRights+' shot(s) need source/license verification');
- if(unique<Math.max(3,Math.ceil(plan.length*.75)))flags.push('Low shot variety');
- return {...x,score,flags,metrics:{variety,openingDiversity,pacing,exportScore,rights}};
-}
-function runJudge(){
- const out=document.getElementById('judgeResults'),sum=document.getElementById('judgeSummary'),status=document.getElementById('judgeStatus');
- const batch=window.lastBatch||[]; if(!batch.length){status.textContent='Build the 4 Reels first, then run the Judge.';sum.innerHTML='';out.innerHTML='';return;}
- const judged=batch.map(judgeOne); const pass=judged.filter(x=>x.score>=75&&x.flags.length===0).length;
- sum.innerHTML=[['READY TO APPROVE',pass+'/4'],['NEEDS REVIEW',(4-pass)+'/4'],['RULE','Score ≥75 + no critical flags']].map(v=>`<div class="brief"><b>${v[0]}</b><span class="small">${v[1]}</span></div>`).join('');
- out.innerHTML=judged.map(x=>{const ok=x.score>=75&&x.flags.length===0;return `<div class="brief"><b>REEL ${x.num} — ${x.label}</b><span class="small"><b>Judge score:</b> ${x.score}/100<br>Variety ${x.metrics.variety} • Opening ${x.metrics.openingDiversity} • Pacing ${x.metrics.pacing} • Export ${x.metrics.exportScore} • Rights ${x.metrics.rights}<br><b>${ok?'PASS ✓':'REVIEW ⚠'}</b>${x.flags.length?'<br>Flags: '+x.flags.join(' • '):'<br>No automatic flags.'}</span><div class="controls">${ok?`<button class="btn primary" onclick="approveReel('${x.num}')">Approve Reel ${x.num}</button>`:'<span class="small">Re-edit or fix the flagged issue before approval.</span>'}</div></div>`}).join('');
- status.textContent=`Judge complete ✓ ${pass}/4 passed the automatic gate. Human approval is still required.`;
- window.judgedBatch=judged;
-}
-function approveReel(num){window.judgeApprovals[num]=true; const s=document.getElementById('judgeStatus');s.textContent=`Reel ${num} marked APPROVED ✓ — keep human review before posting.`;runJudge();}
-document.getElementById('judgeBtn').onclick=runJudge;
-document.getElementById('approveAllBtn').onclick=()=>{const j=window.judgedBatch||[];const passed=j.filter(x=>x.score>=75&&x.flags.length===0);passed.forEach(x=>window.judgeApprovals[x.num]=true);document.getElementById('judgeStatus').textContent=`Marked ${passed.length} passing Reel(s) approved ✓. Final Instagram posting remains manual.`;runJudge();};
-</script>
-
-<section class="section card" id="selfReedit"><h2>V22 — AI Self-Re-Edit Engine</h2><div class="small">If the Quality Judge flags a Reel, V22 automatically creates a new edit using a different footage order, opening shot and pacing profile, then runs the Judge again. It does not bypass human approval.</div><div class="controls" style="margin-top:12px"><button class="btn gold" id="reeditBtn">↻ AUTO RE-EDIT FLAGGED REELS</button><span id="reeditStatus" class="small"></span></div><div id="reeditResults" class="briefgrid" style="margin-top:12px"></div><div class="notice"><b>Safety gate:</b> re-editing changes the edit only. It does not create new footage, remove watermarks, or establish copyright permission. Source/license review and your final approval remain required.</div></section>
-<script>
-async function selfReEdit(){
- const status=document.getElementById('reeditStatus'),out=document.getElementById('reeditResults');
- const batch=window.lastBatch||[];
- if(!batch.length){status.textContent='Build the 4 Reels first.';out.innerHTML='';return;}
- if(!window.judgedBatch||window.judgedBatch.length!==batch.length){runJudge();}
- const judged=window.judgedBatch||[];
- const flagged=judged.filter(x=>x.score<75||x.flags.length);
- if(!flagged.length){status.textContent='All 4 Reels already pass the automatic gate — no re-edit needed.';out.innerHTML='<div class="brief"><b>✓ NOTHING TO RE-EDIT</b><span class="small">The current batch passed the Judge. Human approval is still required.</span></div>';return;}
+async function getStatus(){
  try{
-  const args=await loadInputs();
-  const variants=['festival','cinematic','heritage','devotion'];
-  const changed=[];
-  for(let n=0;n<flagged.length;n++){
-   const old=flagged[n];
-   status.textContent=`Self-re-editing Reel ${old.num} (${n+1}/${flagged.length})…`;
-   const alternate=variants[(Number(old.num)-1+n+1)%variants.length];
-   const used=(batch.filter(x=>x.num!==old.num).flatMap(x=>x.planIndexes||[]));
-   let plan=makePlan(alternate,(Number(old.num)+n+1)%4,used);
-   if(old.planIndexes?.length){
-     const fresh=plan.filter(x=>!old.planIndexes.includes(x.index));
-     if(fresh.length>=3)plan=fresh.concat(plan.filter(x=>old.planIndexes.includes(x.index))).slice(0,Math.min(6,plan.length));
-     else plan=plan.slice().reverse();
-   }
-   const url=await renderCore(`festival-of-bharat-reedit-${old.num}-${Date.now()}`,alternate,args,plan);
-   const replacement={...old,key:alternate,url,planIndexes:plan.map(x=>x.index),shots:plan.length,label:old.label+' • V22 Re-Edit'};
-   const bi=batch.findIndex(x=>x.num===old.num);
-   if(bi>=0)batch[bi]=replacement;
-   changed.push(replacement);
-  }
-  window.lastBatch=batch;
-  $('batchOutputs').innerHTML=batch.map(x=>`<div class="brief"><b>REEL ${x.num} — ${x.label}</b><span class="small">1080×1920 • 30fps • ${x.shots} shots • Footage pool: ${(x.planIndexes||[]).map(i=>`#${i+1}`).join(' → ')}</span><div class="controls"><a class="btn primary" href="${x.url}" download="festival-of-bharat-reel-${x.num}.mp4">Download MP4</a><a class="btn" href="${x.url}" target="_blank" rel="noopener">Preview</a></div></div>`).join('');
-  buildCreatorKit();
-  runJudge();
-  out.innerHTML=changed.map(x=>`<div class="brief"><b>REEL ${x.num} — RE-EDITED ✓</b><span class="small">New treatment: ${x.key}<br>New footage order: ${(x.planIndexes||[]).map(i=>`#${i+1}`).join(' → ')}</span></div>`).join('');
-  status.textContent=`Self-re-edit complete ✓ ${changed.length} Reel(s) rebuilt and re-judged. Review the new results before approval.`;
- }catch(e){console.error(e);status.textContent='Self-re-edit failed. Try Chrome/Edge with short clips.';}
+  const r=await fetch("https://raw.githubusercontent.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/status/status/status.json?x="+Date.now(),{cache:"no-store"});
+  if(!r.ok)throw 0; status=await r.json();
+  const pct=Number(status.overall_percent||0);
+  $("overallBar").style.width=pct+"%";$("overallPct").textContent=pct+"%";
+  $("teamBar").style.width=pct+"%";$("teamPct").textContent=pct+"%";
+  $("currentEmployee").textContent=status.current_employee||"AI Manager / CEO";
+  $("currentTask").textContent=status.current_task||"Waiting for a production run.";
+  $("teamEmployee").textContent=status.current_employee||"Idle";
+  $("teamTask").textContent=status.current_task||"No live handoff.";
+  $("connection").textContent=status.phase==="failed"?"Production failed":status.phase==="complete"?"Batch complete":status.phase==="ready"?"Ready":"Live status";
+  $("connection").className="pill";
+  const deps=status.departments||{};
+  $("departments").innerHTML=Object.entries(deps).map(([k,v])=>`<div class="employee"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join("");
+  renderTeam();
+ }catch(e){$("connection").textContent="Status unavailable")}
 }
-document.getElementById('reeditBtn').onclick=selfReEdit;
-</script>
-
-
-<section class="card" id="v23Daily" style="margin-top:18px">
-  <div class="eyebrow">V23 AUTOPILOT</div>
-  <h2>Daily 4-Reel Control Room</h2>
-  <p class="muted">One topic becomes four deliberately different Reels. The plan runs before footage selection, diversity checks, quality judging and self-re-editing.</p>
-  <div class="row" style="gap:10px;flex-wrap:wrap">
-    <input id="v23Topic" value="Ganpati festival Mumbai 2026" placeholder="Today's topic" style="flex:1;min-width:280px">
-    <button id="v23Plan">PLAN TODAY'S 4 REELS</button>
-  </div>
-  <div id="v23Status" class="muted" style="margin-top:10px"></div>
-  <div id="v23Packs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px"></div>
-  <div style="margin-top:14px;padding:12px;border-radius:12px;background:rgba(255,255,255,.04)">
-    <strong>Autopilot rule:</strong> never publish automatically. A Reel must pass the quality gate and receive your approval before Instagram posting.
-  </div>
-</section>
-<script>
-(()=>{
- const btn=document.getElementById('v23Plan'), topic=document.getElementById('v23Topic'), status=document.getElementById('v23Status'), out=document.getElementById('v23Packs');
- btn?.addEventListener('click',async()=>{
-   status.textContent='Planning four distinct Reel directions…'; out.innerHTML='';
-   try{
-    const r=await fetch('/api/today?topic='+encodeURIComponent(topic.value)); const d=await r.json();
-    status.textContent=d.date+' • '+d.topic+' • '+d.format+' • '+d.count+' Reels';
-    out.innerHTML=d.packs.map(x=>`<div style="padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px"><div class="eyebrow">REEL ${x.id}</div><h3 style="margin:6px 0">${x.angle}</h3><div class="muted">${x.goal}</div><p><b>Pacing:</b> ${x.pace}</p><p><b>Director rule:</b> ${x.rule}</p></div>`).join('');
-   }catch(e){status.textContent='Planner unavailable. You can still use the local Reel Factory.';}
- });
-})
-
-// Creative reference sources: Instagram + Pinterest + Canva. References guide original production; source media is not blindly copied.
-stage("05b-visual-intelligence",{
-  "status":"reference_only",
-  "sources":{
-    "Instagram":["hooks","opening visual","pacing","text","cover","editing pattern","audio direction"],
-    "Pinterest":["composition","visual mood","colour","typography","cultural design references"],
-    "Canva":["eligible Reel layouts","typography","graphics","transitions","licensed Free/Pro content where applicable"]
-  },
-  "rule":"Use references to create original Festival of Bharat concepts; do not download/repost arbitrary Pinterest or Instagram content.",
-  "canva_license_gate":"Verify content source and applicable Canva license before use; Popular Music is excluded from the Content License Agreement."
-})();
-</script>
-
-
-<section class="section card" id="dailyArchive" style="margin-top:18px">
- <div class="eyebrow">V27 DAILY ARCHIVE</div>
- <h2>Keep a local history of every 4-Reel production day</h2>
- <p class="muted">Save the current topic, four Reel directions, Creator Pack and Judge results in this browser. This gives the next planning cycle a usable production history without sending your content to a third party.</p>
- <div class="controls">
-  <button class="btn gold" id="archiveSave">SAVE TODAY'S PRODUCTION</button>
-  <button class="btn" id="archiveLoad">LOAD LATEST DAY</button>
-  <button class="btn" id="archiveClear">CLEAR ARCHIVE</button>
-  <span id="archiveStatus" class="small"></span>
- </div>
- <div id="archiveGrid" class="briefgrid" style="margin-top:12px"></div>
-</section>
-<script>
-(()=>{
- const KEY='fob-daily-production-archive-v27'; const $=id=>document.getElementById(id);
- const get=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return[]}};
- const save=a=>localStorage.setItem(KEY,JSON.stringify(a.slice(-30)));
- function render(){
-  const a=get();
-  $('archiveGrid').innerHTML=a.length?a.slice().reverse().map((x,n)=>`<div class="brief"><b>${x.date} — ${x.topic}</b><span class="small">4-Reel production saved • ${x.passed}/4 passed Judge • ${x.approved}/4 approved<br>${x.hooks.join(' • ')}</span></div>`).join(''):'<div class="notice">No production days archived yet.</div>';
- }
- $('archiveSave').onclick=()=>{
-  const topic=(document.getElementById('creativeTopic')?.value||document.getElementById('autoTopic')?.value||'Bharat culture').trim();
-  const kits=creatorKit||[]; const judged=window.judgedBatch||[];
-  const item={date:new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium'}).format(new Date()),topic,hooks:kits.map(x=>x.hook).slice(0,4),passed:judged.filter(x=>x.score>=75&&!x.flags.length).length,approved:Object.keys(window.judgeApprovals||{}).filter(k=>window.judgeApprovals[k]).length};
-  const a=get();a.push(item);save(a);render();$('archiveStatus').textContent='Production day archived ✓';
- };
- $('archiveLoad').onclick=()=>{const a=get();if(!a.length){$('archiveStatus').textContent='Archive is empty.';return}const x=a[a.length-1];if(document.getElementById('creativeTopic'))document.getElementById('creativeTopic').value=x.topic;if(typeof renderCreativePlans==='function')renderCreativePlans();$('archiveStatus').textContent='Latest production topic loaded ✓';};
- $('archiveClear').onclick=()=>{localStorage.removeItem(KEY);render();$('archiveStatus').textContent='Archive cleared.'};
- render();
-})();
-</script>
-
-<section class="card" id="performance-memory" style="margin-top:18px">
-  <div class="eyebrow">V24 PERFORMANCE MEMORY</div>
-  <h2>Learn from your Festival of Bharat results</h2>
-  <p class="muted">Record post-level results and let the planner use your own history when creating tomorrow's four Reel concepts. This is decision support, not a guarantee of reach.</p>
-  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-    <label>Views<input id="pmViews" type="number" min="0" placeholder="e.g. 12500"></label>
-    <label>Likes<input id="pmLikes" type="number" min="0" placeholder="e.g. 900"></label>
-    <label>Shares<input id="pmShares" type="number" min="0" placeholder="e.g. 120"></label>
-    <label>Comments<input id="pmComments" type="number" min="0" placeholder="e.g. 45"></label>
-    <label>Avg watch (sec)<input id="pmWatch" type="number" min="0" step="0.1" placeholder="e.g. 6.4"></label>
-    <label>Duration (sec)<input id="pmDuration" type="number" min="1" step="0.1" placeholder="e.g. 9"></label>
-  </div>
-  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px">
-    <label>Topic<input id="pmTopic" placeholder="Ganpati Mumbai"></label>
-    <label>Hook style<input id="pmHook" placeholder="Emotional / curiosity / question"></label>
-    <label>Creative type<select id="pmType"><option>Moment</option><option>Detail</option><option>Energy</option><option>Meaning</option></select></label>
-  </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-    <button class="primary" onclick="pmSave()">Save result</button>
-    <button onclick="pmAnalyze()">Analyze my history</button>
-    <button onclick="pmPlan()">Build tomorrow's 4 ideas</button>
-    <button onclick="pmClear()">Clear local history</button>
-  </div>
-  <div id="pmOutput" class="notice" style="margin-top:14px">No performance history loaded yet.</div>
-</section>
-<script>
-(function(){
-  const KEY='fob-performance-memory-v24';
-  const $=id=>document.getElementById(id);
-  function get(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
-  function save(a){localStorage.setItem(KEY,JSON.stringify(a.slice(-100)))}
-  function num(id){return Number($(id).value||0)}
-  window.pmSave=function(){
-    const x={date:new Date().toISOString(),views:num('pmViews'),likes:num('pmLikes'),shares:num('pmShares'),comments:num('pmComments'),watch:num('pmWatch'),duration:num('pmDuration'),topic:$('pmTopic').value.trim(),hook:$('pmHook').value.trim(),type:$('pmType').value};
-    if(!x.views){$('pmOutput').textContent='Enter at least the Reel views before saving.';return}
-    const a=get();a.push(x);save(a);pmAnalyze();
-  };
-  window.pmAnalyze=function(){
-    const a=get(); if(!a.length){$('pmOutput').textContent='No results yet. Save a few published Reel results first.';return}
-    const avg=k=>a.reduce((s,x)=>s+(Number(x[k])||0),0)/a.length;
-    const ranked=[...a].sort((x,y)=>y.views-x.views);
-    const top=ranked.slice(0,Math.max(1,Math.ceil(a.length*.25)));
-    const watchRate=a.filter(x=>x.duration>0).map(x=>x.watch/x.duration).filter(Number.isFinite);
-    const topics={};a.forEach(x=>{if(x.topic)topics[x.topic]=(topics[x.topic]||0)+1});
-    const hooks={};a.forEach(x=>{if(x.hook)hooks[x.hook]=(hooks[x.hook]||0)+1});
-    $('pmOutput').innerHTML='<b>History:</b> '+a.length+' Reels &nbsp; • &nbsp; Avg views: '+Math.round(avg('views'))+'<br><b>Avg likes:</b> '+Math.round(avg('likes'))+' &nbsp; • &nbsp; Avg shares: '+Math.round(avg('shares'))+'<br><b>Top-viewed Reel:</b> '+Math.round(ranked[0].views)+' views'+(ranked[0].topic?' — '+ranked[0].topic:'')+'<br><b>Top group average:</b> '+Math.round(top.reduce((s,x)=>s+x.views,0)/top.length)+' views'+(watchRate.length?' &nbsp; • &nbsp; Avg watch/duration: '+Math.round(watchRate.reduce((s,x)=>s+x,0)/watchRate.length*100)+'%':'')+'<br><b>Planning signal:</b> '+(Object.keys(topics).length?'reuse themes that repeatedly appear in your strongest posts, while varying the creative treatment.':'Add more labeled results for stronger topic/hook comparisons.');
-  };
-  window.pmPlan=function(){
-    const a=get();if(!a.length){$('pmOutput').textContent='Save some performance results first.';return}
-    const top=[...a].sort((x,y)=>y.views-x.views).slice(0,Math.max(2,Math.ceil(a.length*.3)));
-    const topic=top.find(x=>x.topic)?.topic||'Bharat culture';
-    const ideas=[
-      ['THE MOMENT — topic treatment','Open with the strongest available human/emotional visual. Use a short hook and cinematic build.'],
-      ['THE DETAIL — topic treatment','Use a fresh close-up/detail from the same topic. Change the hook and opening shot.'],
-      ['THE ENERGY — topic treatment','Use movement, crowd, rhythm or process footage with quicker cuts.'],
-      ['THE MEANING — topic treatment','Finish with context, heritage, devotion or a quiet human moment.']
-    ];
-    $('pmOutput').innerHTML='<b>Tomorrow planner:</b> base topic signal: '+topic+'<br>'+ideas.map((x,i)=>(i+1)+'. <b>'+x[0]+'</b> — '+x[1]).join('<br>')+'<br><small>Planner uses your stored results as signals; it does not predict viral performance.</small>';
-  };
-  window.pmClear=function(){localStorage.removeItem(KEY);$('pmOutput').textContent='Local performance history cleared.'};
-  if(get().length) pmAnalyze();
-})();
-</script>
-
-
-<section class="card" id="v25Directed" style="margin-top:18px">
-  <div class="eyebrow">V25 PERFORMANCE-DIRECTED AI</div>
-  <h2>Turn your history into today's 4 Reel direction</h2>
-  <p class="muted">V25 converts your stored results into practical creative signals: topic, hook, opening style, pacing and footage allocation. It does not predict virality.</p>
-  <div class="row" style="gap:10px;flex-wrap:wrap">
-    <input id="v25Topic" value="Ganpati festival Mumbai 2026" placeholder="Today's topic" style="flex:1;min-width:280px">
-    <button id="v25Build" class="primary">BUILD PERFORMANCE-DIRECTED 4 REELS</button>
-  </div>
-  <div id="v25Status" class="muted" style="margin-top:10px"></div>
-  <div id="v25Signals" class="notice" style="margin-top:12px">Add Reel results in V24 Performance Memory to generate stronger personalized signals.</div>
-  <div id="v25Plans" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:14px"></div>
-</section>
-<script>
-(()=>{
- const KEY='fob-performance-memory-v24';
- const $=id=>document.getElementById(id);
- const get=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return[]}};
- const avg=(a,k)=>a.length?a.reduce((s,x)=>s+(Number(x[k])||0),0)/a.length:0;
- const norm=s=>String(s||'').trim().toLowerCase();
- function topLabel(a,key){const m={};a.forEach(x=>{const v=String(x[key]||'').trim();if(v)m[v]=(m[v]||0)+Number(x.views||0)});return Object.entries(m).sort((x,y)=>y[1]-x[1])[0]?.[0]||''}
- function build(){
-   const a=get(), topic=$('v25Topic').value.trim()||'Bharat culture';
-   if(!a.length){$('v25Status').textContent='No performance history yet. Add results first.';return}
-   const ranked=[...a].sort((x,y)=>Number(y.views||0)-Number(x.views||0));
-   const top=ranked.slice(0,Math.max(2,Math.ceil(a.length*.3)));
-   const bestTopic=topLabel(top,'topic')||topic;
-   const bestHook=topLabel(top,'hook')||'emotion / curiosity';
-   const bestType=topLabel(top,'type')||'Moment';
-   const watch=top.filter(x=>Number(x.duration)>0).map(x=>Number(x.watch)/Number(x.duration)).filter(Number.isFinite);
-   const watchRate=watch.length?watch.reduce((s,x)=>s+x,0)/watch.length:0;
-   const avgDur=avg(top,'duration')||9;
-   const avgViews=Math.round(avg(a,'views'));
-   $('v25Status').textContent=`${a.length} historical Reels • ${avgViews.toLocaleString()} avg views • strongest labeled topic: ${bestTopic}`;
-   $('v25Signals').innerHTML=`<b>AI Director signals:</b> Keep the subject around <b>${bestTopic}</b>; test the proven hook family <b>${bestHook}</b>; strongest recorded creative type: <b>${bestType}</b>; target duration around <b>${Math.max(5,Math.min(15,avgDur)).toFixed(1)}s</b>${watchRate?' • observed avg watch/duration: <b>'+Math.round(watchRate*100)+'%</b>':''}. These are historical signals, not guarantees.`;
-   const plans=[
-    ['THE MOMENT — topic treatment','Emotional / human opening',`Open with the most visually immediate shot. Hook family: ${bestHook}. Use the strongest human or arrival moment first.`,`Allocate 30% of the best footage pool to the opening + hero shots.`],
-    ['THE DETAIL — topic treatment','Curiosity / close-up',`Avoid the previous Reel's opening. Build around a specific detail from ${topic}. Use a fresh hook while keeping the proven family in mind.`,`Prioritize 3–4 close/detail shots and minimize repeated wide shots.`],
-    ['THE ENERGY — topic treatment','Movement / rhythm',`Use procession, crowd, hands, drums or action. Increase cut frequency while staying readable.`,`Prioritize motion-heavy clips; reserve the cleanest climax shot for the final third.`],
-    ['THE MEANING — topic treatment','Culture / devotion / context',`Slow the edit slightly and finish on a meaningful human, architectural or devotional image.`,`Favor stable, well-exposed footage and a longer closing shot.`]
-   ];
-   $('v25Plans').innerHTML=plans.map((x,i)=>`<div style="padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px"><div class="eyebrow">REEL ${i+1}</div><h3 style="margin:6px 0">${x[0]}</h3><div class="muted"><b>Direction:</b> ${x[1]}</div><p>${x[2]}</p><p><b>Footage rule:</b> ${x[3]}</p><p><b>Target:</b> ~${Math.max(5,Math.min(15,avgDur)).toFixed(1)}s average based on your stronger historical posts.</p></div>`).join('');
- }
- $('v25Build')?.addEventListener('click',build);
-})();
-</script>
-
-
-
-<section class="section card" id="v26Matcher">
-  <div class="eyebrow">V26 PERFORMANCE → SHOT MATCHER</div>
-  <h2>Let your history influence the actual footage</h2>
-  <p class="muted">V26 converts the historical signals from V24/V25 into a shot-allocation layer. It ranks the footage you already loaded differently for each Reel style, while preserving the source/license metadata.</p>
-  <div class="controls">
-    <button class="btn gold" id="v26Match">⚡ MATCH PERFORMANCE SIGNALS TO FOOTAGE</button>
-    <button class="btn" id="v26Clear">Clear V26 match</button>
-    <span id="v26Status" class="small"></span>
-  </div>
-  <div id="v26Signals" class="notice">Run the matcher after loading at least 3 clips and saving some Performance Memory.</div>
-  <div id="v26Grid" class="briefgrid" style="margin-top:12px"></div>
-</section>
-<script>
-(()=>{
- const KEY='fob-performance-memory-v24';
- const $=id=>document.getElementById(id);
- const get=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return[]}};
- const num=x=>Number(x)||0;
- function historical(){const a=get();if(!a.length)return null;const ranked=[...a].sort((x,y)=>num(y.views)-num(x.views));const top=ranked.slice(0,Math.max(2,Math.ceil(a.length*.3)));const pick=k=>{const m={};top.forEach(x=>{const v=String(x[k]||'').trim();if(v)m[v]=(m[v]||0)+num(x.views)});return Object.entries(m).sort((x,y)=>y[1]-x[1])[0]?.[0]||''};return {topic:pick('topic'),hook:pick('hook'),type:pick('type'),avgDur:top.reduce((s,x)=>s+num(x.duration),0)/Math.max(1,top.filter(x=>num(x.duration)>0).length)};}
- function clipScore(i,style,h){
-   const c=(window.analysis||[]).find(x=>x.index===i)||{score:60-i*2,motion:.4,brightness:.52,contrast:.15};
-   const m=(window.clipMeta||[])[i]||{}; const name=((window.clips||[])[i]?.name||'').toLowerCase();
-   let s=num(c.score);
-   if(m.license)s+=8;if(m.source)s+=5;if(m.author)s+=2;
-   const words={moment:['people','face','arrival','darshan','emotion','temple'],detail:['close','detail','idol','flower','hands','lamp'],energy:['crowd','dance','drum','procession','street','movement'],meaning:['temple','architecture','heritage','prayer','devotion','craft']}[style]||[];
-   words.forEach(w=>{if(name.includes(w))s+=9});
-   if(style==='energy')s+=num(c.motion)*18;
-   if(style==='detail')s+=num(c.contrast)*20;
-   if(style==='meaning')s+=(1-Math.abs(num(c.motion)-.34))*8;
-   if(style==='moment')s+=num(c.brightness)*5;
-   if(h&&h.type&&name.includes(String(h.type).toLowerCase()))s+=3;
-   return Math.round(Math.min(100,s));
- }
- window.runV26=function(){
-   const clips=window.clips||[]; const h=historical();
-   if(clips.length<3){$('v26Status').textContent='Load at least 3 clips first.';return}
-   if(!h){$('v26Status').textContent='Save some V24 performance results first.';return}
-   const styles=[['cinematic','moment','THE MOMENT — topic treatment'],['festival','energy','THE ENERGY — topic treatment'],['devotion','meaning','THE MEANING — topic treatment'],['heritage','detail','THE DETAIL — topic treatment']];
-   window.v26Assignments={};
-   const rows=[];
-   styles.forEach(([mode,style,label])=>{
-     const ranked=clips.map((_,i)=>({i,s:clipScore(i,style,h)})).sort((a,b)=>b.s-a.s);
-     window.v26Assignments[mode]=ranked.map(x=>x.i);
-     rows.push({label,mode,ranked});
-   });
-   $('v26Signals').innerHTML='<b>Performance signals applied:</b> '+(h.topic||'Bharat culture')+' • hook family '+(h.hook||'emotion / curiosity')+' • historical duration '+(h.avgDur?Math.max(5,Math.min(15,h.avgDur)).toFixed(1)+'s':'not available')+'. The matcher changes footage priority; it does not predict reach.';
-   $('v26Grid').innerHTML=rows.map(r=>`<div class="brief"><b>${r.label}</b><span class="small">Mode: ${r.mode}<br>Footage priority: ${r.ranked.slice(0,Math.min(6,clips.length)).map((x,n)=>'#'+(x.i+1)+' ('+x.s+')').join(' → ')}<br><br>The next batch build will use this priority when selecting shots for this creative style.</span></div>`).join('');
-   $('v26Status').textContent='Shot matching complete ✓ — build the 4-Reel batch to use these priorities.';
- };
- $('v26Match')?.addEventListener('click',runV26);
- $('v26Clear')?.addEventListener('click',()=>{window.v26Assignments=null;$('v26Grid').innerHTML='';$('v26Status').textContent='V26 match cleared.';});
-})();
-</script>
-
-
-<section id="v30" style="margin-top:28px;padding:22px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02))">
-<h2>V30 — FINAL AI AUTOPILOT</h2>
-<p>Trend → Topic → Performance Strategy → Shot-Specific Visual Source Director → 4 Unique Reels → Quality Judge → Auto Re-Edit → Learning → Human Approval</p>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0">
-<div><b>V27</b><br>Performance-driven footage queries</div>
-<div><b>V28</b><br>Trend + topic intelligence</div>
-<div><b>V29</b><br>End-to-end 4-Reel production</div>
-<div><b>V30</b><br>Autopilot orchestration + approval gate</div>
-</div>
-<label>Today's topic</label><input id="v30topic" value="Ganpati festival Mumbai 2026" style="width:100%;padding:10px;margin:7px 0 10px;border-radius:10px">
-<button id="v30run" style="padding:11px 15px;border-radius:10px">RUN V30 AUTOPILOT</button>
-<pre id="v30log" style="white-space:pre-wrap;margin-top:14px"></pre>
-</section>
-<script>
-(()=>{const b=document.getElementById('v30run'),l=document.getElementById('v30log'); if(!b)return; b.onclick=()=>{const t=document.getElementById('v30topic').value.trim()||'Indian culture'; const steps=[`Topic: ${t}`, '1/8 Trend + topic signals prepared','2/8 Performance memory applied to creative strategy','3/8 Four independent shot plans created','4/8 Visual Source Director queries generated per shot','5/8 Four distinct Reel edit plans prepared','6/8 Quality Judge checks hook, pacing, variety and source metadata','7/8 Weak cuts marked for automatic re-edit','8/8 Final batch ready for HUMAN APPROVAL']; l.textContent=steps.join('\n');};})();
-</script>
-
-
-<script>
-const V50=[
-['V30','Final AI Autopilot','Trend → topic → scout → 4 reels → judge → approval','Core'],
-['V31','Live Trend Radar','Trend signals and topic candidates','Connection-ready'],
-['V32','Topic Intelligence 2.0','Festival, city, culture and seasonal story mapping','Local'],
-['V33','Performance Memory 2.0','Hooks, duration, format and topic history','Local'],
-['V34','AI Creative Strategist','Turns signals into four distinct concepts','Local'],
-['V35','Shot Demand Engine','Creates exact shot requirements per concept','Local'],
-['V36','Smart Visual Source Director','Searches matching licensed/open footage','Connection-ready'],
-['V37','Footage Deduplication','Prevents the same shots dominating all four reels','Local'],
-['V38','Visual Quality Judge','Checks framing, brightness, duration and variety','Local'],
-['V39','Self-Re-Edit Loop','Rebuilds flagged reels and rechecks them','Local'],
-['V40','Story Continuity','Hook → build → detail → climax → close','Local'],
-['V41','Caption Intelligence','Caption, CTA and hashtag draft per reel','Local'],
-['V42','Music Direction','Suggests audio direction; add eligible Instagram audio in-app','Local'],
-['V43','Rights Ledger','Tracks source, author, license and review state','Local'],
-['V44','Cultural Safety Gate','Flags sacred-space, people and context review points','Human review'],
-['V45','Cover/Thumbnail Studio','Generates cover text and composition directions','Local'],
-['V46','Daily Content Calendar','Plans four daily angles without repetitive themes','Local'],
-['V47','Analytics Feedback Loop','Feeds approved performance data back into planning','Connection-ready'],
-['V48','Creator Approval Queue','One place to approve/reject/re-edit each reel','Local'],
-['V49','Production Export Center','Exports MP4 + creator pack + rights manifest','Local'],
-['V50','MASTER AUTOPILOT','One command orchestrates the complete daily workflow','Human approval required']
-];
-const g=document.getElementById('v50Grid'); if(g){g.innerHTML=V50.map(x=>`<div class="brief"><b>${x[0]} • ${x[1]}</b><span class="small">${x[2]}<br><strong style="color:var(--gold)">${x[3]}</strong></span></div>`).join('');}
-const blueprint=()=>({product:'Festival of Bharat AI Studio',range:'V30-V50',modules:V50.map(([version,name,scope,status])=>({version,name,scope,status})),principle:'Human approval before Instagram publishing',format:'1080x1920 9:16'});
-document.getElementById('v50Run')?.addEventListener('click',()=>{const st=document.getElementById('v50Status'),log=document.getElementById('v50Log');st.textContent='Pipeline prepared';log.style.display='block';log.innerHTML='<b>V50 sequence:</b> trend/topic signals → performance strategy → 4 concepts → shot demands → footage scout → rights ledger → four edits → quality judge → self-re-edit if flagged → creator pack → approval queue. External trend/analytics/publishing connections are not simulated as live data.';});
-document.getElementById('v50Export')?.addEventListener('click',()=>{const b=new Blob([JSON.stringify(blueprint(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='festival-of-bharat-v30-to-v50-blueprint.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);});
-</script>
-<script>
-(()=>{
-const V70_STAGES=[
-['V51–55','INTELLIGENCE','Topic freshness, trend-pattern notes, content gaps and audience-history signals.'],
-['V56–60','CREATIVE DIRECTOR','Four story angles, storyboard beats, shot demand and footage search queries.'],
-['V61–65','PRODUCTION','Pacing, caption, cover, audio direction, rights and four distinct edit recipes.'],
-['V66–69','LEARNING','Performance memory, A/B ideas, quality feedback and re-edit recommendations.'],
-['V70','APPROVAL','Final four-Reel pack, creator checklist and human approval before publishing.']
-];
-const styles=[
-['THE MOMENT — topic treatment','Emotion + strongest establishing visual','arrival, faces, idol/place, human reaction, memorable close','cinematic'],
-['THE DETAIL — topic treatment','Curiosity through close-up details','texture, hands, flowers, craft, architecture, ritual detail','devotion'],
-['THE ENERGY — topic treatment','Movement and rhythm','crowd, procession, drums, street movement, peak moment','festival'],
-['THE MEANING — topic treatment','Culture, context and reflection','place, people, heritage, devotion, closing meaning','heritage']
-];
-function plan(topic){
- const clean=topic.trim()||'Indian culture';
- return styles.map((x,i)=>({style:x[0],hook:[`When ${clean} feels different, look closer.`,`The smallest detail can tell the biggest story.`,`This is the energy you can feel before you explain it.`,`Some traditions make more sense when you slow down.`][i],shots:x[2],preset:x[3],search:[clean,x[2].split(',')[0], 'India licensed video'].join(' | ')}));
+async function getBatch(){
+ try{const r=await fetch("/api/batch?x="+Date.now(),{cache:"no-store"});batch=await r.json();renderBatch();renderRights();renderPack();}catch(e){batch=null}
 }
-function render(){
- const p=document.getElementById('v70Pipeline'); if(!p)return;
- p.innerHTML=V70_STAGES.map(x=>`<div class="brief"><b>${x[0]} · ${x[1]}</b><span class="small">${x[2]}</span></div>`).join('');
+function reelCard(r,review=false){
+ const d=r.decision||"pending";
+ return `<div class="card reel">
+  <div class="video">${r.videoUrl?`<video controls playsinline preload="metadata" src="${esc(r.videoUrl)}"></video>`:`<div class="empty" style="height:100%">No MP4</div>`}</div>
+  <h4>Reel ${r.reel}: ${esc(r.title||r.topic||"Untitled")}</h4>
+  <div class="tags">${esc(r.topic||"")} · ${esc(r.pillar||"")} · ${esc(r.style||r.style_key||"")}</div>
+  <p class="mini">${esc(r.hook||"")}</p>
+  ${review?`<div class="decision">
+   <button class="btn" ${d!=="pending"?"disabled":""} onclick="approve(${r.reel})">✓ APPROVE</button>
+   <button class="btn danger" ${d!=="pending"?"disabled":""} onclick="openEdit(${r.reel})">✕ REJECT / EDIT</button>
+  </div>`:""}
+ </div>`;
 }
-function run(){
- const topic=document.getElementById('v70Topic').value;
- const out=document.getElementById('v70Output'); const plans=plan(topic);
- out.innerHTML=`<div class="queue">${plans.map((r,i)=>`<div class="card reelcard"><div class="number">REEL ${i+1}</div><h3>${r.style}</h3><div class="small"><b>Hook:</b> ${r.hook}<br><b>Shot demand:</b> ${r.shots}<br><b>Footage query:</b> ${r.search}<br><b>Edit preset:</b> ${r.preset}<br><b>Gate:</b> Rights ✓ · Quality ✓ · Human approval required</div><div class="controls"><button class="btn gold" data-copy="${encodeURIComponent(r.search)}">COPY FOOTAGE QUERY</button></div></div>`).join('')}</div><div class="notice" style="margin-top:12px"><b>V70 status:</b> 4 creative plans generated. Footage still has to come from footage you own or a source whose specific license permits your intended use. This planner does not claim live trend or Instagram analytics access.</div>`;
- out.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(decodeURIComponent(b.dataset.copy));b.textContent='COPIED ✓'}catch(e){b.textContent='COPY FAILED'}});
+function renderBatch(){
+ const reels=batch?.reels||[];
+ $("commandReels").innerHTML=reels.length?reels.map(r=>reelCard(r)).join(""):`<div class="empty">No finished batch yet.</div>`;
+ $("reviewReels").innerHTML=reels.length?reels.map(r=>reelCard(r,true)).join(""):`<div class="empty">No finished batch yet.</div>`;
+ const decided=reels.filter(r=>r.decision&&r.decision!=="pending").length;
+ $("reviewCount").textContent=`${decided}/${reels.length||4} decided`;
 }
-function reset(){document.getElementById('v70Output').innerHTML='';}
-render(); document.getElementById('v70Run')?.addEventListener('click',run); document.getElementById('v70Reset')?.addEventListener('click',reset);
-})();
-</script>
-<script>
-async function startCloudReels(topic){
-  const status=document.getElementById('instantProductionStatus');
-  const t=(topic||'').trim();
-  status.textContent='Starting cloud Reel production…';
-  try{
-    const r=await fetch('/api/run-reels',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({topic:t})});
-    const d=await r.json();
-    if(!r.ok) throw new Error(d.error||'Unable to start production');
-    status.innerHTML='Production started ✓ <a target="_blank" rel="noopener" href="'+d.actionsUrl+'">Open live run</a>';
-  }catch(e){
-    status.textContent=e.message+' — use the manual workflow button below if needed.';
-  }
+async function approve(reel){
+ const key="fob-decisions-v2-"+(batch?.date||"today");
+ const d=JSON.parse(localStorage.getItem(key)||"{}");d[reel]={decision:"approved",at:new Date().toISOString()};localStorage.setItem(key,JSON.stringify(d));renderBatch();setTab("review");
 }
-</script>
-<section id="visualIntelligence" style="margin:24px 0;padding:22px;border:1px solid #ddd;border-radius:18px;background:#fafafa">
-<h2>INSTAGRAM + PINTEREST + CANVA INTELLIGENCE</h2>
-<p><b>Instagram:</b> hooks, pacing, covers, editing patterns and trend signals.</p>
-<p><b>Pinterest:</b> visual composition, colour, typography and cultural inspiration.</p>
-<p><b>Canva:</b> eligible layouts, graphics and licensed content where permitted.</p>
-<p><b>Rule:</b> references inspire original Festival of Bharat Reels; arbitrary creator content is not copied or reposted.</p>
-</section>
-<section id="musicIntelligence" style="margin:24px 0;padding:22px;border:1px solid #ddd;border-radius:18px;background:#fafafa">
-<h2>MUSIC INTELLIGENCE — FREE / ELIGIBLE ONLY</h2>
-<p><b>Instagram + Edits:</b> use eligible/trending audio inside Instagram or Edits after the Reel is approved. The app does not scrape or extract commercial songs.</p>
-<p><b>YouTube:</b> use the official YouTube Audio Library for music intended to travel outside YouTube, and verify the track's current licence and attribution requirements.</p>
-<p><b>Master MP4:</b> music-free by default, so the final Instagram audio can be selected in-app.</p>
-<p><b>Rule:</b> a YouTube upload saying “no copyright” is not automatically treated as licensed music.</p>
-</section>
+function openEdit(reel){selectedEdit=reel;$("editTitle").textContent="Reel "+reel+" targeted edit";$("editNotes").value="";$("editMsg").textContent="";$("editModal").classList.add("open")}
+function closeEdit(){$("editModal").classList.remove("open")}
+$("sendEdit").onclick=async()=>{
+ if(!selectedEdit)return; const notes=$("editNotes").value.trim();if(!notes){$("editMsg").textContent="Write the exact change first.";return}
+ $("sendEdit").disabled=true;$("editMsg").textContent="Dispatching targeted re-edit…";
+ try{const r=await fetch("/api/run-reels",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({edit_request:`Reel ${selectedEdit}: ${notes}`})});const j=await r.json();if(!r.ok)throw new Error(j.error||"Dispatch failed");$("editMsg").textContent="Re-edit dispatched. Other Reels are unchanged.";setTimeout(closeEdit,900)}catch(e){$("editMsg").textContent=e.message}finally{$("sendEdit").disabled=false}
+};
+async function start(planOnly=false){
+ const btn=planOnly?$("planBtn"):$("makeBtn");btn.disabled=true;$("startMsg").textContent="Dispatching GitHub Actions production…";
+ try{const r=await fetch("/api/run-reels",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({topic:$("topic").value.trim(),plan_only:planOnly})});const j=await r.json();if(!r.ok)throw new Error(j.error||"Could not start");$("startMsg").textContent=j.message||"Production started. Open Production Runs to watch it.";getStatus()}catch(e){$("startMsg").textContent=e.message}finally{btn.disabled=false}
+}
+$("makeBtn").onclick=()=>start(false);$("planBtn").onclick=()=>start(true);
 
+function renderTeam(){
+ const deps=status?.departments||{};
+ $("teamGrid").innerHTML=Object.entries(ROLES).map(([dept,roles])=>`<div class="card"><div style="display:flex;justify-content:space-between"><h3>${esc(dept)}</h3><span class="state">${esc(deps[dept]||"waiting")}</span></div><div style="margin-top:12px">${roles.map(([name,task])=>{const ev=(status?.history||[]).filter(e=>e.employee===name).slice(-1)[0];return `<div class="employee"><b>${esc(name)}</b><span>${esc(task)}</span>${ev?`<span class="right">${esc(ev.task)} · ${ev.duration_seconds?Math.round(ev.duration_seconds)+"s":"recorded"}</span>`:""}</div>`}).join("")}</div></div>`).join("");
+ const hist=status?.history||[];$("history").innerHTML=hist.length?hist.slice().reverse().map(e=>`<div class="row"><span class="mono">${esc(e.percent||0)}%</span><span><b>${esc(e.employee||"")}</b><br><span class="mini">${esc(e.task||"")}</span></span><span class="mono">${esc(e.phase||"")}</span></div>`).join(""):`<div class="empty">No handoffs recorded yet.</div>`;
+}
+async function scout(){
+ const q=$("scoutQuery").value.trim()||"Indian festival India";$("scoutBtn").disabled=true;$("scoutResults").innerHTML='<div class="empty">Scouting…</div>';
+ try{const r=await fetch("/api/scout?query="+encodeURIComponent(q));const j=await r.json();const arr=j.results||j.assets||[];$("scoutResults").innerHTML=arr.length?arr.slice(0,12).map(x=>`<div class="row"><span><b>${esc(x.title||"Visual")}</b></span><span class="mini">${esc(x.license||"License to verify")} · ${esc(x.author||"")}</span><a class="btn" target="_blank" rel="noopener" href="${esc(x.page||x.url||"#")}">SOURCE</a></div>`).join(""):`<div class="empty">No source records returned.</div>`}catch(e){$("scoutResults").innerHTML='<div class="empty">Scout unavailable.</div>'}finally{$("scoutBtn").disabled=false}
+}
+$("scoutBtn").onclick=scout;
+function renderRights(){
+ const reels=batch?.reels||[];const rows=reels.flatMap(r=>(r.assets||[]).map(a=>({...a,reel:r.reel})));
+ $("rightsBox").innerHTML=rows.length?`<div class="list">${rows.map(a=>`<div class="row"><span><b>Reel ${a.reel}</b><br><span class="mini">${esc(a.title||"Visual")}</span></span><span class="mini">${esc(a.author||"")} · ${esc(a.license||"")}</span><a class="btn" target="_blank" rel="noopener" href="${esc(a.page||a.url||"#")}">SOURCE</a></div>`).join("")}</div>`:`<div class="empty">No rights records in the latest manifest.</div>`;
+}
+function renderPack(){
+ const p=batch?.pack; if(!p){$("packBox").innerHTML='<div class="empty">No creator pack loaded.</div>';return}
+ $("packBox").innerHTML=(p.reels||[]).map(x=>`<div class="card"><div class="eyebrow">Reel ${x.reel}</div><h3>${esc(x.title||"")}</h3><p class="mini"><b>Hook:</b> ${esc(x.hook||"")}</p><p class="mini"><b>Caption:</b> ${esc(x.caption||"")}</p><p class="mini"><b>Cover:</b> ${esc(x.cover_text||"")}</p><p class="mini"><b>Audio:</b> ${esc(x.audio_direction||"Add eligible audio in Instagram")}</p></div>`).join("");
+}
+function renderAnalytics(){
+ const saved=JSON.parse(localStorage.getItem("fob-analytics-v2")||"[]");
+ $("analyticsBox").innerHTML=`<div class="card"><div class="metricgrid"><input id="mReel" class="input" placeholder="Reel #"><input id="mViews" class="input" placeholder="Views"><input id="mLikes" class="input" placeholder="Likes"><input id="mWatch" class="input" placeholder="Avg watch sec"></div><div class="controls"><button class="btn primary" onclick="saveMetric()">SAVE RESULT</button></div></div><div class="card section"><div class="list">${saved.length?saved.slice().reverse().map(x=>`<div class="row"><span><b>Reel ${esc(x.reel)}</b><br><span class="mini">${esc(x.date)}</span></span><span class="mini">${esc(x.views)} views · ${esc(x.likes)} likes · ${esc(x.watch)}s avg watch</span><span class="right">learning input</span></div>`).join(""):'<div class="empty">No manual Instagram results yet.</div>'}</div></div>`;
+}
+function saveMetric(){const arr=JSON.parse(localStorage.getItem("fob-analytics-v2")||"[]");arr.push({reel:$("mReel").value,views:$("mViews").value,likes:$("mLikes").value,watch:$("mWatch").value,date:new Date().toLocaleDateString("en-IN")});localStorage.setItem("fob-analytics-v2",JSON.stringify(arr));renderAnalytics()}
+getStatus();getBatch();renderAnalytics();setInterval(getStatus,7000);setInterval(getBatch,12000);
+</script>
 </body></html>

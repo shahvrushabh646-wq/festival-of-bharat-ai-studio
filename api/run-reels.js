@@ -7,9 +7,26 @@ export default async function handler(req,res){
   const source_url=String(body.source_url||'').trim();
   const edit_request=String(body.edit_request||'').trim();
   const owner='shahvrushabh646-wq', repo='festival-of-bharat-ai-studio', workflow='daily-reels.yml';
+  let dispatchTopic=topic;
+  if(edit_request){
+    try{
+      const rel=await fetch(`https://api.github.com/repos/${owner}/${repo}/releases?per_page=10`,{headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'FestivalOfBharatCreatorOS'}});
+      const releases=await rel.json();
+      const latest=(releases||[]).find(x=>!x.draft&&!x.prerelease&&String(x.tag_name).startsWith('daily-'));
+      const manifestAsset=(latest?.assets||[]).find(x=>x.name==='manifest.json');
+      if(manifestAsset){
+        const mr=await fetch(manifestAsset.url,{headers:{'Authorization':`Bearer ${token}`,'Accept':'application/octet-stream','X-GitHub-Api-Version':'2022-11-28','User-Agent':'FestivalOfBharatCreatorOS'}});
+        if(mr.ok){
+          const manifest=await mr.json();
+          const topics=(manifest.topics||[]).map(x=>x.topic).filter(Boolean).slice(0,4);
+          if(topics.length===4) dispatchTopic='EDITTOPICS:'+JSON.stringify(topics);
+        }
+      }
+    }catch(e){}
+  }
   const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`,{
     method:'POST',headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
-    body:JSON.stringify({ref:'main',inputs:{topic,source_url,edit_request}})
+    body:JSON.stringify({ref:'main',inputs:{topic:dispatchTopic,source_url,edit_request}})
   });
   if(!r.ok) return res.status(r.status).json({error:'GitHub could not start the workflow. Check that the token has Actions: Read and write permission.'});
   res.status(200).json({ok:true,actionsUrl:`https://github.com/${owner}/${repo}/actions/workflows/${workflow}`});

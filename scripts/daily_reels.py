@@ -251,7 +251,7 @@ stage("02-strategy",{
     "cta":"save/share/follow"
 })
 for i,item in enumerate(daily_topics,1):
-    employee_handoff(20+i*4,"Strategy & Research","Cultural Researcher",f"Research and verification gate for Reel {i}: {item["topic"]}","research",i)
+    employee_handoff(20+i*4,"Strategy & Research","Cultural Researcher",f"Research and verification gate for Reel {i}: {item['topic']}","research",i)
     stage(f"03-research-{i:02d}",{
         'status':'research_gate','reel':i,'topic':item['topic'],'fact':item['fact'],
         'verification_required':True,

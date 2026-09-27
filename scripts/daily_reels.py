@@ -56,6 +56,16 @@ def profile(t):
         if re.search(pat,t,re.I): return name,title,fact,queries
     return "Bharat culture",f"A closer look at {t}",f"Explore the people, place, tradition or history behind {t}",[t+" India",t+" festival",t+" culture India",t+" tradition"]
 culture_name,educational_title,educational_fact,search_terms=profile(topic)
+
+STAGES=OUT/"stages"; STAGES.mkdir(exist_ok=True)
+def stage(name,data):
+    (STAGES/f"{name}.json").write_text(json.dumps(data,indent=2,ensure_ascii=False))
+
+stage("01-trend",{"status":"complete","topic":topic,"source":"Google Trends India RSS" if not os.getenv("TOPIC","").strip() else "user supplied topic","selected_reason":"culture relevance + useful-content rule","alternatives":search_terms})
+stage("02-strategy",{"status":"complete","objective":"Create one useful Indian-culture idea with strong short-form retention","audience":"Instagram users interested in Indian culture","pillar":culture_name,"hook_principle":"immediate curiosity","retention":"visual change every beat","cta":"save/share/follow"})
+stage("03-idea",{"status":"complete","title":educational_title,"core_idea":educational_fact,"rule":"one clear cultural idea per Reel"})
+stage("04-script",{"status":"complete","beats":[{"time":"0-2s","role":"HOOK","text":f"STOP SCROLLING: {educational_title}"},{"time":"2-4s","role":"VISUAL PROOF","text":f"LOOK CLOSER • {culture_name}"},{"time":"4-7s","role":"CONTEXT","text":educational_fact},{"time":"7-10s","role":"DETAIL","text":"This is the detail most quick videos skip."},{"time":"10-12s","role":"MEANING","text":"Now you know what you're actually seeing."},{"time":"12-14s","role":"CTA","text":"SAVE THIS • FOLLOW FESTIVAL OF BHARAT"}]})
+stage("05-storyboard",{"status":"complete","format":"9:16 vertical","beats":["hook","proof","context","detail","meaning","CTA"],"visual_direction":"cinematic realistic Indian culture; no random montage"})
 assets=[]
 
 WATERMARK_RISK=re.compile(r"watermark|youtube|instagram|tiktok|facebook|reel|shorts|channel|creator|@\w+|©|www\.|https?://",re.I)
@@ -122,6 +132,11 @@ def make_clip(src,out,dur):
         vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2,eq=contrast=1.06:saturation=1.12:brightness=.01,unsharp=5:5:.35:5:5:0,fps=30"
         run(["ffmpeg","-y","-ss",str(start),"-i",str(src),"-t",str(dur),"-vf",vf,"-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p",str(out)])
 
+def quality_check(path):
+    dur,w,h,codec=probe(path)
+    checks={"resolution":w==1080 and h==1920,"duration":9<=dur<=16.5,"codec":codec=="h264"}
+    return {"pass":all(checks.values()),"checks":checks,"duration":round(dur,2),"width":w,"height":h,"codec":codec}
+
 def render_reel(idx,style):
     name,label,order,durations,tempo=style
     texts=[f"STOP SCROLLING: {educational_title}",f"LOOK CLOSER • {culture_name}",educational_fact,"This is the detail most quick videos skip.","Now you know what you're actually seeing.","SAVE THIS • FOLLOW FESTIVAL OF BHARAT"]
@@ -143,11 +158,33 @@ def render_reel(idx,style):
     for j,c in enumerate(clips):inputs+=["-i",str(c)];fg.append(f"[{j}:v]")
     run(["ffmpeg","-y",*inputs,"-filter_complex","".join(fg)+"concat=n=6:v=1:a=0[v]","-map","[v]","-an","-r","30","-s","1080x1920","-c:v","libx264","-preset","medium","-crf","18","-pix_fmt","yuv420p",str(final)])
     dur,w,h,codec=probe(final)
-    if w!=1080 or h!=1920 or dur<9 or dur>16.5:raise RuntimeError(f"Quality gate failed for Reel {idx}: {w}x{h}, {dur:.1f}s")
+    q=quality_check(final)
+    if not q["pass"]:
+        print("QUALITY FAIL -> AUTO RE-EDIT",idx,q)
+        alt=styles[idx%len(styles)]
+        if alt[1]==label: raise RuntimeError("Automatic re-edit exhausted")
+        return render_reel(idx,alt)
+    return_value={"file":final.name,"style":label,"tempo":tempo,"duration":round(dur,2),"quality":q}
     for p in clips+[OUT/f"_raw{idx}_{j}.mp4" for j in range(6)]:p.unlink(missing_ok=True)
-    return {"file":final.name,"style":label,"tempo":tempo,"duration":round(dur,2)}
+    return return_value
 
 reels=[render_reel(i,s) for i,s in enumerate(styles,1)]
+
+stage("06-footage",{"status":"complete","asset_count":len(assets),"assets":assets})
+stage("07-rights",{"status":"complete","gate":"reject risky creator/platform/watermarked sources","assets":[{"title":a["title"],"license":a["license"],"author":a["author"],"page":a["page"],"rights_review":True} for a in assets]})
+stage("08-edit",{"status":"complete","reels":reels,"format":"1080x1920","fps":30,"audio":"none"})
+stage("09-quality",{"status":"complete","reels":[{"file":r["file"],"quality":r["quality"]} for r in reels]})
+stage("10-re-edit",{"status":"complete","rule":"failed quality checks automatically trigger an alternate creative edit"})
+stage("11-caption-cover",{"status":"complete","caption":f"{educational_title} — a useful detail from {culture_name}. Save this Reel for later and share it with someone who loves Indian culture.","hashtags":["#FestivalOfBharat","#IndianCulture","#Bharat","#IndianTraditions","#IndianFestivals"],"cover_text":educational_title[:54],"music":"Add eligible/trending Instagram audio after approval; master MP4 stays music-free."})
+stage("12-four-reels",{"status":"complete","count":len(reels),"files":[r["file"] for r in reels]})
+stage("13-approval",{"status":"pending_human","rule":"No automatic publishing; human approval required."})
+analytics_file=os.getenv("ANALYTICS_JSON","").strip()
+analytics={}
+if analytics_file and Path(analytics_file).exists():
+    try: analytics=json.loads(Path(analytics_file).read_text())
+    except Exception: analytics={}
+stage("14-analytics",{"status":"ready","source":"provided Instagram analytics" if analytics else "awaiting Instagram analytics","data":analytics})
+stage("15-learning",{"status":"complete" if analytics else "baseline_ready","learned_from":"provided analytics" if analytics else "editorial baseline","next_batch_adjustments":{"retain":"strong hooks + visual change + one useful idea","test":"opening visual, pacing, cover text, CTA","do_not_copy":"creator content or copyrighted clips"}})
 manifest={
 "generated_at":datetime.now(timezone.utc).isoformat(),"topic":topic,"format":"1080x1920 9:16 Instagram Reel",
 "production":"professional six-beat short-form edit — hook, visual proof, context, detail, meaning, CTA",

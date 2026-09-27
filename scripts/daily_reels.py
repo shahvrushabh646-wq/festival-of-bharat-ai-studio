@@ -9,7 +9,8 @@ OUT=ROOT/"daily-output"; RAW=ROOT/"daily-raw"
 OUT.mkdir(exist_ok=True); RAW.mkdir(exist_ok=True)
 # Clear previous generated media/stage files so stale batches can never be published.
 for p in OUT.glob('*.mp4'): p.unlink(missing_ok=True)
-if (OUT/'stages').exists():\n    for p in (OUT/'stages').glob('*.json'): p.unlink(missing_ok=True)
+if (OUT/'stages').exists():
+    for p in (OUT/'stages').glob('*.json'): p.unlink(missing_ok=True)
 UA="FestivalOfBharatCreatorOS/3.0"
 
 def fetch(url, timeout=60):
@@ -41,7 +42,8 @@ def trends():
 USEFUL_RULE=("Every Reel must teach, explain, preserve, or give practical cultural context about an Indian "
 "festival, tradition, place, craft, food, history, or cultural practice. Avoid fabricated facts, empty trend-chasing, copied creator content, and generic filler.")
 user_topic=os.getenv("TOPIC","").strip()
-trend_topic=trends()\ntoday_key=datetime.now(timezone.utc).strftime('%Y-%m-%d')
+trend_topic=trends()
+today_key=datetime.now(timezone.utc).strftime('%Y-%m-%d')
 
 topic_profiles=[
 (r"ganesh|ganpati|bappa","Ganpati / Ganesh festival","Why Ganpati celebrations end with Visarjan","Ganesh Chaturthi celebrates Lord Ganesha and the festival concludes with immersion according to local tradition.",["ganesh chaturthi","ganpati visarjan","ganesh festival india","ganpati procession"]),
@@ -81,7 +83,9 @@ def choose_four_topics():
         "Indian folk art",
         "Indian architecture"
     ]
-    offset=int(today_key.replace('-','')) % len(evergreen)\n    rotated=evergreen[offset:]+evergreen[:offset]\n    candidates += [x for x in rotated if normalized_key(x) not in [normalized_key(y) for y in candidates]]
+    offset=int(today_key.replace('-','')) % len(evergreen)
+    rotated=evergreen[offset:]+evergreen[:offset]
+    candidates += [x for x in rotated if normalized_key(x) not in [normalized_key(y) for y in candidates]]
     chosen=[]
     used_names=set()
     for c in candidates:
@@ -342,7 +346,8 @@ manifest={
 "story_engine":{"beats":["hook","visual proof","context","detail","meaning","CTA"],"rule":"One clear cultural idea per Reel; no random clip montage."},
 "editorial_scorecard":{"hook":"immediate","visual_change":"high","information_density":"one clear idea per Reel","ending":"clean CTA"},
 "asset_screening":{"creator_name_risk":"reject","platform_mark_risk":"reject","visual_watermark_risk":"sampled-frame OCR reject","third_party_content":"reject","attribution":"preserve in rights record"},
-"rights_review_required":True,\n"user_supplied_source":{"provided":bool(source_url),"rights_assumption":"user must confirm ownership/permission before use" if source_url else None},
+"rights_review_required":True,
+"user_supplied_source":{"provided":bool(source_url),"rights_assumption":"user must confirm ownership/permission before use" if source_url else None},
 "reels":reels}
 (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2,ensure_ascii=False))
 (OUT/"README.txt").write_text("Festival of Bharat — professional daily Reel batch\nSix-beat edit: hook → visual proof → context → detail → meaning → CTA.\n1080x1920, 30fps, no embedded commercial music. Add eligible/trending Instagram audio after approval.\nRisky creator/platform/watermarked sources are rejected rather than stripped. Verify rights before posting.\n")

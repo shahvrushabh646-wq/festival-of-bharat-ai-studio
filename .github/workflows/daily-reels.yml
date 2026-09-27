@@ -39,6 +39,9 @@ jobs:
           git fetch origin status 2>/dev/null || true
           git show-ref --verify --quiet refs/remotes/origin/status || gh api repos/${GITHUB_REPOSITORY}/git/refs -f ref=refs/heads/status -f sha=${GITHUB_SHA} >/dev/null 2>&1 || true
 
+      - name: Validate production script
+        run: python3 -m py_compile scripts/daily_reels.py
+
       - name: Build today's four Reels
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -96,6 +99,6 @@ jobs:
           TAG="daily-${DATE}"
           gh release delete "${TAG}" --yes 2>/dev/null || true
           git push --delete origin "${TAG}" 2>/dev/null || true
-          gh release create "${TAG}" daily-output/*.mp4 daily-output/manifest.json daily-output/README.txt daily-output/creator-pack.json daily-output/stages/*.json \
+          gh release create "${TAG}" daily-output/*.mp4 daily-output/covers/*.jpg daily-output/manifest.json daily-output/README.txt daily-output/creator-pack.json daily-output/stages/*.json \
             --target "${GITHUB_SHA}" \
             --title "Festival of Bharat — 4 Reels — ${DATE}"             --notes "Automated daily batch. Useful cultural content + four creative cuts. Virality is optimized for, not guaranteed. Verify each source license before posting; add eligible Instagram audio after approval."

@@ -42,10 +42,13 @@ def trends():
     try:
         root=ET.fromstring(fetch("https://trends.google.com/trending/rss?geo=IN"))
         titles=[(x.findtext("title") or "").strip() for x in root.findall(".//item")]
-        culture=re.compile(r"ganesh|ganpati|bappa|festival|diwali|holi|navratri|garba|krishna|janmashtami|shiva|mahadev|temple|india|bharat|pooja|puja|utsav|mela|heritage|culture",re.I)
+        # Only accept culturally relevant trends. Generic country names such as "India"
+        # are deliberately excluded because sports/news trends can contain them.
+        culture=re.compile(r"ganesh|ganpati|bappa|festival|diwali|holi|navratri|garba|krishna|janmashtami|shiva|mahadev|temple|pooja|puja|utsav|mela|heritage|culture|craft|handloom|pottery|artisan|food|cuisine|tradition|ritual|architecture|fort|palace|indian art",re.I)
         for t in titles:
-            if culture.search(t): return t
-        return titles[0] if titles else "Indian culture"
+            if culture.search(t) and len(t.strip()) >= 4:
+                return t
+        return "Indian culture"
     except Exception:return "Indian culture"
 
 USEFUL_RULE=("Every Reel must teach, explain, preserve, or give practical cultural context about an Indian "

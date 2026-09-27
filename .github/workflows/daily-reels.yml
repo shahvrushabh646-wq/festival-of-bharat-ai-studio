@@ -1,7 +1,5 @@
 name: Daily 4 Reels
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       topic:
@@ -16,7 +14,6 @@ on:
     - cron: "30 0 * * *"
 permissions:
   contents: write
-  actions: write
 concurrency:
   group: daily-reels
   cancel-in-progress: false
@@ -44,8 +41,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          DATE="$(date -u +%Y-%m-%d)"
-          TAG="daily-${DATE}"
-          gh release delete "${TAG}" --yes 2>/dev/null || true
-          git push --delete origin "${TAG}" 2>/dev/null || true
+          DATE="$(TZ=Asia/Kolkata date +%Y-%m-%d)"
+          TAG="daily-${DATE}-${GITHUB_RUN_NUMBER}"
           gh release create "${TAG}" daily-output/*.mp4 daily-output/manifest.json daily-output/README.txt daily-output/creator-pack.json daily-output/stages/*.json             --target "${GITHUB_SHA}"             --title "Festival of Bharat — 4 Reels — ${DATE}"             --notes "Automated daily batch. Useful cultural content + four creative cuts. Virality is optimized for, not guaranteed. Verify each source license before posting; add eligible Instagram audio after approval."

@@ -391,7 +391,7 @@ def render_reel(idx,style,item,assets):
     # Apply concrete human feedback during the morning re-edit pass.
     req=edit_request.lower()
     # Morning review edits are targeted to one rejected Reel.
-    m=re.search(r"reel\\s*(\\d+)",req,re.I)
+    m=re.search(r"reel\s*(\d+)",req,re.I)
     target_reel=int(m.group(1)) if m else None
     if req and (target_reel is None or target_reel==idx):
         if any(x in req for x in ["remove text","no text","without text"]):

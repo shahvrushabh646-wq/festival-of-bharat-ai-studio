@@ -449,6 +449,10 @@ for reel_no,item in enumerate(daily_topics,1):
     if len(pool)<4:
         retry_item=dict(item)
         retry_item["topic"]=item["topic"]+" India culture"
+        retry_item["queries"]=list(dict.fromkeys(
+            list(item.get("queries",[]))+
+            [item["title"],item["topic"],item["pillar"]+" India",item["topic"]+" Indian culture"]
+        ))
         try:
             retry_pool=scout_topic(retry_item,reel_no)
             retry_pool=[a for a in retry_pool if not visual_risk(a["file"])]

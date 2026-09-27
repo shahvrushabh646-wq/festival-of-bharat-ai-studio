@@ -10,6 +10,10 @@ on:
     - cron: "30 0 * * *"
 permissions:
   contents: read
+  actions: write
+concurrency:
+  group: daily-reels
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest

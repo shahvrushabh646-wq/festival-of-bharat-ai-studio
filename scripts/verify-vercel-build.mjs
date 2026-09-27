@@ -8,7 +8,8 @@ const required = [
   "api/run-reels.js",
   "api/scout.js",
   "api/today.js",
-  "api/trends.js"
+  "api/trends.js",
+  "api/health.js"
 ];
 
 async function exists(path) {

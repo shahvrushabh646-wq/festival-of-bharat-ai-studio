@@ -227,7 +227,7 @@ function renderReviewSequence(){
       '<div class="meta"><b>REEL '+(i+1)+'</b> • '+a.name+'<br><a target="_blank" rel="noopener" href="'+a.download_url+'">Open full MP4</a>'+
       '<div class="'+stateClass+'" style="margin-top:7px;font-size:9px;font-weight:900">'+stateText+'</div>'+
       '<div class="controls" style="margin-top:8px">'+
-      '<button class="btn" '+(decision?'disabled':'')+' onclick="approveMorningReel('+i+')">✓ APPROVED</button>'+\
+      '<button class="btn" '+(decision?'disabled':'')+' onclick="approveMorningReel('+i+')">✓ APPROVED</button>'+
       '<button class="btn gold" '+(decision?'disabled':'')+' onclick="requestMorningReelEdit('+i+')">✕ REJECT / EDIT</button>'+
       '</div></div></div>';
   }).join('');

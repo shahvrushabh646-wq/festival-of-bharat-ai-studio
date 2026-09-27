@@ -84,12 +84,38 @@ jobs:
             gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/status/status.json" -f message="Record failed production status" -f content="$CONTENT" -f branch="status" >/dev/null
           fi
 
+      - name: Verify production outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d daily-output
+          count="$(find daily-output -maxdepth 1 -type f -name '*.mp4' | wc -l)"
+          if [ "$count" -ne 4 ]; then
+            echo "Expected exactly 4 Reel MP4 files; found $count"
+            find daily-output -maxdepth 2 -type f -print
+            exit 1
+          fi
+          test -f daily-output/manifest.json
+          test -f daily-output/creator-pack.json
+          test -f daily-output/README.txt
+          test -d daily-output/stages
+          for f in daily-output/*.mp4; do
+            w="$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$f")"
+            h="$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$f")"
+            codec="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$f")"
+            if [ "$w" != "1080" ] || [ "$h" != "1920" ] || [ "$codec" != "h264" ]; then
+              echo "Invalid Reel format: $f"
+              exit 1
+            fi
+          done
+          echo "PRODUCTION OUTPUT CHECK PASSED — exactly four valid 1080x1920 H.264 Reels."
+
       - name: Upload four MP4 Reels
         uses: actions/upload-artifact@v4
         with:
           name: festival-of-bharat-4-reels-${{ github.run_number }}
           path: daily-output/
-          retention-days: 7
+          retention-days: 14
 
       - name: Publish daily MP4 release
         env:

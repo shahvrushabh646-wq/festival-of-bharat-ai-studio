@@ -7,7 +7,9 @@ import textwrap
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/"daily-output"; RAW=ROOT/"daily-raw"
 OUT.mkdir(exist_ok=True); RAW.mkdir(exist_ok=True)
-# Clear previous generated media/stage files so stale batches can never be published.\nfor p in OUT.glob('*.mp4'): p.unlink(missing_ok=True)\nif (OUT/'stages').exists():\n    for p in (OUT/'stages').glob('*.json'): p.unlink(missing_ok=True)
+# Clear previous generated media/stage files so stale batches can never be published.
+for p in OUT.glob('*.mp4'): p.unlink(missing_ok=True)
+if (OUT/'stages').exists():\n    for p in (OUT/'stages').glob('*.json'): p.unlink(missing_ok=True)
 UA="FestivalOfBharatCreatorOS/3.0"
 
 def fetch(url, timeout=60):
@@ -17,7 +19,8 @@ def run(cmd, check=True):
     return subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,check=check)
 def esc(s):
     return str(s or "").replace("\\","\\\\").replace(":","\\:").replace("'","\\'").replace("%","\\%").replace("[","\\[").replace("]","\\]")
-def clean(s): return re.sub("<[^>]+>"," ",str(s or "")).strip()\ndef fit_text(s,width=30): return '\\n'.join(textwrap.wrap(str(s or ''),width=width,break_long_words=False,break_on_hyphens=False))
+def clean(s): return re.sub("<[^>]+>"," ",str(s or "")).strip()
+def fit_text(s,width=30): return '\\n'.join(textwrap.wrap(str(s or ''),width=width,break_long_words=False,break_on_hyphens=False))
 def probe(path):
     try:
         d=json.loads(run(["ffprobe","-v","error","-show_streams","-show_format","-of","json",str(path)]).stdout)
@@ -328,7 +331,9 @@ stage("15-learning",{"status":"complete" if analytics else "baseline_ready",
       "test":"opening visual, pacing, cover text, CTA","do_not_copy":"creator content or copyrighted clips"}})
 
 manifest={
-"generated_at":datetime.now(timezone.utc).isoformat(),\n"daily_key":today_key,\n"reference_intelligence":{"instagram":instagram_refs,"pinterest":pinterest_refs,"canva":canva_refs},
+"generated_at":datetime.now(timezone.utc).isoformat(),
+"daily_key":today_key,
+"reference_intelligence":{"instagram":instagram_refs,"pinterest":pinterest_refs,"canva":canva_refs},
 "topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)],
 "format":"1080x1920 9:16 Instagram Reel",
 "production":"four independent professional short-form edits — each Reel has a different topic and pillar",

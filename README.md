@@ -22,3 +22,5 @@ The Daily 4 Reels workflow runs at 06:00 IST and can also be started manually fr
 
 
 Studio Day 1 launch trigger: 2026-09-27 — automated 4-Reel production started.
+
+Production retry trigger: 2026-09-27 — fresh 4-Reel batch requested using latest rights/rate-limit fixes.

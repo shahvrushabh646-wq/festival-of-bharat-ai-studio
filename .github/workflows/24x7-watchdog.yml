@@ -1,0 +1,39 @@
+name: 24x7 Reel Factory Watchdog
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: reel-factory-watchdog
+  cancel-in-progress: false
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check today's production
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          DATE="$(date -u +%Y-%m-%d)"
+          TAG="daily-${DATE}"
+
+          if gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "Today's four-Reel release already exists: ${TAG}"
+            exit 0
+          fi
+
+          RUNNING="$(gh run list --repo "${GITHUB_REPOSITORY}" --workflow daily-reels.yml --status in_progress --json databaseId --jq 'length')"
+          QUEUED="$(gh run list --repo "${GITHUB_REPOSITORY}" --workflow daily-reels.yml --status queued --json databaseId --jq 'length')"
+
+          if [ "${RUNNING}" -gt 0 ] || [ "${QUEUED}" -gt 0 ]; then
+            echo "Production is already running/queued. No duplicate dispatch."
+            exit 0
+          fi
+
+          echo "No completed batch and no active production run. Starting recovery run."
+          gh workflow run daily-reels.yml --repo "${GITHUB_REPOSITORY}" --ref main

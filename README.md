@@ -25,3 +25,5 @@ Studio Day 1 launch trigger: 2026-09-27 — automated 4-Reel production started.
 Production retry trigger: 2026-09-27 — fresh 4-Reel batch requested using latest rights/rate-limit fixes.
 
 Vercel deployment trigger: 2026-09-27 — latest AI employee production telemetry build.
+
+Vercel production fix trigger: 2026-09-27 — restored the original static/API deployment architecture after removing temporary build configuration.

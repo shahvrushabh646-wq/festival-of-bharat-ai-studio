@@ -23,6 +23,7 @@ def trends():
     except Exception:
         return "Indian culture festival"
 
+USEFUL_CONTENT_RULE = """Create useful cultural content, not empty trend-chasing: every Reel must teach, explain, preserve, or give practical context about an Indian festival, tradition, place, craft, food, history, or cultural practice. Avoid fabricated facts, clickbait, copied creator content, and generic slideshow filler."""
 topic=os.getenv("TOPIC","").strip() or trends()
 source_url=os.getenv("SOURCE_URL","").strip()
 
@@ -89,7 +90,7 @@ styles=[
  ("energy",[1,3,0,2],1.8,"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"),
  ("meaning",[3,2,1,0],3.4,"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"),
 ]
-manifest={"date":datetime.now(timezone.utc).isoformat(),"topic":topic,"rights_note":"Only footage with displayed license metadata permitting the intended use is imported. Verify each asset license and attribution/share-alike requirements before posting.","rights_review_required":True,"assets":[],"reels":[]}
+manifest={"date":datetime.now(timezone.utc).isoformat(),"topic":topic,"content_rule":USEFUL_CONTENT_RULE,"rights_note":"Only footage with displayed license metadata permitting the intended use is imported. Verify each asset license and attribution/share-alike requirements before posting.","rights_review_required":True,"assets":[],"reels":[]}
 
 for a in assets: manifest["assets"].append({k:a[k] for k in ("title","license","author","page")})
 for n,(name,order,dur,vf) in enumerate(styles,1):

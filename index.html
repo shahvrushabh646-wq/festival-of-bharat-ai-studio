@@ -45,11 +45,11 @@ function v100Run(mode){
     <button class="btn gold" onclick="loadLatestDailyReels()">↻ CHECK LATEST BATCH</button>
     <span id="dailyAutoStatus" class="small">Checking…</span>
   </div>
-  <div id="dailyAutoOutput" style="margin-top:12px"></div>
+  <div id="dailyAutoCards" style="margin-top:12px"></div>
 </section>
 <script>
 async function loadLatestDailyReels(){
-  const s=document.getElementById('dailyAutoStatus'),o=document.getElementById('dailyAutoOutput');
+  const s=document.getElementById('dailyAutoStatus'),o=document.getElementById('dailyAutoCards');
   s.textContent='Checking latest completed batch…';
   try{
     const r=await fetch('/api/latest-reels'); const d=await r.json();

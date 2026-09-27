@@ -417,9 +417,10 @@ def make_local_fallback_asset(item,reel_no):
     dest=RAW/f"reel{reel_no}_fallback.jpg"
     title=esc(f"{item['title']}")
     pillar=esc(f"{item['pillar'].upper()} • FESTIVAL OF BHARAT")
+    fallback_font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
     run(["ffmpeg","-y","-f","lavfi","-i","color=c=0x17120f:s=1080x1920:d=1",
-         "-vf",f"drawtext=fontfile={FONT}:text='{title}':fontcolor=white:fontsize=58:borderw=3:bordercolor=black@.8:x=70:y=780:enable='between(t,0,1)',"
-               f"drawtext=fontfile={FONT}:text='{pillar}':fontcolor=white:fontsize=30:borderw=2:bordercolor=black@.7:x=70:y=900",
+         "-vf",f"drawtext=fontfile={fallback_font}:text='{title}':fontcolor=white:fontsize=58:borderw=3:bordercolor=black@.8:x=70:y=780:enable='between(t,0,1)',"
+               f"drawtext=fontfile={fallback_font}:text='{pillar}':fontcolor=white:fontsize=30:borderw=2:bordercolor=black@.7:x=70:y=900",
          "-frames:v","1",str(dest)])
     return {"title":item["title"],"url":"","license":"Original fallback graphic","author":"Festival of Bharat","page":"",
             "kind":"photo","rights_review":True,"file":str(dest),"fallback":True}

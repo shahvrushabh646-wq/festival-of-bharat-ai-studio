@@ -289,9 +289,9 @@ function buildCreatorKit(){
  const topicTags=words.slice(0,3).map(w=>'#'+w).filter(x=>x.length>1);
  const baseTags=['#FestivalOfBharat','#Bharat','#IndianCulture'];
  const dynamic=[
-  ['FEEL THE MOMENT',`When ${topic} comes alive, the feeling arrives before the explanation.`],
+  ['FEEL THE MOMENT — topic treatment',`When ${topic} comes alive, the feeling arrives before the explanation.`],
   ['LOOK CLOSER',`Look closer at ${topic}. The smallest details carry the story.`],
-  ['FEEL THE ENERGY',`The movement, sound and people are what make ${topic} unforgettable.`],
+  ['FEEL THE ENERGY — topic treatment',`The movement, sound and people are what make ${topic} unforgettable.`],
   ['STILL ALIVE',`${topic} is not only history — it is a living part of Bharat today.`]
  ];
  const profile=typeof topicProfile==='function'?topicProfile(topic):null;
@@ -345,7 +345,7 @@ const creativeAngles=[
  ['03','The Energy','Lead with movement, crowd rhythm and the strongest action shots. Keep cuts tight and energetic.','Festival energy','Momentum-first'],
  ['04','The Meaning','Use architecture, ritual, hands, light and people to tell a quiet cultural story.','Devotional / heritage','Meaning-first']
 ];
-function makeCreativePlans(){const topic=($('creativeTopic').value||'Bharat culture').trim(); const base=topic.replace(/\s+/g,' '); return creativeAngles.map((a,i)=>({reel:a[0],title:`${a[1]} — ${base}`,hook:[`You can feel this moment before you can explain it.`,`Look closely. This is where the story begins.`,`This is the energy that makes the festival unforgettable.`,`This tradition is still alive, right here, right now.`][i],story:a[2],treatment:a[3],priority:a[4],cover:[`FEEL THE MOMENT`,`LOOK CLOSER`,`FEEL THE ENERGY`,`STILL ALIVE`][i],cta:'Save this moment. Share Bharat.'}));}
+function makeCreativePlans(){const topic=($('creativeTopic').value||'Bharat culture').trim(); const base=topic.replace(/\s+/g,' '); return creativeAngles.map((a,i)=>({reel:a[0],title:`${a[1]} — ${base}`,hook:[`You can feel this moment before you can explain it.`,`Look closely. This is where the story begins.`,`This is the energy that makes the festival unforgettable.`,`This tradition is still alive, right here, right now.`][i],story:a[2],treatment:a[3],priority:a[4],cover:[`FEEL THE MOMENT — topic treatment`,`LOOK CLOSER`,`FEEL THE ENERGY — topic treatment`,`STILL ALIVE`][i],cta:'Save this moment. Share Bharat.'}));}
 function renderCreativePlans(){const plans=makeCreativePlans();$('creativeGrid').innerHTML=plans.map(x=>`<div class="brief"><b>REEL ${x.reel} — ${x.title}</b><span class="small"><b>Hook:</b> ${x.hook}<br><b>Story:</b> ${x.story}<br><b>Treatment:</b> ${x.treatment}<br><b>Priority:</b> ${x.priority}<br><b>Cover:</b> ${x.cover}<br><b>CTA:</b> ${x.cta}</span></div>`).join('');return plans;}
 $('creativePlan').onclick=()=>{renderCreativePlans();$('creativeStatus').textContent='4 unique creative directions prepared ✓ — Auto Director will use these angles for the daily cuts.'};
 
@@ -562,10 +562,10 @@ document.getElementById('reeditBtn').onclick=selfReEdit;
     const top=[...a].sort((x,y)=>y.views-x.views).slice(0,Math.max(2,Math.ceil(a.length*.3)));
     const topic=top.find(x=>x.topic)?.topic||'Bharat culture';
     const ideas=[
-      ['THE MOMENT','Open with the strongest available human/emotional visual. Use a short hook and cinematic build.'],
-      ['THE DETAIL','Use a fresh close-up/detail from the same topic. Change the hook and opening shot.'],
-      ['THE ENERGY','Use movement, crowd, rhythm or process footage with quicker cuts.'],
-      ['THE MEANING','Finish with context, heritage, devotion or a quiet human moment.']
+      ['THE MOMENT — topic treatment','Open with the strongest available human/emotional visual. Use a short hook and cinematic build.'],
+      ['THE DETAIL — topic treatment','Use a fresh close-up/detail from the same topic. Change the hook and opening shot.'],
+      ['THE ENERGY — topic treatment','Use movement, crowd, rhythm or process footage with quicker cuts.'],
+      ['THE MEANING — topic treatment','Finish with context, heritage, devotion or a quiet human moment.']
     ];
     $('pmOutput').innerHTML='<b>Tomorrow planner:</b> base topic signal: '+topic+'<br>'+ideas.map((x,i)=>(i+1)+'. <b>'+x[0]+'</b> — '+x[1]).join('<br>')+'<br><small>Planner uses your stored results as signals; it does not predict viral performance.</small>';
   };
@@ -610,10 +610,10 @@ document.getElementById('reeditBtn').onclick=selfReEdit;
    $('v25Status').textContent=`${a.length} historical Reels • ${avgViews.toLocaleString()} avg views • strongest labeled topic: ${bestTopic}`;
    $('v25Signals').innerHTML=`<b>AI Director signals:</b> Keep the subject around <b>${bestTopic}</b>; test the proven hook family <b>${bestHook}</b>; strongest recorded creative type: <b>${bestType}</b>; target duration around <b>${Math.max(5,Math.min(15,avgDur)).toFixed(1)}s</b>${watchRate?' • observed avg watch/duration: <b>'+Math.round(watchRate*100)+'%</b>':''}. These are historical signals, not guarantees.`;
    const plans=[
-    ['THE MOMENT','Emotional / human opening',`Open with the most visually immediate shot. Hook family: ${bestHook}. Use the strongest human or arrival moment first.`,`Allocate 30% of the best footage pool to the opening + hero shots.`],
-    ['THE DETAIL','Curiosity / close-up',`Avoid the previous Reel's opening. Build around a specific detail from ${topic}. Use a fresh hook while keeping the proven family in mind.`,`Prioritize 3–4 close/detail shots and minimize repeated wide shots.`],
-    ['THE ENERGY','Movement / rhythm',`Use procession, crowd, hands, drums or action. Increase cut frequency while staying readable.`,`Prioritize motion-heavy clips; reserve the cleanest climax shot for the final third.`],
-    ['THE MEANING','Culture / devotion / context',`Slow the edit slightly and finish on a meaningful human, architectural or devotional image.`,`Favor stable, well-exposed footage and a longer closing shot.`]
+    ['THE MOMENT — topic treatment','Emotional / human opening',`Open with the most visually immediate shot. Hook family: ${bestHook}. Use the strongest human or arrival moment first.`,`Allocate 30% of the best footage pool to the opening + hero shots.`],
+    ['THE DETAIL — topic treatment','Curiosity / close-up',`Avoid the previous Reel's opening. Build around a specific detail from ${topic}. Use a fresh hook while keeping the proven family in mind.`,`Prioritize 3–4 close/detail shots and minimize repeated wide shots.`],
+    ['THE ENERGY — topic treatment','Movement / rhythm',`Use procession, crowd, hands, drums or action. Increase cut frequency while staying readable.`,`Prioritize motion-heavy clips; reserve the cleanest climax shot for the final third.`],
+    ['THE MEANING — topic treatment','Culture / devotion / context',`Slow the edit slightly and finish on a meaningful human, architectural or devotional image.`,`Favor stable, well-exposed footage and a longer closing shot.`]
    ];
    $('v25Plans').innerHTML=plans.map((x,i)=>`<div style="padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px"><div class="eyebrow">REEL ${i+1}</div><h3 style="margin:6px 0">${x[0]}</h3><div class="muted"><b>Direction:</b> ${x[1]}</div><p>${x[2]}</p><p><b>Footage rule:</b> ${x[3]}</p><p><b>Target:</b> ~${Math.max(5,Math.min(15,avgDur)).toFixed(1)}s average based on your stronger historical posts.</p></div>`).join('');
  }
@@ -660,7 +660,7 @@ document.getElementById('reeditBtn').onclick=selfReEdit;
    const clips=window.clips||[]; const h=historical();
    if(clips.length<3){$('v26Status').textContent='Load at least 3 clips first.';return}
    if(!h){$('v26Status').textContent='Save some V24 performance results first.';return}
-   const styles=[['cinematic','moment','THE MOMENT'],['festival','energy','THE ENERGY'],['devotion','meaning','THE MEANING'],['heritage','detail','THE DETAIL']];
+   const styles=[['cinematic','moment','THE MOMENT — topic treatment'],['festival','energy','THE ENERGY — topic treatment'],['devotion','meaning','THE MEANING — topic treatment'],['heritage','detail','THE DETAIL — topic treatment']];
    window.v26Assignments={};
    const rows=[];
    styles.forEach(([mode,style,label])=>{
@@ -735,10 +735,10 @@ const V70_STAGES=[
 ['V70','APPROVAL','Final four-Reel pack, creator checklist and human approval before publishing.']
 ];
 const styles=[
-['THE MOMENT','Emotion + strongest establishing visual','arrival, faces, idol/place, human reaction, memorable close','cinematic'],
-['THE DETAIL','Curiosity through close-up details','texture, hands, flowers, craft, architecture, ritual detail','devotion'],
-['THE ENERGY','Movement and rhythm','crowd, procession, drums, street movement, peak moment','festival'],
-['THE MEANING','Culture, context and reflection','place, people, heritage, devotion, closing meaning','heritage']
+['THE MOMENT — topic treatment','Emotion + strongest establishing visual','arrival, faces, idol/place, human reaction, memorable close','cinematic'],
+['THE DETAIL — topic treatment','Curiosity through close-up details','texture, hands, flowers, craft, architecture, ritual detail','devotion'],
+['THE ENERGY — topic treatment','Movement and rhythm','crowd, procession, drums, street movement, peak moment','festival'],
+['THE MEANING — topic treatment','Culture, context and reflection','place, people, heritage, devotion, closing meaning','heritage']
 ];
 function plan(topic){
  const clean=topic.trim()||'Indian culture';

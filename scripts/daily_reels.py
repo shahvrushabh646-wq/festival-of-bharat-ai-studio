@@ -129,44 +129,90 @@ manifest={
 for a in assets:
     manifest["assets"].append({k:a.get(k,"") for k in ("title","license","author","page","kind","rights_review")})
 
-def ffmpeg_clip(src,out,dur,index):
+def esc_textfile(p):
+    return str(p).replace("\\","/").replace(":","\\:")
+
+FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+FONT_REG="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+
+def ffmpeg_clip(src,out,dur,index,hook="",label=""):
     ext=Path(src).suffix.lower()
+    hook_file=RAW/f"hook_{index}.txt"
+    hook_file.write_text(hook,encoding="utf-8")
+    label_file=RAW/f"label_{index}.txt"
+    label_file.write_text("FESTIVAL OF BHARAT  •  "+label,encoding="utf-8")
+    hf=esc_textfile(hook_file); lf=esc_textfile(label_file)
+    base="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30,eq=contrast=1.06:saturation=1.08:brightness=0.01,unsharp=5:5:0.35:5:5:0"
     if ext in (".jpg",".jpeg",".png",".webp"):
-        vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.0015,1.08)':d=81:s=1080x1920:fps=30"
-        cmd=["ffmpeg","-y","-loglevel","error","-loop","1","-i",src,"-t",str(dur),"-vf",vf,"-an","-c:v","libx264","-preset","veryfast","-crf","21","-pix_fmt","yuv420p","-movflags","+faststart",str(out)]
+        base="scale=1188:2112:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.0018,1.09)':d=81:s=1080x1920:fps=30,eq=contrast=1.06:saturation=1.08:brightness=0.01,unsharp=5:5:0.35:5:5:0"
+        inp=["-loop","1","-i",src]
     else:
-        vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30"
-        cmd=["ffmpeg","-y","-loglevel","error","-i",src,"-t",str(dur),"-vf",vf,"-an","-c:v","libx264","-preset","veryfast","-crf","21","-pix_fmt","yuv420p","-movflags","+faststart",str(out)]
+        inp=["-i",src]
+    draw=(
+        f"drawtext=fontfile={FONT_REG}:textfile='{lf}':fontcolor=white:fontsize=26:"
+        f"x=64:y=92:box=1:boxcolor=black@0.34:boxborderw=14:"
+        f"shadowcolor=black@0.65:shadowx=2:shadowy=2,"
+        f"drawtext=fontfile={FONT}:textfile='{hf}':fontcolor=white:fontsize=54:"
+        f"x=64:y=h-390:box=1:boxcolor=black@0.48:boxborderw=24:"
+        f"line_spacing=8:shadowcolor=black@0.8:shadowx=3:shadowy=3"
+    )
+    vf=base+","+draw
+    cmd=["ffmpeg","-y","-loglevel","error",*inp,"-t",str(dur),"-vf",vf,
+         "-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p",
+         "-movflags","+faststart",str(out)]
     subprocess.run(cmd,check=True)
 
 for n,(name,order,dur,label,direction) in enumerate(styles,1):
     segs=[]
-    for j,pos in enumerate(order):
-        a=assets[pos%len(assets)]
-        seg=RAW/f"r{n}_{j}.mp4"
-        ffmpeg_clip(a["file"],seg,dur,j)
-        segs.append(seg)
-    lst=RAW/f"list_{n}.txt"
-    lst.write_text("".join("file '"+str(s).replace("'","'\\''")+"'\n" for s in segs))
-    out=OUT/f"festival-of-bharat-reel-{n}.mp4"
-    subprocess.run(["ffmpeg","-y","-loglevel","error","-f","concat","-safe","0","-i",str(lst),"-an","-c:v","libx264","-preset","veryfast","-crf","21","-pix_fmt","yuv420p","-movflags","+faststart",str(out)],check=True)
-    probe=subprocess.run(["ffprobe","-v","error","-show_entries","stream=width,height:format=duration","-of","json",str(out)],capture_output=True,text=True)
-    quality={"passed":False}
-    try:
-        pj=json.loads(probe.stdout); st=(pj.get("streams") or [{}])[0]; fmt=pj.get("format") or {}
-        w,h=int(st.get("width",0)),int(st.get("height",0)); d=float(fmt.get("duration",0))
-        quality={"passed":w==1080 and h==1920 and d>=5,"width":w,"height":h,"duration":round(d,2)}
-    except Exception: pass
-    if not quality["passed"]:
-        tmp=OUT/f"fix-{n}.mp4"
-        subprocess.run(["ffmpeg","-y","-loglevel","error","-i",str(out),"-vf","scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30","-an","-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-movflags","+faststart",str(tmp)],check=True)
-        tmp.replace(out); quality["self_reedited"]=True
-    hooks=[
+    hook_list=[
         f"{educational_title}.",
         f"Look closer: {culture_name} has more to the story.",
         f"Before you scroll: one useful fact about {culture_name}.",
         f"What this tradition means — in one quick Reel."
     ]
+    for j,pos in enumerate(order):
+        a=assets[pos%len(assets)]
+        seg=RAW/f"r{n}_{j}.mp4"
+        seg_hook=hook_list[n-1] if j==0 else ""
+        ffmpeg_clip(a["file"],seg,dur,j+n*10,seg_hook,label)
+        segs.append(seg)
+
+    transition=0.24
+    inputs=[]
+    for seg in segs: inputs += ["-i",str(seg)]
+    filters=[]
+    for i in range(len(segs)):
+        filters.append(f"[{i}:v]setpts=PTS-STARTPTS[v{i}]")
+    current="[v0]"
+    elapsed=dur-transition
+    for i in range(1,len(segs)):
+        outv=f"[x{i}]"
+        filters.append(f"{current}[v{i}]xfade=transition=fade:duration={transition}:offset={elapsed:.2f}{outv}")
+        current=outv
+        elapsed += dur-transition
+    total=dur*4-transition*3
+    filters.append(f"{current}fade=t=in:st=0:d=0.18,fade=t=out:st={total-0.18:.2f}:d=0.18,format=yuv420p[vout]")
+    out=OUT/f"festival-of-bharat-reel-{n}.mp4"
+    subprocess.run(["ffmpeg","-y","-loglevel","error",*inputs,"-filter_complex",";".join(filters),
+                     "-map","[vout]","-an","-c:v","libx264","-preset","veryfast","-crf","19",
+                     "-pix_fmt","yuv420p","-movflags","+faststart",str(out)],check=True)
+
+    probe=subprocess.run(["ffprobe","-v","error","-show_entries","stream=width,height,r_frame_rate:format=duration,size","-of","json",str(out)],capture_output=True,text=True)
+    quality={"passed":False}
+    try:
+        pj=json.loads(probe.stdout); st=(pj.get("streams") or [{}])[0]; fmt=pj.get("format") or {}
+        w,h=int(st.get("width",0)),int(st.get("height",0)); d=float(fmt.get("duration",0))
+        fps=st.get("r_frame_rate","")
+        quality={"passed":w==1080 and h==1920 and d>=5 and fps=="30/1","width":w,"height":h,"duration":round(d,2),"fps":fps}
+    except Exception: pass
+    if not quality["passed"]:
+        tmp=OUT/f"fix-{n}.mp4"
+        subprocess.run(["ffmpeg","-y","-loglevel","error","-i",str(out),
+                        "-vf","scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
+                        "-an","-c:v","libx264","-preset","veryfast","-crf","18","-pix_fmt","yuv420p",
+                        "-movflags","+faststart",str(tmp)],check=True)
+        tmp.replace(out); quality["self_reedited"]=True
+
     caption = f"{educational_title} — a quick cultural context from Bharat. Save this Reel for later and share it with someone who loves Indian culture."
     hashtags = ["#FestivalOfBharat","#Bharat","#IndianCulture", "#IndianTraditions"]
     if re.search(r"ganesh|ganpati|bappa", topic, re.I): hashtags += ["#Ganpati","#GaneshChaturthi","#Mumbai"]
@@ -178,9 +224,11 @@ for n,(name,order,dur,label,direction) in enumerate(styles,1):
     cover = [educational_title, "LOOK CLOSER", "ONE USEFUL FACT", "THE MEANING"][n-1]
     manifest["reels"].append({
         "file":out.name,"style":name,"creative_label":label,"direction":direction,
-        "hook":hooks[n-1],"useful_context":educational_fact,"quality":quality,
+        "hook":hook_list[n-1],"useful_context":educational_fact,"quality":quality,
         "cover_text":cover,"caption":caption,"hashtags":hashtags,"cta":"Save this Reel and share it with someone who loves Bharat.",
-        "content_pillar":culture_name,"music":"Search Instagram for an eligible/trending audio that fits the mood; add it inside Instagram after approval."
+        "content_pillar":culture_name,
+        "editing":"Cinematic crop + subtle grade + branded upper strip + hook card + smooth crossfades + controlled pacing + 1080x1920/30fps.",
+        "music":"Search Instagram for an eligible/trending audio that fits the mood; add it inside Instagram after approval."
     })
 
 (OUT/"README.txt").write_text(f"""Festival of Bharat — Daily 4-Reel Autopilot

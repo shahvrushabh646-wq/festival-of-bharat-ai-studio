@@ -473,6 +473,18 @@ document.getElementById('reeditBtn').onclick=selfReEdit;
     out.innerHTML=d.packs.map(x=>`<div style="padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px"><div class="eyebrow">REEL ${x.id}</div><h3 style="margin:6px 0">${x.angle}</h3><div class="muted">${x.goal}</div><p><b>Pacing:</b> ${x.pace}</p><p><b>Director rule:</b> ${x.rule}</p></div>`).join('');
    }catch(e){status.textContent='Planner unavailable. You can still use the local Reel Factory.';}
  });
+})
+
+// Creative reference sources: Instagram + Pinterest + Canva. References guide original production; source media is not blindly copied.
+stage("05b-visual-intelligence",{
+  "status":"reference_only",
+  "sources":{
+    "Instagram":["hooks","opening visual","pacing","text","cover","editing pattern","audio direction"],
+    "Pinterest":["composition","visual mood","colour","typography","cultural design references"],
+    "Canva":["eligible Reel layouts","typography","graphics","transitions","licensed Free/Pro content where applicable"]
+  },
+  "rule":"Use references to create original Festival of Bharat concepts; do not download/repost arbitrary Pinterest or Instagram content.",
+  "canva_license_gate":"Verify content source and applicable Canva license before use; Popular Music is excluded from the Content License Agreement."
 })();
 </script>
 
@@ -772,4 +784,12 @@ async function startCloudReels(topic){
     status.textContent=e.message+' — use the manual workflow button below if needed.';
   }
 }
-</script></body></html>
+</script>
+<section id="visualIntelligence" style="margin:24px 0;padding:22px;border:1px solid #ddd;border-radius:18px;background:#fafafa">
+<h2>INSTAGRAM + PINTEREST + CANVA INTELLIGENCE</h2>
+<p><b>Instagram:</b> hooks, pacing, covers, editing patterns and trend signals.</p>
+<p><b>Pinterest:</b> visual composition, colour, typography and cultural inspiration.</p>
+<p><b>Canva:</b> eligible layouts, graphics and licensed content where permitted.</p>
+<p><b>Rule:</b> references inspire original Festival of Bharat Reels; arbitrary creator content is not copied or reposted.</p>
+</section>
+</body></html>

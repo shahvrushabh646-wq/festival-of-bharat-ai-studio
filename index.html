@@ -37,6 +37,45 @@ function v100Run(mode){
   </div>
   <div style="margin-top:10px;font-size:10px;color:#748396">The workflow runs in the cloud, so your browser does not need to stay open.</div><div id="instantProductionStatus" style="margin-top:9px;font-size:10px;color:#67a8ff"></div>
 </section>
+<section class="card" id="liveProductionProgress" style="margin-top:18px;border-color:#33485f">
+  <div class="eyebrow">LIVE PRODUCTION CONTROL</div>
+  <h2>Today's 4-Reel Factory Progress</h2>
+  <p class="small">Live view of the latest GitHub production run. Progress is calculated from the actual workflow steps.</p>
+  <div style="display:flex;align-items:center;gap:10px;margin:14px 0 8px">
+    <div class="progress" style="height:10px"><i id="liveProgressBar"></i></div>
+    <b id="liveProgressPct">0%</b>
+  </div>
+  <div id="liveProgressStatus" class="small">Checking production…</div>
+  <div class="briefgrid" id="liveProductionEmployees" style="margin-top:12px"></div>
+  <div class="controls">
+    <button class="btn gold" onclick="loadLiveProduction()">↻ REFRESH LIVE STATUS</button>
+    <a class="btn" target="_blank" rel="noopener" href="https://github.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/workflows/daily-reels.yml">OPEN GITHUB RUN</a>
+  </div>
+</section>
+<script>
+async function loadLiveProduction(){
+ const status=document.getElementById('liveProgressStatus'),bar=document.getElementById('liveProgressBar'),pct=document.getElementById('liveProgressPct'),box=document.getElementById('liveProductionEmployees');
+ try{
+  const rr=await fetch('https://api.github.com/repos/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/runs?per_page=20');
+  const data=await rr.json();
+  const runs=(data.workflow_runs||[]).filter(x=>x.path==='.github/workflows/daily-reels.yml');
+  const run=runs[0];
+  if(!run){status.textContent='No production run found yet.';return;}
+  const jr=await fetch('https://api.github.com/repos/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/runs/'+run.id+'/jobs?per_page=20');
+  const jd=await jr.json(),job=(jd.jobs||[])[0];
+  const steps=(job&&job.steps)||[];
+  const done=steps.filter(s=>s.status==='completed').length, total=Math.max(steps.length,7);
+  const p=run.status==='completed' ? (run.conclusion==='success'?100:done/total*100) : Math.min(95,Math.round(done/total*100));
+  bar.style.width=Math.round(p)+'%'; pct.textContent=Math.round(p)+'%';
+  status.textContent=(run.status==='completed'?'Run completed: '+(run.conclusion||'unknown'):'Currently '+run.status+' • started '+new Date(run.created_at).toLocaleString('en-IN'))+' • Run #'+run.run_number;
+  const labels=['Install FFmpeg','Build today’s four Reels','Upload four MP4 Reels','Publish daily MP4 release'];
+  const cards=steps.map(s=>'<div class="brief"><b>'+s.name+'</b><span class="small">'+(s.status==='completed'?'COMPLETED':s.status.toUpperCase())+(s.conclusion?' • '+s.conclusion:'')+'</span></div>');
+  box.innerHTML=cards.length?cards.join(''):'<div class="brief"><b>Build job</b><span class="small">Waiting for GitHub job details…</span></div>';
+ }catch(e){status.textContent='Live status unavailable right now. Open GitHub Run to verify.';}
+}
+loadLiveProduction();
+setInterval(loadLiveProduction,30000);
+</script>
 <section class="card" id="dailyAutoOutput" style="margin-top:18px">
   <div class="eyebrow">DAILY 4-REEL AUTOPILOT</div>
   <h2>Latest automatic MP4 batch</h2>

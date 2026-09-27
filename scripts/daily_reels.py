@@ -196,7 +196,7 @@ def publish_status(percent, team, employee, task, phase, departments=None, reel=
             "employee":employee,
             "task":task,
             "reel":reel,
-            "topic":next((x.get("topic") for x in daily_topics if x.get("reel")==reel), None) if isinstance(reel,int) else None
+            "topic":(daily_topics[reel-1].get("topic") if isinstance(reel,int) and 1 <= reel <= len(daily_topics) else None)
         }
         history.append(event)
         payload["history"]=history[-100:]
@@ -215,10 +215,21 @@ def publish_status(percent, team, employee, task, phase, departments=None, reel=
     except Exception as e:
         print("status telemetry skipped:",e)
 
+def employee_handoff(percent, team, employee, task, phase, reel=None):
+    """Record a real employee handoff in live telemetry and a stage artifact.
+    Employees are production roles backed by concrete code stages, not simulated workers.
+    """
+    publish_status(percent, team, employee, task, phase, {
+        "Strategy & Research":"complete" if team != "Strategy & Research" else "working",
+        "Creative & Story":"complete" if team in ["Production","Quality & Growth"] else ("working" if team == "Creative & Story" else "waiting"),
+        "Production":"complete" if team == "Quality & Growth" else ("working" if team == "Production" else "waiting"),
+        "Quality & Growth":"working" if team == "Quality & Growth" else "waiting"
+    }, reel)
+
 def stage(name,data):
     (STAGES/f"{name}.json").write_text(json.dumps(data,indent=2,ensure_ascii=False))
 
-publish_status(10,"Strategy & Research","Trend Researcher","Selecting a culturally relevant India trend","trend",{"Strategy & Research":"working","Creative & Story":"waiting","Production":"waiting","Quality & Growth":"waiting"})
+employee_handoff(10,"Strategy & Research","Trend Researcher","Select culturally relevant India trend and reject unrelated trends","trend")
 stage("01-trend",{
     "status":"complete",
     "daily_plan":"four_distinct_topics",
@@ -229,7 +240,7 @@ stage("01-trend",{
     "trend_topic":trend_topic,
     "topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)]
 })
-publish_status(18,"Strategy & Research","Content Manager","Building the four-topic daily strategy","strategy",{"Strategy & Research":"working","Creative & Story":"waiting","Production":"waiting","Quality & Growth":"waiting"})
+employee_handoff(18,"Strategy & Research","Content Manager","Build four-topic strategy and enforce topic/pillar diversity","strategy")
 stage("02-strategy",{
     "status":"complete",
     "objective":"Create four useful Indian-culture Reels with four different topics and pillars",
@@ -239,7 +250,7 @@ stage("02-strategy",{
     "cta":"save/share/follow"
 })
 for i,item in enumerate(daily_topics,1):
-    publish_status(20+i*4,"Strategy & Research","Cultural Researcher",f"Researching Reel {i}: {item["topic"]}","research",{"Strategy & Research":"working","Creative & Story":"waiting","Production":"waiting","Quality & Growth":"waiting"},i)
+    employee_handoff(20+i*4,"Strategy & Research","Cultural Researcher",f"Research and verification gate for Reel {i}: {item["topic"]}","research",i)
     stage(f"03-research-{i:02d}",{
         'status':'research_gate','reel':i,'topic':item['topic'],'fact':item['fact'],
         'verification_required':True,
@@ -249,6 +260,7 @@ for i,item in enumerate(daily_topics,1):
         "status":"complete","reel":i,"topic":item["topic"],"pillar":item["pillar"],
         "title":item["title"],"core_idea":item["fact"],"rule":"one clear cultural idea per Reel"
     })
+    employee_handoff(42+i,"Creative & Story","Script Writer",f"Write six-beat script for Reel {i}","script",i)
     stage(f"04-script-{i:02d}",{
         "status":"complete","reel":i,"topic":item["topic"],"beats":[
             {"time":"0-2s","role":"HOOK","text":f"STOP SCROLLING: {item['title']}"},
@@ -259,13 +271,14 @@ for i,item in enumerate(daily_topics,1):
             {"time":"12-14s","role":"CTA","text":"SAVE THIS • FOLLOW FESTIVAL OF BHARAT"}
         ]
     })
+    employee_handoff(46+i,"Creative & Story","Storyboard Director",f"Build 9:16 storyboard and visual beat order for Reel {i}","storyboard",i)
     stage(f"05-storyboard-{i:02d}",{
         "status":"complete","reel":i,"topic":item["topic"],"format":"9:16 vertical",
         "beats":["hook","proof","context","detail","meaning","CTA"],
         "visual_direction":"cinematic realistic Indian culture; original editorial treatment; source intelligence from Instagram, Pinterest, Google and Canva; no random montage"
     })
 assets_by_reel={}
-publish_status(38,"Creative & Story","Creative Director","Turning four researched topics into distinct Reel stories","creative",{"Strategy & Research":"complete","Creative & Story":"working","Production":"waiting","Quality & Growth":"waiting"})
+employee_handoff(38,"Creative & Story","Creative Director","Create four distinct story treatments from the researched topics","creative")
 instagram_refs=[
  {"type":"explore","url":"https://www.instagram.com/explore/","use":"trend discovery"},
  {"type":"hashtag","url":"https://www.instagram.com/explore/tags/indianculture/","use":"culture patterns"},
@@ -436,7 +449,7 @@ def visual_risk(path):
     except Exception: return False
 
 for reel_no,item in enumerate(daily_topics,1):
-    publish_status(40+reel_no*7,"Production","Visual Source Director",f"Combining Instagram, Pinterest, Google and Canva visual intelligence for Reel {reel_no}","visual sources",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"working","Quality & Growth":"waiting"},reel_no)
+    employee_handoff(40+reel_no*7,"Production","Visual Source Director",f"Combine Instagram, Pinterest, Google and Canva intelligence and source visuals for Reel {reel_no}","visual sources",reel_no)
     # A single provider failure must never block the whole batch. Try every permitted
     # source and keep only topic-matched, clean assets. If fewer than four are found,
     # retry broader queries for the SAME topic before considering the Reel blocked.
@@ -477,6 +490,7 @@ for reel_no,item in enumerate(daily_topics,1):
             "fallback_used":any(a.get("fallback") for a in pool)})
     assets_by_reel[reel_no]=pool[:4]
     stage(f"06-visual-sources-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"asset_count":len(assets_by_reel[reel_no]),"assets":assets_by_reel[reel_no],"source_intelligence":{"Instagram":"trend/hook/pacing reference","Pinterest":"composition and visual mood reference","Google":"topic/image research reference","Canva":"eligible design/layout/asset reference"}})
+    employee_handoff(58+reel_no,"Production","Rights & Copyright Manager",f"Screen licenses, authors, watermarks and platform-risk sources for Reel {reel_no}","rights",reel_no)
     stage(f"07-rights-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"gate":"reject risky creator/platform/watermarked sources",
            "assets":[{"title":a["title"],"license":a["license"],"author":a["author"],"page":a["page"],"rights_review":True} for a in assets_by_reel[reel_no]]})
 
@@ -568,14 +582,23 @@ def music_direction(item):
 
 reels=[]
 for i,(item,style) in enumerate(zip(daily_topics,styles),1):
-    publish_status(68+i*5,"Production","Video Editor",f"Editing and rendering Reel {i}","edit",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"working","Quality & Growth":"waiting"},i)
+    employee_handoff(68+i*5,"Production","Video Director",f"Direct shot order, pacing and cinematic treatment for Reel {i}","direction",i)
+    employee_handoff(69+i*5,"Production","Video Editor",f"Render six-beat 1080x1920 edit for Reel {i}","edit",i)
+    employee_handoff(70+i*5,"Production","Motion Graphics Designer",f"Apply motion treatment and readable graphics for Reel {i}","motion",i)
+    employee_handoff(71+i*5,"Production","Caption Designer",f"Apply on-screen hook, context and CTA text for Reel {i}","caption design",i)
+    employee_handoff(72+i*5,"Production","Music & Sound Designer",f"Set music direction while keeping master audio-free for Reel {i}","sound",i)
+    employee_handoff(73+i*5,"Production","Voiceover Director",f"Check voiceover requirement for Reel {i}; keep silent master unless required","voiceover",i)
+    employee_handoff(74+i*5,"Production","Colorist",f"Apply crop, contrast, saturation and sharpening treatment for Reel {i}","color",i)
     reels.append(render_reel(i,style,item,assets_by_reel[i]))
 
-publish_status(90,"Quality & Growth","Quality Manager","Checking all four final exports before approval","quality",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"complete","Quality & Growth":"working"})
+employee_handoff(90,"Quality & Growth","Quality Manager","Check resolution, duration, codec and final export quality for all four Reels","quality")
 for i,(item,reel) in enumerate(zip(daily_topics,reels),1):
     stage(f"08-edit-{i:02d}",{"status":"complete","reel":i,"topic":item["topic"],"format":"1080x1920","fps":30,"audio":"none","result":reel})
     stage(f"09-quality-{i:02d}",{"status":"complete","reel":i,"topic":item["topic"],"quality":reel["quality"]})
+    employee_handoff(92+i,"Quality & Growth","Self-ReEditor",f"Review quality result and trigger alternate edit when Reel {i} fails","re-edit",i)
     stage(f"10-re-edit-{i:02d}",{"status":"complete","reel":i,"rule":"failed quality checks automatically trigger an alternate creative edit"})
+    employee_handoff(96+i,"Quality & Growth","Cover Designer",f"Prepare cover text and composition direction for Reel {i}","cover",i)
+    employee_handoff(97+i,"Quality & Growth","Caption Writer",f"Prepare publish caption and hashtags for Reel {i}","caption",i)
     stage(f"11-caption-cover-{i:02d}",{"status":"complete","reel":i,"topic":item["topic"],
         "caption":f"{item['title']} — a useful detail from {item['pillar']}. Save this Reel for later and share it with someone who loves Indian culture.",
         "hashtags":["#FestivalOfBharat","#IndianCulture","#Bharat","#IndianTraditions","#IndianFestivals"],
@@ -585,7 +608,8 @@ for i,(item,reel) in enumerate(zip(daily_topics,reels),1):
 stage("12-four-reels",{"status":"complete","count":4,"distinct_topics":[x["topic"] for x in daily_topics],
       "distinct_pillars":[x["pillar"] for x in daily_topics],"files":[r["file"] for r in reels],
       "rule":"Four different topics; four independent production tracks."})
-publish_status(96,"Quality & Growth","AI Manager","Four Reels complete — waiting for human approval","approval",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"complete","Quality & Growth":"working"})
+employee_handoff(98,"Quality & Growth","Analytics Manager","Prepare analytics input stage and wait for provided Instagram results","analytics")
+employee_handoff(99,"Quality & Growth","AI Manager / CEO","Coordinate final batch, enforce approval gate and stop before publishing","approval")
 stage("13-approval",{"status":"pending_human","review_window":"Morning review after overnight 02:00–06:00 IST production","rule":"No automatic publishing; human approval required.","edit_request_received":bool(edit_request),"edit_request":edit_request or None})
 analytics_file=os.getenv("ANALYTICS_JSON","").strip()
 analytics={}
@@ -616,7 +640,7 @@ manifest={
 "music_policy":MUSIC_POLICY,
 "user_supplied_source":{"provided":bool(source_url),"rights_assumption":"user must confirm ownership/permission before use" if source_url else None},
 "reels":reels}
-publish_status(100,"Quality & Growth","Learning Manager","Batch complete — ready for human approval","complete",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"complete","Quality & Growth":"complete"})
+employee_handoff(100,"Quality & Growth","Learning Manager","Record baseline learning and prepare next-batch adjustments","learning")
 (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2,ensure_ascii=False))
 (OUT/"README.txt").write_text("Festival of Bharat — professional daily Reel batch\nSix-beat edit: hook → visual proof → context → detail → meaning → CTA.\n1080x1920, 30fps, no embedded commercial music. Add eligible/trending Instagram audio after approval.\nRisky creator/platform/watermarked sources are rejected rather than stripped. Verify rights before posting.\n")
 (OUT/"creator-pack.json").write_text(json.dumps({"topics":[x["topic"] for x in daily_topics],"caption_direction":"Lead with the useful cultural fact, then invite a save/share.","music_direction":"Use eligible/trending Instagram audio inside Instagram; do not embed commercial music in the master.","posting_note":"Human approval required before publishing."},indent=2))

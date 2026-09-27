@@ -30,7 +30,7 @@ def trends():
         culture=re.compile(r"ganesh|ganpati|bappa|festival|diwali|holi|navratri|garba|krishna|janmashtami|shiva|mahadev|temple|india|bharat|pooja|puja|utsav|mela|heritage|culture",re.I)
         for t in titles:
             if culture.search(t): return t
-        return titles[0] if titles else "Indian culture"
+        return "Indian culture"
     except Exception:return "Indian culture"
 
 USEFUL_RULE=("Every Reel must teach, explain, preserve, or give practical cultural context about an Indian "
@@ -68,7 +68,7 @@ stage("04-script",{"status":"complete","beats":[{"time":"0-2s","role":"HOOK","te
 stage("05-storyboard",{"status":"complete","format":"9:16 vertical","beats":["hook","proof","context","detail","meaning","CTA"],"visual_direction":"cinematic realistic Indian culture; no random montage"})
 assets=[]
 
-WATERMARK_RISK=re.compile(r"\b(?:youtube|instagram|tiktok|facebook|vimeo|dailymotion)\b|@\w+|©|\bwww\b|https?://",re.I)
+WATERMARK_RISK=re.compile(r"watermark|\b(?:youtube|instagram|tiktok|facebook|vimeo|dailymotion)\b|@\w+|©|\bwww\b|https?://",re.I)
 def reject_source(title,author,page=""):
     # Commons page URLs are provenance, not evidence of an overlaid watermark.
     return bool(WATERMARK_RISK.search(" ".join([str(title or ""),str(author or "")])))
@@ -120,7 +120,8 @@ def visual_risk(path):
     for stamp in samples:
         tmp=RAW/(Path(path).stem+"_ocr_"+str(int(stamp*10))+".jpg")
         try:
-            sampled=run(["ffmpeg","-v","error","-y","-ss",str(stamp),"-i",str(path),"-frames:v","1","-q:v","3",str(tmp)],False)
+            seek=[] if Path(path).suffix.lower() in [".jpg",".jpeg",".png",".webp"] else ["-ss",str(stamp)]
+            sampled=run(["ffmpeg","-v","error","-y",*seek,"-i",str(path),"-frames:v","1","-q:v","3",str(tmp)],False)
             if sampled.returncode or not tmp.exists():raise RuntimeError("OCR frame sampling failed")
             result=run(["tesseract",str(tmp),"stdout","--psm","11"],False)
             if result.returncode:raise RuntimeError("Tesseract OCR is required for rights screening")

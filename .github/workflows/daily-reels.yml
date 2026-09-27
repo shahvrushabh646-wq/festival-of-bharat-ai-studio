@@ -1,5 +1,7 @@
 name: Daily 4 Reels
 on:
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       topic:

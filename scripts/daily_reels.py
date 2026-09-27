@@ -310,51 +310,76 @@ def add_source_asset(pool,title,url,license_name,author,page,file_path=None,kind
                  "page":page,"kind":kind,"rights_review":True,**({"file":file_path} if file_path else {})})
     return True
 
-def scout_openverse_topic(topic_item, reel_no):
-    """Fallback/primary CC-media source that avoids a single Wikimedia-host rate limit."""
-    pool=[]
-    seen=set()
+def _openverse_results(endpoint,q):
+    api=(endpoint+"?q="+urllib.parse.quote(q)+
+         "&license=cc0,by,by-sa&per_page=12&page=1")
+    try:
+        return json.loads(fetch(api,60)).get("results",[])
+    except Exception as e:
+        print("Openverse search failed",endpoint,q,e)
+        return []
+
+def scout_openverse_videos(topic_item,reel_no):
+    pool=[]; seen=set()
     for q in list(dict.fromkeys(topic_item["queries"])):
-        api=("https://api.openverse.org/v1/images/?q="+urllib.parse.quote(q)+
-             "&license=cc0,by,by-sa&per_page=12&page=1")
-        try:
-            data=json.loads(fetch(api,60))
-        except Exception as e:
-            print("Openverse search failed",q,e)
-            continue
-        for item in data.get("results",[]):
+        for item in _openverse_results("https://api.openverse.org/v1/videos/",q):
             url=item.get("url") or item.get("thumbnail")
-            title=clean(item.get("title") or q)
-            lic=clean(item.get("license") or "")
+            title=clean(item.get("title") or q); lic=clean(item.get("license") or "")
             author=clean(item.get("creator") or "")
             pageurl=item.get("foreign_landing_url") or item.get("detail_url") or ""
-            if not url or url in seen: continue
-            if str(item.get("license","")).lower() not in {"cc0","by","by-sa"}: continue
+            if not url or url in seen or str(item.get("license","")).lower() not in {"cc0","by","by-sa"}: continue
             if reject_source(title,author,pageurl): continue
-            seen.add(url)
+            dest=RAW/(f"reel{reel_no}_video{len(pool):02d}.mp4")
+            try:
+                dest.write_bytes(fetch(url,90))
+                dur,w,h,codec=probe(dest)
+                if dest.stat().st_size<30000 or w<400 or h<400 or dur<1:
+                    dest.unlink(missing_ok=True); continue
+                seen.add(url)
+                add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"video")
+            except Exception as e:
+                dest.unlink(missing_ok=True)
+                print("Openverse video skip",e)
+            if len(pool)>=4: return pool
+    return pool
+
+def scout_openverse_topic(topic_item,reel_no):
+    """Use openly licensed video first, then openly licensed images."""
+    pool=scout_openverse_videos(topic_item,reel_no)
+    if len(pool)>=4: return pool
+    seen={a.get("url") for a in pool}
+    for q in list(dict.fromkeys(topic_item["queries"])):
+        for item in _openverse_results("https://api.openverse.org/v1/images/",q):
+            url=item.get("url") or item.get("thumbnail")
+            title=clean(item.get("title") or q); lic=clean(item.get("license") or "")
+            author=clean(item.get("creator") or "")
+            pageurl=item.get("foreign_landing_url") or item.get("detail_url") or ""
+            if not url or url in seen or str(item.get("license","")).lower() not in {"cc0","by","by-sa"}: continue
+            if reject_source(title,author,pageurl): continue
             dest=RAW/(f"reel{reel_no}_asset{len(pool):02d}.jpg")
             try:
                 dest.write_bytes(fetch(url,60))
                 dur,w,h,codec=probe(dest)
                 if dest.stat().st_size<15000 or w<400 or h<400:
                     dest.unlink(missing_ok=True); continue
+                seen.add(url)
                 add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"photo")
             except Exception as e:
                 dest.unlink(missing_ok=True)
-                print("Openverse asset skip",e)
+                print("Openverse image skip",e)
             if len(pool)>=4: return pool
     return pool
 
-def scout_topic(topic_item, reel_no):
-    # Use Openverse first so a temporary Wikimedia/Commons rate limit cannot stop
-    # the whole production. Wikimedia remains a secondary CC/public-domain source.
+def scout_topic(topic_item,reel_no):
+    # Source priority: openly licensed video -> openly licensed image -> Wikimedia.
+    # Instagram/Pinterest/Google/Canva remain intelligence/reference sources, not
+    # arbitrary media download targets.
     pool=scout_openverse_topic(topic_item,reel_no)
-    if len(pool)>=4:
-        return pool
+    if len(pool)>=4: return pool
     print(f"Openverse supplied {len(pool)} assets; trying Wikimedia Commons fallback.")
-    queries=topic_item["queries"]
+    queries=list(dict.fromkeys(topic_item["queries"]))
     seen={a.get("url") for a in pool}
-    for q in list(dict.fromkeys(queries)):
+    for q in queries:
         import time; time.sleep(1.2)
         api=("https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+urllib.parse.quote(q)+
              "&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=600&format=json&origin=*")
@@ -364,8 +389,7 @@ def scout_topic(topic_item, reel_no):
         for page in data.get("query",{}).get("pages",{}).values():
             info=(page.get("imageinfo") or [{}])[0]
             url=(info.get("thumburl") if info.get("mime","").startswith("image/") and info.get("thumburl") else info.get("url",""))
-            mime=info.get("mime","")
-            meta=info.get("extmetadata",{})
+            mime=info.get("mime",""); meta=info.get("extmetadata",{})
             title=page.get("title","")
             lic=clean((meta.get("LicenseShortName") or {}).get("value",""))
             author=clean((meta.get("Artist") or {}).get("value",""))
@@ -386,6 +410,19 @@ def scout_topic(topic_item, reel_no):
                 print("Wikimedia asset skip",e)
             if len(pool)>=4: return pool
     return pool
+
+def make_local_fallback_asset(item,reel_no):
+    # Last-resort production safety net. This keeps the batch alive without
+    # pretending an unlicensed/random web image is usable.
+    dest=RAW/f"reel{reel_no}_fallback.jpg"
+    title=esc(f"{item['title']}")
+    pillar=esc(f"{item['pillar'].upper()} • FESTIVAL OF BHARAT")
+    run(["ffmpeg","-y","-f","lavfi","-i","color=c=0x17120f:s=1080x1920:d=1",
+         "-vf",f"drawtext=fontfile={FONT}:text='{title}':fontcolor=white:fontsize=58:borderw=3:bordercolor=black@.8:x=70:y=780:enable='between(t,0,1)',"
+               f"drawtext=fontfile={FONT}:text='{pillar}':fontcolor=white:fontsize=30:borderw=2:bordercolor=black@.7:x=70:y=900",
+         "-frames:v","1",str(dest)])
+    return {"title":item["title"],"url":"","license":"Original fallback graphic","author":"Festival of Bharat","page":"",
+            "kind":"photo","rights_review":True,"file":str(dest),"fallback":True}
 
 def visual_risk(path):
     try:
@@ -419,12 +456,20 @@ for reel_no,item in enumerate(daily_topics,1):
         except Exception as e:
             print(f"Fallback visual scouting failed for Reel {reel_no}: {e}")
     if len(pool)<4:
-        # Do not stop Reels 1–3 because Reel 4 is short on assets. Record the
-        # individual Reel as blocked and continue the production batch.
-        print(f"Reel {reel_no} ({item['topic']}) has only {len(pool)} clean visual assets; marking this Reel blocked and continuing the batch.")
-        stage(f"06-visual-sources-{reel_no:02d}",{"status":"blocked","reel":reel_no,"topic":item["topic"],"asset_count":len(pool),"reason":"All permitted visual-source fallbacks exhausted."})
-        assets_by_reel[reel_no]=pool
-        continue
+        # Reuse clean assets from the SAME topic before falling back to an original
+        # generated card. Never mix an unrelated topic into this Reel.
+        if pool:
+            while len(pool)<4:
+                pool.append(dict(pool[len(pool)%len(pool)],"reused_for_continuity":True))
+            print(f"Reel {reel_no}: only {len(set(a.get('url') for a in pool))} unique clean assets; reusing same-topic assets to complete the visual sequence.")
+        else:
+            fallback=make_local_fallback_asset(item,reel_no)
+            pool=[fallback]*4
+            print(f"Reel {reel_no}: no licensed web assets available; using original fallback graphic so the production batch continues.")
+        stage(f"06-visual-sources-{reel_no:02d}",{"status":"complete_with_fallback" if any(a.get("fallback") for a in pool) else "complete",
+            "reel":reel_no,"topic":item["topic"],"asset_count":len(pool),
+            "unique_asset_count":len(set(a.get("url") or a.get("file") for a in pool)),
+            "fallback_used":any(a.get("fallback") for a in pool)})
     assets_by_reel[reel_no]=pool[:4]
     stage(f"06-visual-sources-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"asset_count":len(assets_by_reel[reel_no]),"assets":assets_by_reel[reel_no],"source_intelligence":{"Instagram":"trend/hook/pacing reference","Pinterest":"composition and visual mood reference","Google":"topic/image research reference","Canva":"eligible design/layout/asset reference"}})
     stage(f"07-rights-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"gate":"reject risky creator/platform/watermarked sources",

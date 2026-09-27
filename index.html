@@ -61,31 +61,47 @@ const FOB_TEAMS=[
  ['3. Production','Footage Scout · Rights · Video Director · Editor · Motion · Captions · Music · Voiceover · Colorist'],
  ['4. Quality & Growth','Quality · Self-ReEditor · Cover · Caption · Analytics · Learning · AI Manager']
 ];
-function teamCard(n,m,s){const x=s==='done'?['COMPLETED','ok']:s==='working'?['WORKING NOW','blue']:['WAITING','warn'];return '<div class="brief"><b>'+n+'</b><div class="small" style="margin-top:4px">'+m+'</div><div class="'+x[1]+'" style="margin-top:6px;font-size:9px">'+x[0]+'</div></div>'}
+const TEAM_NAMES={'Strategy & Research':'1. Strategy & Research','Creative & Story':'2. Creative & Story','Production':'3. Production','Quality & Growth':'4. Quality & Growth'};
+function teamCard(n,m,s,current){
+ const x=s==='complete'?['COMPLETED','ok']:s==='working'?['WORKING NOW','blue']:s==='failed'?['BLOCKED','red']:['WAITING','warn'];
+ return '<div class="brief" style="'+(s==='working'?'border-color:#3b6fa8;box-shadow:0 0 0 1px #3b6fa833 inset':'')+'"><b>'+n+'</b><div class="small" style="margin-top:4px">'+m+'</div><div class="'+x[1]+'" style="margin-top:6px;font-size:9px">'+x[0]+(s==='working'?' • '+(current||'ACTIVE'):'')+'</div></div>'
+}
+function setLiveStatus(pct,status,employee,work,teams){
+ $('liveProgressBar').style.width=Math.max(0,Math.min(100,pct))+'%';
+ $('liveProgressPct').textContent=Math.round(pct)+'%';
+ $('liveProgressStatus').textContent=status;
+ $('liveCurrentEmployee').textContent=employee;
+ $('liveCurrentWork').textContent=work;
+ $('liveProductionEmployees').innerHTML=FOB_TEAMS.map(([n,m])=>{
+   const key=n.replace(/^\d+\. /,''); return teamCard(n,m,teams?.[key]||'waiting',employee);
+ }).join('');
+}
 async function loadLiveProduction(){
+ try{
+  const raw=await fetch('https://raw.githubusercontent.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/status/status/status.json?cache='+Date.now());
+  if(raw.ok){
+   const st=await raw.json();
+   const teams=st.departments||{};
+   setLiveStatus(st.overall_percent||0,'Run #'+(st.run_number||'—')+' • '+(st.phase||'live'),st.current_employee||'Production Team',st.current_task||'Working…',teams);
+   return;
+  }
+ }catch(e){}
  try{
   const rr=await fetch('https://api.github.com/repos/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/runs?per_page=20');
   const d=await rr.json(),run=(d.workflow_runs||[]).filter(x=>x.path==='.github/workflows/daily-reels.yml')[0];
-  if(!run)return;
-  const jr=await fetch('https://api.github.com/repos/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/runs/'+run.id+'/jobs?per_page=20');
-  const jd=await jr.json(),steps=((jd.jobs||[])[0]||{}).steps||[];
-  const build=steps.find(s=>/Build today/i.test(s.name)),upload=steps.find(s=>/Upload four/i.test(s.name)),release=steps.find(s=>/Publish daily/i.test(s.name));
-  let p=run.status==='completed'?(run.conclusion==='success'?100:0):8,phase='setup',cur='AI Manager / CEO',work='Preparing production.';
-  if(build?.status==='in_progress'){p=25;phase='build';cur='Production Team';work='Creating four Reels: research → story → footage → edit → QC.'}
-  if(upload?.status==='in_progress'){p=88;phase='upload';cur='Production Team';work='Exporting four finished MP4 Reels.'}
-  if(release?.status==='in_progress'){p=96;phase='release';cur='AI Manager / CEO';work='Publishing the completed batch.'}
-  if(run.status==='completed'&&run.conclusion==='success'){cur='Learning Manager';work='Batch ready for human approval.'}
-  document.getElementById('liveProgressBar').style.width=p+'%';
-  document.getElementById('liveProgressPct').textContent=p+'%';
-  document.getElementById('liveProgressStatus').textContent='Run #'+run.run_number+' • '+(run.status==='completed'?run.conclusion:run.status);
-  document.getElementById('liveCurrentEmployee').textContent=cur;
-  document.getElementById('liveCurrentWork').textContent=work;
-  document.getElementById('liveProductionEmployees').innerHTML=FOB_TEAMS.map(([n,m],i)=>{
-   let s='waiting'; if(run.status==='completed'&&run.conclusion==='success')s='done'; else if(phase==='build')s=i===2?'working':i<2?'done':'waiting'; else if(phase==='upload'||phase==='release')s='done'; return teamCard(n,m,s);
-  }).join('');
- }catch(e){document.getElementById('liveProgressStatus').textContent='Status unavailable';}
+  if(!run){setLiveStatus(0,'No production run found','AI Manager / CEO','Waiting for production.',{});return;}
+  if(run.status==='queued'||run.status==='waiting'||run.status==='requested'){
+   setLiveStatus(8,'Run #'+run.run_number+' • '+run.status,'AI Manager / CEO','Preparing production.',{});return;
+  }
+  if(run.status==='completed'){
+   const ok=run.conclusion==='success';
+   setLiveStatus(ok?100:0,'Run #'+run.run_number+' • '+run.conclusion,ok?'Learning Manager':'AI Manager / CEO',ok?'Batch ready for human approval.':'Production stopped — open the run for the error.',ok?{'Strategy & Research':'complete','Creative & Story':'complete','Production':'complete','Quality & Growth':'complete'}:{});
+   return;
+  }
+  setLiveStatus(12,'Run #'+run.run_number+' • '+run.status,'AI Manager / CEO','Production telemetry is starting…',{});
+ }catch(e){setLiveStatus(0,'Status unavailable','AI Manager / CEO','Refresh to retry.',{});}
 }
-loadLiveProduction();setInterval(loadLiveProduction,30000);
+loadLiveProduction();setInterval(loadLiveProduction,10000);
 </script>
 <section class="card" id="dailyAutoOutput" style="margin-top:18px">
   <div class="eyebrow">DAILY 4-REEL AUTOPILOT</div>

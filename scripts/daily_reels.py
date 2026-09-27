@@ -305,6 +305,22 @@ def render_reel(idx,style,item,assets):
     for p in clips+[OUT/f"_raw{idx}_{j}.mp4" for j in range(6)]: p.unlink(missing_ok=True)
     return result
 
+
+MUSIC_POLICY={
+ "master_audio":"silent",
+ "instagram_edits":"Use Instagram/Edits music only through the Instagram/Edits in-app music workflow after upload/approval; do not scrape or extract commercial tracks.",
+ "youtube":"Use only YouTube Audio Library tracks whose current usage terms permit the intended Instagram use; ordinary YouTube uploads labelled 'no copyright' are not automatically safe.",
+ "preferred":"Original/commissioned music or a verified cross-platform licence; otherwise add eligible Instagram audio in-app.",
+ "attribution":"Preserve required attribution/license evidence in the creator pack."
+}
+
+def music_direction(item):
+    mood={"heritage":"cinematic Indian instrumental / tanpura / soft percussion","food":"warm folk instrumental / light rhythmic texture","festival":"energetic Indian percussion / festive instrumental","craft":"organic folk instrumental / hand-percussion texture","tradition":"calm devotional-inspired instrumental / ambient texture","culture":"cinematic Indian instrumental / subtle tabla texture"}
+    return {"direction":mood.get(item["pillar"],"cinematic Indian instrumental / subtle percussion"),
+            "instagram_edits":"Add eligible/trending audio from Instagram or Edits after the master is approved.",
+            "youtube_source":"YouTube Audio Library only; verify the track's current licence and cross-platform permission before importing.",
+            "license_status":"not_assumed","master_audio":"none"}
+
 reels=[]
 for i,(item,style) in enumerate(zip(daily_topics,styles),1):
     reels.append(render_reel(i,style,item,assets_by_reel[i]))
@@ -317,7 +333,7 @@ for i,(item,reel) in enumerate(zip(daily_topics,reels),1):
         "caption":f"{item['title']} — a useful detail from {item['pillar']}. Save this Reel for later and share it with someone who loves Indian culture.",
         "hashtags":["#FestivalOfBharat","#IndianCulture","#Bharat","#IndianTraditions","#IndianFestivals"],
         "cover_text":item["title"][:54],
-        "music":"Add eligible/trending Instagram audio after approval; master MP4 stays music-free."})
+        "music":music_direction(item)})
 
 stage("12-four-reels",{"status":"complete","count":4,"distinct_topics":[x["topic"] for x in daily_topics],
       "distinct_pillars":[x["pillar"] for x in daily_topics],"files":[r["file"] for r in reels],
@@ -347,6 +363,7 @@ manifest={
 "editorial_scorecard":{"hook":"immediate","visual_change":"high","information_density":"one clear idea per Reel","ending":"clean CTA"},
 "asset_screening":{"creator_name_risk":"reject","platform_mark_risk":"reject","visual_watermark_risk":"sampled-frame OCR reject","third_party_content":"reject","attribution":"preserve in rights record"},
 "rights_review_required":True,
+"music_policy":MUSIC_POLICY,
 "user_supplied_source":{"provided":bool(source_url),"rights_assumption":"user must confirm ownership/permission before use" if source_url else None},
 "reels":reels}
 (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2,ensure_ascii=False))

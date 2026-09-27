@@ -38,101 +38,54 @@ function v100Run(mode){
   <div style="margin-top:10px;font-size:10px;color:#748396">The workflow runs in the cloud, so your browser does not need to stay open.</div><div id="instantProductionStatus" style="margin-top:9px;font-size:10px;color:#67a8ff"></div>
 </section>
 <section class="card" id="liveProductionProgress" style="margin-top:18px;border-color:#33485f">
-  <div class="eyebrow">AI EMPLOYEE CONTROL ROOM</div>
-  <h2>Today's 4-Reel Production — Employee Status</h2>
-  <p class="small">Employee status is derived from the live production stage. During the Build stage, the production team is working through the full pipeline.</p>
-  <div style="display:flex;align-items:center;gap:10px;margin:14px 0 8px">
-    <div class="progress" style="height:10px"><i id="liveProgressBar"></i></div>
-    <b id="liveProgressPct">0%</b>
+  <div class="eyebrow">AI PRODUCTION TEAM</div>
+  <h2>Today's 4-Reel Production</h2>
+  <div style="display:flex;align-items:center;gap:10px;margin:10px 0 7px">
+    <div class="progress" style="height:8px"><i id="liveProgressBar"></i></div><b id="liveProgressPct">0%</b>
   </div>
-  <div id="liveProgressStatus" class="small">Checking production…</div>
-  <div style="margin-top:12px;padding:12px;border:1px solid #25313d;border-radius:10px;background:#0b1017">
-    <b id="liveCurrentEmployee">Current employee: checking…</b>
-    <div id="liveCurrentWork" class="small" style="margin-top:5px">Checking what the team is doing…</div>
+  <div id="liveProgressStatus" class="small">Checking latest run…</div>
+  <div style="margin-top:10px;padding:10px;border:1px solid #25313d;border-radius:9px;background:#0b1017">
+    <b id="liveCurrentEmployee">Checking…</b>
+    <div id="liveCurrentWork" class="small" style="margin-top:3px">Checking current stage…</div>
   </div>
-  <div class="briefgrid" id="liveProductionEmployees" style="margin-top:12px"></div>
+  <div class="briefgrid" id="liveProductionEmployees" style="margin-top:10px"></div>
   <div class="controls">
-    <button class="btn gold" onclick="loadLiveProduction()">↻ REFRESH EMPLOYEE STATUS</button>
-    <a class="btn" target="_blank" rel="noopener" href="https://github.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/workflows/daily-reels.yml">OPEN GITHUB RUN</a>
+    <button class="btn gold" onclick="loadLiveProduction()">↻ Refresh</button>
+    <a class="btn" target="_blank" rel="noopener" href="https://github.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/workflows/daily-reels.yml">Open Run</a>
   </div>
 </section>
 <script>
-const FOB_EMPLOYEES=[
- ['Content Manager','Chooses the daily four editorial topics.'],
- ['Trend Researcher','Finds current India/festival trend signals.'],
- ['Cultural Researcher','Checks cultural facts and context.'],
- ['Script Writer','Creates hooks, scripts and CTAs.'],
- ['Creative Director','Sets the visual treatment and creative direction.'],
- ['Storyboard Director','Converts each idea into shot-by-shot structure.'],
- ['Footage Scout','Finds suitable rights-safe visual assets.'],
- ['Rights & Copyright Manager','Checks licence, watermark and rights risks.'],
- ['Video Director','Controls shot order, pacing and visual flow.'],
- ['Video Editor','Builds the actual 1080×1920 Reel.'],
- ['Motion Graphics Designer','Creates titles, highlights and motion text.'],
- ['Caption Designer','Keeps on-screen captions readable.'],
- ['Music & Sound Designer','Creates the music direction; master stays music-free.'],
- ['Voiceover Director','Adds voiceover direction where useful.'],
- ['Colorist','Applies the final cinematic colour treatment.'],
- ['Quality Manager','Checks resolution, codec, duration and output quality.'],
- ['Self-ReEditor','Fixes failed quality checks automatically.'],
- ['Cover Designer','Creates the Reel cover direction.'],
- ['Caption Writer','Creates the posting caption, hashtags and CTA.'],
- ['Analytics Manager','Prepares the performance-learning stage.'],
- ['Learning Manager','Feeds completed results back into future planning.'],
- ['AI Manager / CEO','Coordinates the complete production pipeline.']
+const FOB_TEAMS=[
+ ['1. Strategy & Research','Content Manager · Trend Researcher · Cultural Researcher'],
+ ['2. Creative & Story','Script Writer · Creative Director · Storyboard Director'],
+ ['3. Production','Footage Scout · Rights · Video Director · Editor · Motion · Captions · Music · Voiceover · Colorist'],
+ ['4. Quality & Growth','Quality · Self-ReEditor · Cover · Caption · Analytics · Learning · AI Manager']
 ];
-
-function employeeCard(name,desc,state){
- const map={done:['COMPLETED','ok'],working:['WORKING NOW','blue'],waiting:['WAITING','warn'],ready:['READY','small']};
- const m=map[state]||map.ready;
- return '<div class="brief"><b>'+name+'</b><span class="small">'+desc+'</span><div style="margin-top:7px;font-size:9px" class="'+m[1]+'">'+m[0]+'</div></div>';
-}
-
+function teamCard(n,m,s){const x=s==='done'?['COMPLETED','ok']:s==='working'?['WORKING NOW','blue']:['WAITING','warn'];return '<div class="brief"><b>'+n+'</b><div class="small" style="margin-top:4px">'+m+'</div><div class="'+x[1]+'" style="margin-top:6px;font-size:9px">'+x[0]+'</div></div>'}
 async function loadLiveProduction(){
- const status=document.getElementById('liveProgressStatus'),bar=document.getElementById('liveProgressBar'),pct=document.getElementById('liveProgressPct'),box=document.getElementById('liveProductionEmployees'),ce=document.getElementById('liveCurrentEmployee'),cw=document.getElementById('liveCurrentWork');
  try{
   const rr=await fetch('https://api.github.com/repos/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/runs?per_page=20');
-  const data=await rr.json();
-  const runs=(data.workflow_runs||[]).filter(x=>x.path==='.github/workflows/daily-reels.yml');
-  const run=runs[0];
-  if(!run){status.textContent='No production run found yet.';return;}
+  const d=await rr.json(),run=(d.workflow_runs||[]).filter(x=>x.path==='.github/workflows/daily-reels.yml')[0];
+  if(!run)return;
   const jr=await fetch('https://api.github.com/repos/shahvrushabh646-wq/festival-of-bharat-ai-studio/actions/runs/'+run.id+'/jobs?per_page=20');
-  const jd=await jr.json(),job=(jd.jobs||[])[0],steps=(job&&job.steps)||[];
-  const build=steps.find(s=>/Build today/i.test(s.name)),install=steps.find(s=>/Install FFmpeg/i.test(s.name)),upload=steps.find(s=>/Upload four/i.test(s.name)),release=steps.find(s=>/Publish daily/i.test(s.name));
-  const done=steps.filter(s=>s.status==='completed').length,total=Math.max(steps.length,7);
-  let p=run.status==='completed'?(run.conclusion==='success'?100:Math.round(done/total*100)):Math.min(95,Math.round(done/total*100));
-  if(install&&install.status==='in_progress')p=Math.max(p,8);
-  if(build&&build.status==='in_progress')p=Math.max(p,25);
-  if(upload&&upload.status==='in_progress')p=Math.max(p,88);
-  if(release&&release.status==='in_progress')p=Math.max(p,96);
-  bar.style.width=p+'%';pct.textContent=p+'%';
-  status.textContent=(run.status==='completed'?'Production completed: '+(run.conclusion||'unknown'):'Production '+run.status.toUpperCase())+' • Run #'+run.run_number+' • Started '+new Date(run.created_at).toLocaleString('en-IN');
-
-  let current='AI Manager / CEO',work='Coordinating the production environment and preparing the 4-Reel factory.';
-  let phase='setup';
-  if(build&&build.status==='in_progress'){current='Video Editor + Full Production Team';work='Building the four different Reels: research → scripts → storyboard → footage → rights → edit → QC → re-edit → cover/caption.';phase='build';}
-  else if(upload&&upload.status==='in_progress'){current='Production Export Manager';work='Uploading the four finished MP4 Reels to the daily production artifact.';phase='upload';}
-  else if(release&&release.status==='in_progress'){current='AI Manager / CEO';work='Publishing the completed 4-Reel batch and creator-pack records.';phase='release';}
-  else if(run.status==='completed'&&run.conclusion==='success'){current='Learning Manager';work='Batch completed. Human approval is now required before posting.';phase='done';}
-  else if(install&&install.status==='in_progress'){current='AI Manager / CEO';work='Setting up the production environment so the Video Editor can start rendering.';phase='setup';}
-
-  ce.textContent='Current employee/team: '+current;cw.textContent=work;
-
-  const cards=FOB_EMPLOYEES.map(([n,d])=>{
-    let s='waiting';
-    if(phase==='done')s='done';
-    else if(phase==='build'){
-      const active=['Content Manager','Trend Researcher','Cultural Researcher','Script Writer','Creative Director','Storyboard Director','Footage Scout','Rights & Copyright Manager','Video Director','Video Editor','Motion Graphics Designer','Caption Designer','Music & Sound Designer','Voiceover Director','Colorist','Quality Manager','Self-ReEditor','Cover Designer','Caption Writer'];
-      if(active.includes(n))s='working'; else if(n==='AI Manager / CEO')s='working';
-    } else if(phase==='upload'&&n==='AI Manager / CEO')s='working';
-    else if(phase==='release'&&n==='AI Manager / CEO')s='working';
-    return employeeCard(n,d,s);
-  });
-  box.innerHTML=cards.join('');
- }catch(e){status.textContent='Live employee status unavailable. Open the GitHub run to verify.';}
+  const jd=await jr.json(),steps=((jd.jobs||[])[0]||{}).steps||[];
+  const build=steps.find(s=>/Build today/i.test(s.name)),upload=steps.find(s=>/Upload four/i.test(s.name)),release=steps.find(s=>/Publish daily/i.test(s.name));
+  let p=run.status==='completed'?(run.conclusion==='success'?100:0):8,phase='setup',cur='AI Manager / CEO',work='Preparing production.';
+  if(build?.status==='in_progress'){p=25;phase='build';cur='Production Team';work='Creating four Reels: research → story → footage → edit → QC.'}
+  if(upload?.status==='in_progress'){p=88;phase='upload';cur='Production Team';work='Exporting four finished MP4 Reels.'}
+  if(release?.status==='in_progress'){p=96;phase='release';cur='AI Manager / CEO';work='Publishing the completed batch.'}
+  if(run.status==='completed'&&run.conclusion==='success'){cur='Learning Manager';work='Batch ready for human approval.'}
+  document.getElementById('liveProgressBar').style.width=p+'%';
+  document.getElementById('liveProgressPct').textContent=p+'%';
+  document.getElementById('liveProgressStatus').textContent='Run #'+run.run_number+' • '+(run.status==='completed'?run.conclusion:run.status);
+  document.getElementById('liveCurrentEmployee').textContent=cur;
+  document.getElementById('liveCurrentWork').textContent=work;
+  document.getElementById('liveProductionEmployees').innerHTML=FOB_TEAMS.map(([n,m],i)=>{
+   let s='waiting'; if(run.status==='completed'&&run.conclusion==='success')s='done'; else if(phase==='build')s=i===2?'working':i<2?'done':'waiting'; else if(phase==='upload'||phase==='release')s='done'; return teamCard(n,m,s);
+  }).join('');
+ }catch(e){document.getElementById('liveProgressStatus').textContent='Status unavailable';}
 }
-loadLiveProduction();
-setInterval(loadLiveProduction,30000);
+loadLiveProduction();setInterval(loadLiveProduction,30000);
 </script>
 <section class="card" id="dailyAutoOutput" style="margin-top:18px">
   <div class="eyebrow">DAILY 4-REEL AUTOPILOT</div>

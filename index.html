@@ -772,4 +772,28 @@ async function startCloudReels(topic){
     status.textContent=e.message+' — use the manual workflow button below if needed.';
   }
 }
-</script></body></html>
+</script>
+<script>
+// V30 is the real cloud pipeline entry point; do not report a local/mock run as production.
+(()=>{
+ const button=document.getElementById('v30run'), log=document.getElementById('v30log');
+ if(!button||!log)return;
+ button.onclick=async()=>{
+   const topic=(document.getElementById('v30topic')?.value||'').trim();
+   button.disabled=true; log.textContent='Dispatching the real GitHub Actions production run…';
+   try{
+     const response=await fetch('/api/run-reels',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({topic})});
+     const data=await response.json();
+     if(!response.ok)throw new Error(data.error||'GitHub Actions dispatch failed');
+     log.textContent='Production run queued. The workflow will build the four Reels, run the rights and quality gates, and prepare the approval pack. Publishing to Instagram remains a human action. ';
+     const url=new URL(data.actionsUrl);
+     if(url.hostname==='github.com'){
+       const link=document.createElement('a');link.href=url.href;link.target='_blank';link.rel='noopener';link.textContent='Open live GitHub Actions run';
+       log.appendChild(link);
+     }
+   }catch(error){log.textContent=(error.message||'Unable to start production')+' — check the Vercel GITHUB_TOKEN and try again.'}
+   finally{button.disabled=false}
+ };
+})();
+</script>
+</body></html>

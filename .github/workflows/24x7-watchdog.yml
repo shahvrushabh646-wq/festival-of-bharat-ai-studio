@@ -1,7 +1,7 @@
 name: 24x7 Reel Factory Watchdog
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          DATE="$(date -u +%Y-%m-%d)"
+          DATE="$(TZ=Asia/Kolkata date +%Y-%m-%d)"
           TAG="daily-${DATE}"
 
           if gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then

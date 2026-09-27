@@ -56,7 +56,8 @@ USEFUL_RULE=("Every Reel must teach, explain, preserve, or give practical cultur
 "festival, tradition, place, craft, food, history, or cultural practice. Avoid fabricated facts, empty trend-chasing, copied creator content, and generic filler.")
 user_topic=os.getenv("TOPIC","").strip()
 trend_topic=trends()
-today_key=datetime.now(timezone.utc).strftime('%Y-%m-%d')
+IST=timezone(__import__('datetime').timedelta(hours=5,minutes=30))
+today_key=datetime.now(IST).strftime('%Y-%m-%d')
 
 topic_profiles=[
 (r"ganesh|ganpati|bappa","Ganpati / Ganesh festival","Why Ganpati celebrations end with Visarjan","Ganesh Chaturthi celebrates Lord Ganesha and the festival concludes with immersion according to local tradition.",["ganesh chaturthi","ganpati visarjan","ganesh festival india","ganpati procession"]),
@@ -495,6 +496,30 @@ for reel_no,item in enumerate(daily_topics,1):
            "assets":[{"title":a["title"],"license":a["license"],"author":a["author"],"page":a["page"],"rights_review":True} for a in assets_by_reel[reel_no]]})
 
 FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+def preflight_render_environment():
+    required=["ffmpeg","ffprobe","tesseract"]
+    missing=[x for x in required if subprocess.call(["bash","-lc",f"command -v {x} >/dev/null 2>&1"])!=0]
+    if not Path(FONT).exists():
+        missing.append(FONT)
+    if missing:
+        raise RuntimeError("Production preflight failed. Missing: "+", ".join(missing))
+    print("RENDER PREFLIGHT OK")
+
+preflight_render_environment()
+
+def make_cover(reel_path,item,idx):
+    covers=OUT/"covers"
+    covers.mkdir(exist_ok=True)
+    dest=covers/f"reel_{idx:02d}_cover.jpg"
+    title=esc(item["title"][:48])
+    pillar=esc(item["pillar"].upper()+" • FESTIVAL OF BHARAT")
+    run(["ffmpeg","-y","-ss","0.5","-i",str(reel_path),"-frames:v","1","-q:v","3",
+         "-vf",f"drawbox=x=0:y=0:w=iw:h=360:color=black@0.42:t=fill,drawtext=fontfile={FONT}:text='{title}':fontcolor=white:fontsize=54:borderw=3:bordercolor=black@.8:x=55:y=105,drawtext=fontfile={FONT}:text='{pillar}':fontcolor=white:fontsize=26:borderw=2:bordercolor=black@.7:x=55:y=245",
+         str(dest)])
+    if not dest.exists() or dest.stat().st_size<10000:
+        raise RuntimeError(f"Cover generation failed for Reel {idx}")
+    return dest.name
+
 def make_clip(src,out,dur):
     sd,sw,sh,codec=probe(src); start=0 if sd<dur+0.3 else min(.7,sd-dur)
     if Path(src).suffix.lower() in [".jpg",".jpeg",".png",".webp"]:
@@ -508,6 +533,14 @@ def quality_check(path):
     dur,w,h,codec=probe(path)
     checks={"resolution":w==1080 and h==1920,"duration":9<=dur<=16.5,"codec":codec=="h264"}
     return {"pass":all(checks.values()),"checks":checks,"duration":round(dur,2),"width":w,"height":h,"codec":codec}
+
+STYLE_LIBRARY=[
+    ("moment","THE MOMENT — topic treatment",[0,1,2,3,4,5],[2.0,2.0,2.5,2.5,2.0,2.0],"cinematic"),
+    ("detail","THE DETAIL — topic treatment",[1,0,2,3,4,5],[2.0,2.0,2.5,2.5,2.0,2.0],"curiosity"),
+    ("energy","THE ENERGY — topic treatment",[0,2,1,3,5,4],[1.5,1.8,2.0,2.2,2.0,2.2],"fast"),
+    ("meaning","THE MEANING — topic treatment",[0,1,3,2,4,5],[2.2,2.0,2.5,2.5,2.0,2.0],"reflective")
+]
+styles=STYLE_LIBRARY
 
 def render_reel(idx,style,item,assets):
     # Final hard safety guard: render_reel must never receive an empty asset list.
@@ -589,7 +622,9 @@ for i,(item,style) in enumerate(zip(daily_topics,styles),1):
     employee_handoff(72+i*5,"Production","Music & Sound Designer",f"Set music direction while keeping master audio-free for Reel {i}","sound",i)
     employee_handoff(73+i*5,"Production","Voiceover Director",f"Check voiceover requirement for Reel {i}; keep silent master unless required","voiceover",i)
     employee_handoff(74+i*5,"Production","Colorist",f"Apply crop, contrast, saturation and sharpening treatment for Reel {i}","color",i)
-    reels.append(render_reel(i,style,item,assets_by_reel[i]))
+    rendered=render_reel(i,style,item,assets_by_reel[i])
+    rendered["cover_file"]=make_cover(OUT/rendered["file"],item,i)
+    reels.append(rendered)
 
 employee_handoff(90,"Quality & Growth","Quality Manager","Check resolution, duration, codec and final export quality for all four Reels","quality")
 for i,(item,reel) in enumerate(zip(daily_topics,reels),1):
@@ -627,6 +662,8 @@ manifest={
 "daily_key":today_key,
 "reference_intelligence":{"instagram":instagram_refs,"pinterest":pinterest_refs,"canva":canva_refs},
 "topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)],
+"employee_roster":EMPLOYEE_ROSTER,
+"departments":["Strategy & Research","Creative & Story","Production","Quality & Growth"],
 "format":"1080x1920 9:16 Instagram Reel",
 "production":"four independent professional short-form edits — each Reel has a different topic and pillar; visual direction informed by Instagram, Pinterest, Google and Canva",
 "production_window":"02:00–06:00 IST overnight production; morning human review and edit pass follows.",
@@ -640,6 +677,31 @@ manifest={
 "music_policy":MUSIC_POLICY,
 "user_supplied_source":{"provided":bool(source_url),"rights_assumption":"user must confirm ownership/permission before use" if source_url else None},
 "reels":reels}
+EMPLOYEE_ROSTER=[
+ {"department":"Strategy & Research","employee":"Content Manager"},
+ {"department":"Strategy & Research","employee":"Trend Researcher"},
+ {"department":"Strategy & Research","employee":"Cultural Researcher"},
+ {"department":"Creative & Story","employee":"Creative Director"},
+ {"department":"Creative & Story","employee":"Script Writer"},
+ {"department":"Creative & Story","employee":"Storyboard Director"},
+ {"department":"Production","employee":"Visual Source Director"},
+ {"department":"Production","employee":"Rights & Copyright Manager"},
+ {"department":"Production","employee":"Video Director"},
+ {"department":"Production","employee":"Video Editor"},
+ {"department":"Production","employee":"Motion Graphics Designer"},
+ {"department":"Production","employee":"Caption Designer"},
+ {"department":"Production","employee":"Music & Sound Designer"},
+ {"department":"Production","employee":"Voiceover Director"},
+ {"department":"Production","employee":"Colorist"},
+ {"department":"Quality & Growth","employee":"Quality Manager"},
+ {"department":"Quality & Growth","employee":"Self-ReEditor"},
+ {"department":"Quality & Growth","employee":"Cover Designer"},
+ {"department":"Quality & Growth","employee":"Caption Writer"},
+ {"department":"Quality & Growth","employee":"Analytics Manager"},
+ {"department":"Quality & Growth","employee":"Learning Manager"},
+ {"department":"Quality & Growth","employee":"AI Manager / CEO"}
+]
+
 employee_handoff(100,"Quality & Growth","Learning Manager","Record baseline learning and prepare next-batch adjustments","learning")
 (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2,ensure_ascii=False))
 (OUT/"README.txt").write_text("Festival of Bharat — professional daily Reel batch\nSix-beat edit: hook → visual proof → context → detail → meaning → CTA.\n1080x1920, 30fps, no embedded commercial music. Add eligible/trending Instagram audio after approval.\nRisky creator/platform/watermarked sources are rejected rather than stripped. Verify rights before posting.\n")

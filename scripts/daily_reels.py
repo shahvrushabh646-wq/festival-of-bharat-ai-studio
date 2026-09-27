@@ -398,11 +398,33 @@ def visual_risk(path):
     except Exception: return False
 
 for reel_no,item in enumerate(daily_topics,1):
-    publish_status(40+reel_no*7,"Production","Visual Source Director",f"Combining Instagram, Pinterest, Google and Canva visual intelligence for Reel {reel_no}","footage",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"working","Quality & Growth":"waiting"},reel_no)
-    pool=scout_topic(item,reel_no)
+    publish_status(40+reel_no*7,"Production","Visual Source Director",f"Combining Instagram, Pinterest, Google and Canva visual intelligence for Reel {reel_no}","visual sources",{"Strategy & Research":"complete","Creative & Story":"complete","Production":"working","Quality & Growth":"waiting"},reel_no)
+    # A single provider failure must never block the whole batch. Try every permitted
+    # source and keep only topic-matched, clean assets. If fewer than four are found,
+    # retry broader queries for the SAME topic before considering the Reel blocked.
+    pool=[]
+    try:
+        pool=scout_topic(item,reel_no)
+    except Exception as e:
+        print(f"Primary visual scouting failed for Reel {reel_no}: {e}")
     pool=[a for a in pool if not visual_risk(a["file"])]
     if len(pool)<4:
-        raise RuntimeError(f"Reel {reel_no} ({item['topic']}) has only {len(pool)} clean visual assets; production stops instead of mixing unrelated content.")
+        retry_item=dict(item)
+        retry_item["topic"]=item["topic"]+" India culture"
+        try:
+            retry_pool=scout_topic(retry_item,reel_no)
+            retry_pool=[a for a in retry_pool if not visual_risk(a["file"])]
+            seen={a.get("page") or a.get("file") for a in pool}
+            pool.extend(a for a in retry_pool if (a.get("page") or a.get("file")) not in seen)
+        except Exception as e:
+            print(f"Fallback visual scouting failed for Reel {reel_no}: {e}")
+    if len(pool)<4:
+        # Do not stop Reels 1–3 because Reel 4 is short on assets. Record the
+        # individual Reel as blocked and continue the production batch.
+        print(f"Reel {reel_no} ({item['topic']}) has only {len(pool)} clean visual assets; marking this Reel blocked and continuing the batch.")
+        stage(f"06-visual-sources-{reel_no:02d}",{"status":"blocked","reel":reel_no,"topic":item["topic"],"asset_count":len(pool),"reason":"All permitted visual-source fallbacks exhausted."})
+        assets_by_reel[reel_no]=pool
+        continue
     assets_by_reel[reel_no]=pool[:4]
     stage(f"06-visual-sources-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"asset_count":len(assets_by_reel[reel_no]),"assets":assets_by_reel[reel_no],"source_intelligence":{"Instagram":"trend/hook/pacing reference","Pinterest":"composition and visual mood reference","Google":"topic/image research reference","Canva":"eligible design/layout/asset reference"}})
     stage(f"07-rights-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"gate":"reject risky creator/platform/watermarked sources",

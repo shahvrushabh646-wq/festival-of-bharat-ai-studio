@@ -60,11 +60,11 @@ for q in queries:
         meta=ii.get("extmetadata") or {}
         lic=str(meta.get("LicenseShortName",{}).get("value",""))
         if not url or not mime.startswith("video/") or p.get("title") in seen: continue
-        if not re.search(r"CC|Creative Commons|Public Domain|PD|GFDL|GPL|Attribution|ShareAlike",lic,re.I): continue
+        if not re.search(r"CC BY|CC BY-SA|CC0|Public Domain|PD|GFDL|GPL|Attribution|ShareAlike",lic,re.I): continue
         seen.add(p.get("title")); assets.append({
             "title":p.get("title",""),"url":url,"license":re.sub("<[^>]+>","",lic),
             "author":re.sub("<[^>]+>","",str(meta.get("Artist",{}).get("value",""))),
-            "page":"https://commons.wikimedia.org/wiki/"+urllib.parse.quote(p.get("title","").replace(" ","_"))
+            "page":"https://commons.wikimedia.org/wiki/"+urllib.parse.quote(p.get("title","").replace(" ","_")),"rights_review":True
         })
         if len(assets)>=8: break
     if len(assets)>=8: break
@@ -89,7 +89,7 @@ styles=[
  ("energy",[1,3,0,2],1.8,"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"),
  ("meaning",[3,2,1,0],3.4,"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"),
 ]
-manifest={"date":datetime.now(timezone.utc).isoformat(),"topic":topic,"rights_note":"Only Commons assets with open/public license metadata were selected. Verify each asset license before posting.","assets":[],"reels":[]}
+manifest={"date":datetime.now(timezone.utc).isoformat(),"topic":topic,"rights_note":"Only footage with displayed license metadata permitting the intended use is imported. Verify each asset license and attribution/share-alike requirements before posting.","rights_review_required":True,"assets":[],"reels":[]}
 
 for a in assets: manifest["assets"].append({k:a[k] for k in ("title","license","author","page")})
 for n,(name,order,dur,vf) in enumerate(styles,1):

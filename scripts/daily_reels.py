@@ -79,6 +79,31 @@ def add_source_asset(title,url,license_name,author,page,file_path=None,kind="vid
     assets.append({"title":title,"url":url,"license":license_name or "License not displayed","author":author,"page":page,"kind":kind,"rights_review":True,**({"file":file_path} if file_path else {})})
     return True
 
+def scout_pexels_fallback():
+    pages=[
+        "https://www.pexels.com/photo/traditional-ganesh-festival-celebration-in-india-28779439/",
+        "https://www.pexels.com/photo/ganesh-chaturthi-festival-in-mumbai-30184160/",
+        "https://www.pexels.com/photo/ganesh-chaturthi-festival-celebration-in-mumbai-28770061/",
+        "https://www.pexels.com/photo/vibrant-ganesh-idol-at-ganesh-chaturthi-festival-35692036/",
+        "https://www.pexels.com/photo/vibrant-ganesha-festival-celebration-in-india-28153361/",
+        "https://www.pexels.com/photo/ganesh-idol-celebrated-during-mumbai-festival-28770064/"
+    ]
+    for pageurl in pages:
+        if len(assets)>=8:return
+        try:
+            html=fetch(pageurl,30).decode("utf-8","ignore")
+            m=re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']',html,re.I)
+            if not m:m=re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']',html,re.I)
+            if not m:continue
+            img=urllib.parse.unquote(m.group(1)).replace("&amp;","&")
+            dest=RAW/(f"pexels_{len(assets):02d}.jpg")
+            dest.write_bytes(fetch(img,60))
+            dur,w,h,codec=probe(dest)
+            if dest.stat().st_size<15000 or w<400 or h<400:dest.unlink(missing_ok=True);continue
+            title=pageurl.rstrip("/").split("/")[-1].replace("-"," ").title()
+            add_source_asset(title,img,"Pexels — Free to use; verify current license","Pexels photographer",pageurl,str(dest),"photo")
+        except Exception as e:print("pexels fallback skip",e)
+
 def scout_wikimedia():
     queries=list(dict.fromkeys(search_terms+["Indian culture festival India","Indian temple culture"]))
     seen=set()
@@ -110,7 +135,8 @@ if source_url:
         if dur>1 and w>=400 and h>=400 and not reject_source("Provided MP4","",source_url):
             add_source_asset("Provided MP4",source_url,"User-provided source — verify rights","",source_url,str(dest),"video")
     except Exception as e:print("provided source unusable",e)
-if len(assets)<6:scout_wikimedia()
+if len(assets)<6:scout_pexels_fallback()
+if len(assets)<4:scout_wikimedia()
 if len(assets)<4:raise RuntimeError("Not enough clean, rights-reviewable visual assets; risky/random sources were rejected.")
 
 def visual_risk(path):

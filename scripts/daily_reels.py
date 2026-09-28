@@ -479,7 +479,7 @@ for reel_no,item in enumerate(daily_topics,1):
         # generated card. Never mix an unrelated topic into this Reel.
         if pool:
             while len(pool)<4:
-                pool.append(dict(pool[len(pool)%len(pool)],"reused_for_continuity":True))
+                pool.append({**pool[len(pool)%len(pool)],"reused_for_continuity":True})
             print(f"Reel {reel_no}: only {len(set(a.get('url') for a in pool))} unique clean assets; reusing same-topic assets to complete the visual sequence.")
         else:
             fallback=make_local_fallback_asset(item,reel_no)

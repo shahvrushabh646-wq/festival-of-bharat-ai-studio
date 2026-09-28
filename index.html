@@ -139,23 +139,27 @@ function reelCard(r,review=false){
 }
 function renderBatch(){
  const reels=batch?.reels||[];
- const saved=JSON.parse(localStorage.getItem("fob-decisions-v2-"+(batch?.date||"today"))||"{}");
- const effective=reels.map(r=>({...r,decision:saved[r.reel]?.decision||r.decision}));
+ const approvals=batch?.approvals||{};
+ const effective=reels.map(r=>({...r,decision:approvals[String(r.reel)]?.decision||r.decision}));
  $("commandReels").innerHTML=effective.length?effective.map(r=>reelCard(r)).join(""):`<div class="empty">No finished batch yet.</div>`;
  $("reviewReels").innerHTML=effective.length?effective.map(r=>reelCard(r,true)).join(""):`<div class="empty">No finished batch yet.</div>`;
  const decided=effective.filter(r=>r.decision&&r.decision!=="pending").length;
  $("reviewCount").textContent=`${decided}/${effective.length||4} decided`;
 }
 async function approve(reel){
- const key="fob-decisions-v2-"+(batch?.date||"today");
- const d=JSON.parse(localStorage.getItem(key)||"{}");d[reel]={decision:"approved",at:new Date().toISOString()};localStorage.setItem(key,JSON.stringify(d));renderBatch();setTab("review");
+ if(!batch?.date)return;
+ try{
+  const r=await fetch("/api/approval",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({date:batch.date,reel,decision:"approved"})});
+  const j=await r.json(); if(!r.ok)throw new Error(j.error||"Approval could not be saved");
+  await getBatch(); setTab("review");
+ }catch(e){alert(e.message||"Approval could not be saved");}
 }
 function openEdit(reel){selectedEdit=reel;$("editTitle").textContent="Reel "+reel+" targeted edit";$("editNotes").value="";$("editMsg").textContent="";$("editModal").classList.add("open")}
 function closeEdit(){$("editModal").classList.remove("open")}
 $("sendEdit").onclick=async()=>{
  if(!selectedEdit)return; const notes=$("editNotes").value.trim();if(!notes){$("editMsg").textContent="Write the exact change first.";return}
  $("sendEdit").disabled=true;$("editMsg").textContent="Dispatching targeted re-edit…";
- try{const r=await fetch("/api/run-reels",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({edit_request:`Reel ${selectedEdit}: ${notes}`})});const j=await r.json();if(!r.ok)throw new Error(j.error||"Dispatch failed");$("editMsg").textContent="Re-edit dispatched. Other Reels are unchanged.";setTimeout(closeEdit,900)}catch(e){$("editMsg").textContent=e.message}finally{$("sendEdit").disabled=false}
+ try{const r=await fetch("/api/run-reels",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({target_reel:selectedEdit,edit_request:`Reel ${selectedEdit}: ${notes}`})});const j=await r.json();if(!r.ok)throw new Error(j.error||"Dispatch failed");$("editMsg").textContent="Re-edit dispatched. Other Reels are unchanged.";setTimeout(closeEdit,900)}catch(e){$("editMsg").textContent=e.message}finally{$("sendEdit").disabled=false}
 };
 async function start(planOnly=false){
  const btn=planOnly?$("planBtn"):$("makeBtn");btn.disabled=true;$("startMsg").textContent="Dispatching GitHub Actions production…";

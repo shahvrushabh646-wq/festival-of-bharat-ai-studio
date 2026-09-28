@@ -313,6 +313,116 @@ for i,item in enumerate(daily_topics,1):
         "beats":["hook","proof","context","detail","meaning","CTA"],
         "visual_direction":"cinematic realistic Indian culture; original editorial treatment; source intelligence from Instagram, Pinterest, Google and Canva; no random montage"
     })
+
+# Template library: templates are executable production rules, not UI labels.
+# Every template defines how photos move, how videos are paced, and how captions sit
+# on the vertical frame. The renderer below uses these rules for the actual Reel.
+TEMPLATES = {
+    "cinematic_festival": {
+        "id":"cinematic_festival","name":"Cinematic Festival","eq":"eq=contrast=1.08:saturation=1.14:brightness=0.01",
+        "effects":["slow_zoom_in","pan_right","slow_zoom_out","tilt_up","slow_zoom_in","pan_left"],
+        "beat_durations":[2.2,2.2,2.5,2.5,2.2,2.2],"pacing":"cinematic","photo_bias":1
+    },
+    "photo_story": {
+        "id":"photo_story","name":"Photo Story","eq":"eq=contrast=1.05:saturation=1.08",
+        "effects":["slow_zoom_in","pan_left","slow_zoom_out","pan_right","tilt_down","slow_zoom_in"],
+        "beat_durations":[2.2,2.2,2.3,2.3,2.2,2.2],"pacing":"measured","photo_bias":3
+    },
+    "documentary": {
+        "id":"documentary","name":"Documentary","eq":"eq=contrast=1.04:saturation=0.96:gamma=0.98",
+        "effects":["slow_zoom_in","tilt_up","pan_right","slow_zoom_out","slow_zoom_in","pan_left"],
+        "beat_durations":[2.3,2.3,2.5,2.4,2.2,2.2],"pacing":"measured","photo_bias":2
+    },
+    "fast_cultural": {
+        "id":"fast_cultural","name":"Fast Cultural","eq":"eq=contrast=1.10:saturation=1.18:brightness=0.02",
+        "effects":["pan_right","slow_zoom_in","pan_left","tilt_down","slow_zoom_out","slow_zoom_in"],
+        "beat_durations":[1.6,1.8,1.8,1.9,1.8,1.9],"pacing":"fast","photo_bias":1
+    },
+    "temple_spiritual": {
+        "id":"temple_spiritual","name":"Temple / Spiritual","eq":"eq=contrast=1.03:saturation=1.06:gamma=0.96",
+        "effects":["slow_zoom_in","slow_zoom_out","tilt_up","pan_right","slow_zoom_in","pan_left"],
+        "beat_durations":[2.3,2.3,2.5,2.4,2.2,2.2],"pacing":"slow","photo_bias":3
+    }
+}
+
+ANGLE_LIBRARY = [
+    {"key":"unknown","label":"3 things you didn't know","template":"fast_cultural"},
+    {"key":"history","label":"History behind the story","template":"documentary"},
+    {"key":"why","label":"Why people celebrate it","template":"temple_spiritual"},
+    {"key":"journey","label":"Visual journey / story","template":"photo_story"},
+]
+
+def choose_template(item, edit_request=""):
+    req=(edit_request or "").lower()
+    for tid,spec in TEMPLATES.items():
+        if tid.replace("_"," ") in req or spec["name"].lower() in req:
+            return dict(spec)
+    if "photo" in req: return dict(TEMPLATES["photo_story"])
+    if "documentary" in req: return dict(TEMPLATES["documentary"])
+    if "fast" in req: return dict(TEMPLATES["fast_cultural"])
+    topic=(str(item.get("topic",""))+" "+str(item.get("pillar",""))).lower()
+    if re.search(r"temple|mandir|shiva|krishna|aarti|devotion",topic):
+        return dict(TEMPLATES["temple_spiritual"])
+    if re.search(r"heritage|fort|palace|history|architecture",topic):
+        return dict(TEMPLATES["documentary"])
+    if re.search(r"ganesh|ganpati|holi|diwali|navratri|festival",topic):
+        return dict(TEMPLATES["cinematic_festival"])
+    return dict(TEMPLATES[["cinematic_festival","photo_story","documentary","fast_cultural"][
+        (int(today_key.replace("-","")) + len(str(item.get("topic","")))) % 4
+    ]])
+
+SHOT_WANTS = [
+    {"want":["skyline","city","wide","landscape","ghat","river","exterior"],"pref":"video"},
+    {"want":["idol","deity","murti","statue","ganesh","krishna","shiva"],"pref":"photo"},
+    {"want":["crowd","procession","festival","celebration","people"],"pref":"video"},
+    {"want":["decoration","flower","diya","lamp","rangoli","mandap"],"pref":"photo"},
+    {"want":["aarti","ritual","puja","temple","offering"],"pref":"video"},
+    {"want":["architecture","carving","detail","craft","close"],"pref":"photo"},
+]
+
+def score_asset(asset,want):
+    blob=" ".join([str(asset.get("title") or ""),str(asset.get("page") or ""),str(asset.get("query") or "")]).lower()
+    score=sum(1 for w in want if w in blob)
+    if asset.get("kind") in {"photo","image"} and "photo" in want: score += 2
+    if asset.get("kind")=="video" and "video" in want: score += 2
+    return score
+
+def arrange_shots(pool,template,item):
+    """Turn the template into actual photo/video shot assignments."""
+    pool=[dict(x) for x in pool if x.get("file")]
+    if not pool: return []
+    remaining=list(pool); chosen=[]
+    for i,slot in enumerate(SHOT_WANTS[:6]):
+        pref=slot["pref"]
+        candidates=sorted(remaining,key=lambda a:score_asset(a,slot["want"])+(2 if a.get("kind")==pref else 0),reverse=True)
+        pick=candidates[0] if candidates else None
+        if pick is None: break
+        remaining=[a for a in remaining if a is not pick]
+        rec=dict(pick)
+        rec["shot"]=i+1
+        rec["effect"]=template["effects"][i%len(template["effects"])]
+        rec["duration"]=template["beat_durations"][i%len(template["beat_durations"])]
+        chosen.append(rec)
+    # Reuse only same-topic licensed assets when the pool is smaller than six slots.
+    if chosen:
+        idx=0
+        while len(chosen)<6:
+            base=chosen[idx%len(chosen)]
+            rec=dict(base); rec["shot"]=len(chosen)+1; rec["reused_for_continuity"]=True
+            rec["effect"]=template["effects"][len(chosen)%len(template["effects"])]
+            rec["duration"]=template["beat_durations"][len(chosen)%len(template["beat_durations"])]
+            chosen.append(rec); idx+=1
+    # Hard mixed-media guard: if both kinds exist, at least one of each must survive.
+    kinds={x.get("kind") for x in pool}
+    if {"photo","video"} <= kinds and len(chosen)>=2:
+        if not any(x.get("kind")=="photo" for x in chosen):
+            photo=next(x for x in pool if x.get("kind")=="photo")
+            chosen[1]={**photo,"shot":2,"effect":template["effects"][1],"duration":template["beat_durations"][1]}
+        if not any(x.get("kind")=="video" for x in chosen):
+            video=next(x for x in pool if x.get("kind")=="video")
+            chosen[0]={**video,"shot":1,"effect":template["effects"][0],"duration":template["beat_durations"][0]}
+    return chosen[:6]
+
 assets_by_reel={}
 instagram_refs=[
  {"type":"explore","url":"https://www.instagram.com/explore/","use":"trend discovery"},
@@ -564,16 +674,27 @@ def make_cover(reel_path,item,idx):
         raise RuntimeError(f"Cover generation failed for Reel {idx}")
     return dest.name
 
-def make_clip(src,out,dur):
-    """Normalize every visual to one deterministic 1080x1920/30fps H.264 stream."""
+def make_clip(src,out,dur,effect="slow_zoom_in",grade="eq=contrast=1.06:saturation=1.12:brightness=.01"):
+    """Normalize photos/videos while applying the selected template motion."""
     sd,sw,sh,codec=probe(src); start=0 if sd<dur+0.3 else min(.7,sd-dur)
     is_image=Path(src).suffix.lower() in [".jpg",".jpeg",".png",".webp"]
     if is_image:
-        vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2,zoompan=z='min(zoom+0.0018,1.12)':d=1:s=1080x1920:fps=30,eq=contrast=1.06:saturation=1.12:brightness=.01,setsar=1,format=yuv420p"
+        if effect=="pan_right":
+            motion=f"scale=1680:1920:force_original_aspect_ratio=increase,crop=1680:1920,crop=1080:1920:x='(in_w-1080)*t/{max(dur,0.1)}':y=0"
+        elif effect=="pan_left":
+            motion=f"scale=1680:1920:force_original_aspect_ratio=increase,crop=1680:1920,crop=1080:1920:x='(in_w-1080)*(1-t/{max(dur,0.1)})':y=0"
+        elif effect=="tilt_up":
+            motion=f"scale=1080:2300:force_original_aspect_ratio=increase,crop=1080:2300,crop=1080:1920:x=0:y='(in_h-1920)*(1-t/{max(dur,0.1)})'"
+        elif effect=="tilt_down":
+            motion=f"scale=1080:2300:force_original_aspect_ratio=increase,crop=1080:2300,crop=1080:1920:x=0:y='(in_h-1920)*t/{max(dur,0.1)}'"
+        else:
+            frames=max(2,int(dur*30))
+            motion=f"scale=1600:2844:force_original_aspect_ratio=increase,crop=1600:2844,zoompan=z='min(1+0.0013*on,1.14)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s=1080x1920:fps=30"
+        vf=motion+","+grade+",setsar=1,format=yuv420p"
         cmd=["ffmpeg","-y","-loop","1","-framerate","30","-i",str(src),"-t",str(dur),"-vf",vf,
              "-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p","-r","30","-threads","2",str(out)]
     else:
-        vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2,eq=contrast=1.06:saturation=1.12:brightness=.01,unsharp=5:5:.35:5:5:0,fps=30,setsar=1,format=yuv420p"
+        vf=f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,{grade},unsharp=5:5:.35:5:5:0,fps=30,setsar=1,format=yuv420p"
         cmd=["ffmpeg","-y","-ss",str(start),"-i",str(src),"-t",str(dur),"-vf",vf,
              "-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p","-r","30","-threads","2",str(out)]
     r=run(cmd,check=False)
@@ -594,7 +715,7 @@ STYLE_LIBRARY=[
 ]
 styles=STYLE_LIBRARY
 
-def render_reel(idx,style,item,assets):
+def render_reel(idx,style,item,assets,template=None):
     # Final hard safety guard: render_reel must never receive an empty asset list.
     # This is intentionally redundant with visual sourcing so a future sourcing change
     # cannot reintroduce the assets[... % len(assets)] crash.
@@ -603,6 +724,14 @@ def render_reel(idx,style,item,assets):
         assets=[fallback,fallback,fallback,fallback]
         print(f"Reel {idx}: render guard created an original fallback asset.")
     name,label,order,durations,tempo=style
+    template=template or choose_template(item,edit_request)
+    grade=template["eq"]
+    shots=arrange_shots(assets,template,item)
+    if len(shots)<2:
+        raise RuntimeError(f"Reel {idx}: template could not assemble enough visual shots")
+    # Template now controls real visual motion. The style remains the six-beat editorial order.
+    order=list(range(min(6,len(shots))))
+    durations=[float(shots[j].get("duration") or durations[j]) for j in range(min(6,len(shots)))]
     texts=[f"STOP SCROLLING: {item['title']}",f"LOOK CLOSER • {item['pillar']}",item["fact"],
            "This is the detail most quick videos skip.","Now you know what you're actually seeing.",
            "SAVE THIS • FOLLOW FESTIVAL OF BHARAT"]
@@ -623,16 +752,16 @@ def render_reel(idx,style,item,assets):
     roles=["HOOK","VISUAL PROOF","CONTEXT","DETAIL","MEANING","CTA"]; clips=[]
     for j,(ai,d) in enumerate(zip(order,durations)):
         raw=OUT/f"_raw{idx}_{j}.mp4"; styled=OUT/f"_cut{idx}_{j}.mp4"
-        asset=assets[ai%len(assets)]
+        asset=shots[ai%len(shots)]
         source=asset.get("file","")
         try:
             if not source or not Path(source).exists():
                 raise RuntimeError("visual asset file is missing")
-            make_clip(source,raw,d)
+            make_clip(source,raw,d,asset.get("effect") or "slow_zoom_in",grade)
         except Exception as e:
             print(f"Reel {idx} beat {j+1}: source render failed; replacing only this visual with an original fallback: {e}")
             fallback=make_local_fallback_asset(item,idx)
-            make_clip(fallback["file"],raw,d)
+            make_clip(fallback["file"],raw,d,"slow_zoom_in",grade)
             asset=fallback
         # Use FFmpeg textfile= for editorial copy. This prevents filter-parser
         # failures from commas, apostrophes, brackets and other trend text.
@@ -679,7 +808,10 @@ def render_reel(idx,style,item,assets):
         return render_reel(idx,alt,item,assets)
     dur,w,h,codec=probe(final)
     result={"file":final.name,"reel":idx,"topic":item["topic"],"pillar":item["pillar"],"title":item["title"],
-            "style":label,"tempo":tempo,"duration":round(dur,2),"quality":q,"edit_request_applied":edit_request or None}
+            "style":label,"template":template["id"],"template_name":template["name"],"tempo":tempo,
+            "duration":round(dur,2),"quality":q,"edit_request_applied":edit_request or None,
+            "shots":[{"shot":x.get("shot"),"kind":x.get("kind"),"title":x.get("title"),"effect":x.get("effect"),
+                     "duration":x.get("duration"),"license":x.get("license"),"page":x.get("page")} for x in shots]}
     for p in clips+[OUT/f"_raw{idx}_{j}.mp4" for j in range(6)]: p.unlink(missing_ok=True)
     return result
 
@@ -708,7 +840,11 @@ for i,(item,style) in enumerate(zip(daily_topics,styles),1):
     employee_handoff(72+i*5,"Production","Music & Sound Designer",f"Set music direction while keeping master audio-free for Reel {i}","sound",i)
     employee_handoff(73+i*5,"Production","Voiceover Director",f"Check voiceover requirement for Reel {i}; keep silent master unless required","voiceover",i)
     employee_handoff(74+i*5,"Production","Colorist",f"Apply crop, contrast, saturation and sharpening treatment for Reel {i}","color",i)
-    rendered=render_reel(i,style,item,assets_by_reel[i])
+    template=choose_template(item,edit_request)
+    rendered=render_reel(i,style,item,assets_by_reel[i],template)
+    stage(f"05-template-{i:02d}",{"status":"complete","reel":i,"template":template["id"],"template_name":template["name"],
+        "pacing":template["pacing"],"photo_motion":template["effects"],"beat_durations":template["beat_durations"],
+        "asset_rule":"Templates must use the actual licensed photo/video assets assigned to their slots."})
     rendered["cover_file"]=make_cover(OUT/rendered["file"],item,i)
     reels.append(rendered)
 

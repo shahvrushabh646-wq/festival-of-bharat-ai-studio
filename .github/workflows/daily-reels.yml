@@ -15,6 +15,10 @@ on:
         description: "Morning human edit instructions for the next re-edit pass"
         required: false
         default: ""
+      target_reel:
+        description: "Optional Reel number 1-4 to re-render only"
+        required: false
+        default: ""
   schedule:
     - cron: "30 20 * * *"
 permissions:
@@ -29,23 +33,33 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-
       - name: Install FFmpeg
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core tesseract-ocr
-
       - name: Prepare live status branch
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           git fetch origin status 2>/dev/null || true
           git show-ref --verify --quiet refs/remotes/origin/status || gh api repos/${GITHUB_REPOSITORY}/git/refs -f ref=refs/heads/status -f sha=${GITHUB_SHA} >/dev/null 2>&1 || true
-
       - name: Apply production hotfixes
         run: python3 scripts/production_hotfix.py
-
+      - name: Prepare previous batch for targeted re-edit
+        if: ${{ github.event.inputs.target_reel != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_REEL: ${{ github.event.inputs.target_reel }}
+        run: |
+          set -euo pipefail
+          mkdir -p previous-release
+          DATE="$(TZ=Asia/Kolkata date +%Y-%m-%d)"
+          if ! gh release download "daily-${DATE}" --dir previous-release --pattern 'reel_*.mp4' --pattern 'manifest.json' --pattern 'creator-pack.json' --clobber; then
+            echo "No completed daily release is available for targeted re-edit."
+            exit 1
+          fi
+          test -f previous-release/manifest.json
+          echo "Previous batch loaded for targeted Reel ${TARGET_REEL}."
       - name: Validate production script
         run: python3 -m py_compile scripts/daily_reels.py
-
       - name: Build today's four Reels
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -53,9 +67,10 @@ jobs:
           TOPIC: ${{ github.event.inputs.topic }}
           SOURCE_URL: ${{ github.event.inputs.source_url }}
           EDIT_REQUEST: ${{ github.event.inputs.edit_request }}
+          TARGET_REEL: ${{ github.event.inputs.target_reel }}
+          PREVIOUS_RELEASE_DIR: previous-release
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
         run: python3 scripts/daily_reels.py
-
       - name: Record failed production status without erasing history
         if: failure()
         env:
@@ -116,7 +131,6 @@ jobs:
           req=urllib.request.Request(f"https://api.github.com/repos/{repo}/contents/status/status.json",data=json.dumps(body).encode(),headers={**headers,"Content-Type":"application/json"},method="PUT")
           with urllib.request.urlopen(req,timeout=20) as r: r.read()
           PY
-
       - name: Verify production outputs
         if: success()
         shell: bash
@@ -143,7 +157,6 @@ jobs:
             fi
           done
           echo "PRODUCTION OUTPUT CHECK PASSED — exactly four valid 1080x1920 H.264 Reels."
-
       - name: Upload four MP4 Reels
         if: success()
         uses: actions/upload-artifact@v4
@@ -151,7 +164,6 @@ jobs:
           name: festival-of-bharat-4-reels-${{ github.run_number }}
           path: daily-output/
           retention-days: 14
-
       - name: Publish daily MP4 release
         if: success()
         env:
@@ -161,7 +173,4 @@ jobs:
           TAG="daily-${DATE}"
           gh release delete "${TAG}" --yes 2>/dev/null || true
           git push --delete origin "${TAG}" 2>/dev/null || true
-          gh release create "${TAG}" daily-output/*.mp4 daily-output/covers/*.jpg daily-output/manifest.json daily-output/README.txt daily-output/creator-pack.json daily-output/stages/*.json \
-            --target "${GITHUB_SHA}" \
-            --title "Festival of Bharat — 4 Reels — ${DATE}" \
-            --notes "Automated daily batch. Verify each source license before posting; add eligible Instagram audio after approval."
+          gh release create "${TAG}" daily-output/*.mp4 daily-output/covers/*.jpg daily-output/manifest.json daily-output/README.txt daily-output/creator-pack.json daily-output/stages/*.json             --target "${GITHUB_SHA}"             --title "Festival of Bharat — 4 Reels — ${DATE}"             --notes "Automated daily batch. Verify each source license before posting; add eligible Instagram audio after approval."

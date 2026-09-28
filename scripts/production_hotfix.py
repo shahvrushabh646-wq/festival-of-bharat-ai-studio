@@ -122,4 +122,5 @@ for marker in ("TEMPLATES = {", "def choose_template", "def arrange_shots", "def
         raise SystemExit(f"Production preflight failed: missing {marker}")
 
 smoke_test()
+caption_smoke_test()
 print("Production preflight OK: renderer, template engine, mixed-media shot planner and FFmpeg concat are executable")

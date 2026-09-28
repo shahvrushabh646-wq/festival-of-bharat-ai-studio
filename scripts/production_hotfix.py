@@ -1,24 +1,36 @@
 #!/usr/bin/env python3
-"""Runtime hotfixes for the production renderer.
-This file is intentionally small: it patches known-safe source/FFmpeg escaping
-issues before the existing production pipeline executes.
+"""Idempotent production safety hotfixes.
+The script must never fail merely because a hotfix was already applied.
 """
 from pathlib import Path
+import re
 
 p=Path("scripts/daily_reels.py")
 s=p.read_text(encoding="utf-8")
 
-old='def esc(s):\n    return str(s or "").replace("\\\\","\\\\\\\\").replace(":","\\\\:").replace("'","\\\\'").replace("%","\\\\%").replace("[","\\\\[").replace("]","\\\\]")'
-new='def esc(s):\n    # Escape characters that are meaningful inside an FFmpeg drawtext filter.\n    return (str(s or "").replace("\\\\","\\\\\\\\").replace("\'","\\\\\'")\n            .replace(":","\\\\:").replace(",","\\\\,").replace(";","\\\\;")\n            .replace("%","\\\\%").replace("[","\\\\[").replace("]","\\\\]"))'
-if old not in s:
-    raise SystemExit("esc() hotfix target not found")
-s=s.replace(old,new,1)
+# Escape characters meaningful to FFmpeg drawtext. Replace the whole esc()
+# implementation rather than depending on an exact previous version.
+esc_re=re.compile(r"def esc\(s\):\n(?:    .*\n)+?def clean\(s\):",re.M)
+esc_block='''def esc(s):
+    # Escape characters that are meaningful inside an FFmpeg drawtext filter.
+    return (str(s or "").replace("\\\\","\\\\\\\\").replace("'","\\\\'")
+            .replace(":","\\\\:").replace(",","\\\\,").replace(";","\\\\;")
+            .replace("%","\\\\%").replace("[","\\\\[").replace("]","\\\\]"))
+def clean(s):'''
+s,n=esc_re.subn(esc_block,s,count=1)
+if n==0:
+    raise SystemExit("Could not locate esc()/clean() block safely")
 
-old='WATERMARK_RISK=re.compile(r"watermark|youtube|instagram|tiktok|facebook|vimeo|dailymotion|@\\w+|©|www\\.|https?://",re.I)\ndef reject_source(title,author,page):\n    return bool(WATERMARK_RISK.search(" ".join([str(title or ""),str(author or "")])))'
-new='WATERMARK_RISK=re.compile(r"watermark|youtube|instagram|tiktok|facebook|vimeo|dailymotion|@\\w+|©|\\bwww\\.",re.I)\ndef reject_source(title,author,page):\n    # The landing-page URL itself is not a watermark. Inspect source metadata/title/author,\n    # while separately rejecting known platform marks in the metadata.\n    metadata=" ".join([str(title or ""),str(author or "")])\n    return bool(WATERMARK_RISK.search(metadata))'
-if old not in s:
-    raise SystemExit("rights-filter hotfix target not found")
-s=s.replace(old,new,1)
+# Never treat a normal https landing-page URL as a watermark.
+risk_re=re.compile(r'WATERMARK_RISK=re\.compile\(r".*?"\,re\.I\)\ndef reject_source\(title,author,page\):\n(?:    .*\n){1,3}',re.S)
+risk_block='''WATERMARK_RISK=re.compile(r"watermark|youtube|instagram|tiktok|facebook|vimeo|dailymotion|@\\w+|©|\\bwww\\.",re.I)
+def reject_source(title,author,page):
+    metadata=" ".join([str(title or ""),str(author or "")])
+    return bool(WATERMARK_RISK.search(metadata))
+'''
+s,n=risk_re.subn(risk_block,s,count=1)
+if n==0:
+    raise SystemExit("Could not locate watermark filter safely")
 
 p.write_text(s,encoding="utf-8")
-print("Applied production hotfixes to",p)
+print("Production hotfixes applied successfully")

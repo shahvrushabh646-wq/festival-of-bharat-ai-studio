@@ -605,7 +605,17 @@ def render_reel(idx,style,item,assets):
     roles=["HOOK","VISUAL PROOF","CONTEXT","DETAIL","MEANING","CTA"]; clips=[]
     for j,(ai,d) in enumerate(zip(order,durations)):
         raw=OUT/f"_raw{idx}_{j}.mp4"; styled=OUT/f"_cut{idx}_{j}.mp4"
-        make_clip(assets[ai%len(assets)]["file"],raw,d)
+        asset=assets[ai%len(assets)]
+        source=asset.get("file","")
+        try:
+            if not source or not Path(source).exists():
+                raise RuntimeError("visual asset file is missing")
+            make_clip(source,raw,d)
+        except Exception as e:
+            print(f"Reel {idx} beat {j+1}: source render failed; replacing only this visual with an original fallback: {e}")
+            fallback=make_local_fallback_asset(item,idx)
+            make_clip(fallback["file"],raw,d)
+            asset=fallback
         main=esc(fit_text(texts[j],30 if j in [2,3,4] else 25)); role=esc(roles[j])
         if j in [2,3,4]:
             draw=f"drawtext=fontfile={FONT}:text='{role}':fontcolor=white:fontsize=28:borderw=3:bordercolor=black@.75:x=55:y=1510,drawtext=fontfile={FONT}:text='{main}':fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1555"

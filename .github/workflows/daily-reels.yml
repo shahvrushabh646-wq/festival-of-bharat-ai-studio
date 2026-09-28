@@ -52,7 +52,7 @@ jobs:
           set -euo pipefail
           mkdir -p previous-release
           DATE="$(TZ=Asia/Kolkata date +%Y-%m-%d)"
-          if ! gh release download "daily-${DATE}" --dir previous-release --pattern 'reel_*.mp4' --pattern 'manifest.json' --pattern 'creator-pack.json' --clobber; then
+          if ! gh release download "daily-${DATE}" --dir previous-release --pattern 'reel_*.mp4' --pattern 'reel_*_cover.jpg' --pattern 'manifest.json' --pattern 'creator-pack.json' --clobber; then
             echo "No completed daily release is available for targeted re-edit."
             exit 1
           fi

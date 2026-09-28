@@ -8,9 +8,7 @@ export default async function handler(req,res){
   const edit_request=String(body.edit_request||'').trim();
   const plan_only=String(body.plan_only||'').toLowerCase()==='true';
   const owner='shahvrushabh646-wq', repo='festival-of-bharat-ai-studio', workflow='daily-reels.yml';
-  if(plan_only){
-    return res.status(200).json({ok:true,planOnly:true,message:'Plan only selected. No GitHub Actions production run was started.',planUrl:`https://github.com/${owner}/${repo}/actions/workflows/${workflow}`});
-  }
+  if(plan_only) return res.status(200).json({ok:true,planOnly:true,message:'Plan only selected. No GitHub Actions production run was started.',planUrl:`https://github.com/${owner}/${repo}/actions/workflows/${workflow}`});
   let dispatchTopic=topic;
   if(edit_request){
     try{
@@ -28,10 +26,18 @@ export default async function handler(req,res){
       }
     }catch(e){}
   }
+  const payload={ref:'main',inputs:{topic:dispatchTopic,source_url,edit_request}};
   const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`,{
     method:'POST',headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
-    body:JSON.stringify({ref:'main',inputs:{topic:dispatchTopic,source_url,edit_request,plan_only:plan_only?'true':'false'}})
+    body:JSON.stringify(payload)
   });
-  if(!r.ok) return res.status(r.status).json({error:'GitHub could not start the workflow. Check that the token has Actions: Read and write permission.'});
+  if(!r.ok){
+    let detail='GitHub rejected the workflow dispatch.';
+    try{ const data=await r.json(); if(data?.message) detail=data.message; }catch{}
+    const hint=r.status===401||r.status===403
+      ?' Check Vercel GITHUB_TOKEN: it must be a GitHub fine-grained token for this repository with Actions = Read and write (and Contents = Read and write if the workflow creates releases/updates repository content).'
+      :'';
+    return res.status(r.status).json({error:`${detail}${hint}`,githubStatus:r.status});
+  }
   res.status(200).json({ok:true,actionsUrl:`https://github.com/${owner}/${repo}/actions/workflows/${workflow}`});
 }

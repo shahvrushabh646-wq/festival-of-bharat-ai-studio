@@ -392,10 +392,11 @@ def scout_openverse_videos(topic_item,reel_no):
     return pool
 
 def scout_openverse_topic(topic_item,reel_no):
-    """Use openly licensed video first, then openly licensed images."""
-    pool=scout_openverse_videos(topic_item,reel_no)
-    if len(pool)>=4: return pool
+    """Build a mixed visual pool: always try to include both video and photo."""
+    videos=scout_openverse_videos(topic_item,reel_no)
+    pool=list(videos[:3])
     seen={a.get("url") for a in pool}
+    image_target=1 if videos else 4
     for q in list(dict.fromkeys(topic_item["queries"])):
         for item in _openverse_results("https://api.openverse.org/v1/images/",q):
             url=item.get("url") or item.get("thumbnail")
@@ -415,8 +416,17 @@ def scout_openverse_topic(topic_item,reel_no):
             except Exception as e:
                 dest.unlink(missing_ok=True)
                 print("Openverse image skip",e)
-            if len(pool)>=4: return pool
-    return pool
+            if sum(1 for x in pool if x.get("kind")=="photo")>=image_target:
+                break
+        if sum(1 for x in pool if x.get("kind")=="photo")>=image_target:
+            break
+    # Fill any remaining slots with licensed visuals; preserve at least one photo whenever available.
+    if len(pool)<4:
+        for extra in scout_openverse_videos(topic_item,reel_no):
+            if extra.get("url") not in seen:
+                pool.append(extra); seen.add(extra.get("url"))
+            if len(pool)>=4: break
+    return pool[:4]
 
 def scout_topic(topic_item,reel_no):
     # Source priority: openly licensed video -> openly licensed image -> Wikimedia.
@@ -555,13 +565,21 @@ def make_cover(reel_path,item,idx):
     return dest.name
 
 def make_clip(src,out,dur):
+    """Normalize every visual to one deterministic 1080x1920/30fps H.264 stream."""
     sd,sw,sh,codec=probe(src); start=0 if sd<dur+0.3 else min(.7,sd-dur)
-    if Path(src).suffix.lower() in [".jpg",".jpeg",".png",".webp"]:
-        vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2,zoompan=z='min(zoom+0.0018,1.12)':d=1:s=1080x1920:fps=30,eq=contrast=1.06:saturation=1.12:brightness=.01"
-        run(["ffmpeg","-y","-loop","1","-i",str(src),"-t",str(dur),"-vf",vf,"-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p",str(out)])
+    is_image=Path(src).suffix.lower() in [".jpg",".jpeg",".png",".webp"]
+    if is_image:
+        vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2,zoompan=z='min(zoom+0.0018,1.12)':d=1:s=1080x1920:fps=30,eq=contrast=1.06:saturation=1.12:brightness=.01,setsar=1,format=yuv420p"
+        cmd=["ffmpeg","-y","-loop","1","-framerate","30","-i",str(src),"-t",str(dur),"-vf",vf,
+             "-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p","-r","30","-threads","2",str(out)]
     else:
-        vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2,eq=contrast=1.06:saturation=1.12:brightness=.01,unsharp=5:5:.35:5:5:0,fps=30"
-        run(["ffmpeg","-y","-ss",str(start),"-i",str(src),"-t",str(dur),"-vf",vf,"-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p",str(out)])
+        vf="scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2,eq=contrast=1.06:saturation=1.12:brightness=.01,unsharp=5:5:.35:5:5:0,fps=30,setsar=1,format=yuv420p"
+        cmd=["ffmpeg","-y","-ss",str(start),"-i",str(src),"-t",str(dur),"-vf",vf,
+             "-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p","-r","30","-threads","2",str(out)]
+    r=run(cmd,check=False)
+    if r.returncode!=0 or not Path(out).exists() or Path(out).stat().st_size<20000:
+        raise RuntimeError((r.stderr or "")[-1200:])
+    return out
 
 def quality_check(path):
     dur,w,h,codec=probe(path)
@@ -626,9 +644,22 @@ def render_reel(idx,style,item,assets):
         run(["ffmpeg","-y","-i",str(raw),"-vf",draw+",fade=t=in:st=0:d=.10,fade=t=out:st="+str(max(0,d-.18))+":d=.18","-an","-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p",str(styled)])
         clips.append(styled)
     final=OUT/f"reel_{idx:02d}.mp4"
-    inputs=[];fg=[]
-    for j,c in enumerate(clips): inputs += ["-i",str(c)]; fg.append(f"[{j}:v]")
-    run(["ffmpeg","-y",*inputs,"-filter_complex","".join(fg)+"concat=n=6:v=1:a=0[v]","-map","[v]","-an","-r","30","-s","1080x1920","-c:v","libx264","-preset","medium","-crf","18","-pix_fmt","yuv420p",str(final)])
+    valid=[Path(x) for x in clips if Path(x).exists() and Path(x).stat().st_size>20000]
+    if len(valid)<2:
+        raise RuntimeError(f"Reel {idx}: not enough valid rendered clips for concat")
+    inputs=[];parts=[]
+    for j,clip in enumerate(valid):
+        inputs += ["-i",str(clip)]
+        parts.append(f"[{j}:v]settb=AVTB,scale=1080:1920:force_original_aspect_ratio=decrease,"
+                     f"pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=30,format=yuv420p[v{j}]")
+    n=len(valid)
+    fc=";".join(parts)+";"+"".join(f"[v{j}]" for j in range(n))+f"concat=n={n}:v=1:a=0:unsafe=1[v]"
+    r=run(["ffmpeg","-y","-filter_threads","1","-filter_complex_threads","1",*inputs,
+           "-filter_complex",fc,"-map","[v]","-an","-r","30","-s","1080x1920",
+           "-c:v","libx264","-preset","veryfast","-crf","18","-pix_fmt","yuv420p",
+           "-threads","2","-movflags","+faststart",str(final)],check=False)
+    if r.returncode!=0 or not final.exists() or final.stat().st_size<100000:
+        raise RuntimeError("Final concat failed: "+(r.stderr or "")[-1600:])
     q=quality_check(final)
     if not q["pass"]:
         print("QUALITY FAIL -> AUTO RE-EDIT",idx,q)

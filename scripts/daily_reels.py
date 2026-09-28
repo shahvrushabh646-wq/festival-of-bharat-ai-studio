@@ -250,7 +250,6 @@ stage("02-strategy",{
     "retention":"visual change every beat",
     "cta":"save/share/follow"
 })
-employee_handoff(22,"Creative & Story","Creative Director","Create four distinct story treatments from the researched topics","creative")
 for i,item in enumerate(daily_topics,1):
     employee_handoff(24+i*4,"Strategy & Research","Cultural Researcher",f"Research and verification gate for Reel {i}: {item['topic']}","research",i)
     stage(f"03-research-{i:02d}",{
@@ -262,6 +261,8 @@ for i,item in enumerate(daily_topics,1):
         "status":"complete","reel":i,"topic":item["topic"],"pillar":item["pillar"],
         "title":item["title"],"core_idea":item["fact"],"rule":"one clear cultural idea per Reel"
     })
+    if i == 1:
+        employee_handoff(40,"Creative & Story","Creative Director","Create four distinct story treatments from the researched topics","creative")
     employee_handoff(42+i,"Creative & Story","Script Writer",f"Write six-beat script for Reel {i}","script",i)
     stage(f"04-script-{i:02d}",{
         "status":"complete","reel":i,"topic":item["topic"],"beats":[

@@ -771,12 +771,12 @@ def render_reel(idx,style,item,assets,template=None):
         main_path.write_text(fit_text(texts[j],30 if j in [2,3,4] else 25),encoding="utf-8")
         role_file=esc(str(role_path)); main_file=esc(str(main_path))
         if j in [2,3,4]:
-            draw=f"drawtext=fontfile={FONT}:textfile='{role_file}':fontcolor=white:fontsize=28:borderw=3:bordercolor=black@.75:x=55:y=1510,drawtext=fontfile={FONT}:textfile='{main_file}':fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1555"
+            draw=f"drawtext=fontfile={FONT}:textfile='{role_file}':expansion=none:fontcolor=white:fontsize=28:borderw=3:bordercolor=black@.75:x=55:y=1510,drawtext=fontfile={FONT}:textfile='{main_file}':expansion=none:fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1555"
         elif j==5:
-            draw=f"drawtext=fontfile={FONT}:textfile='{main_file}':fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1740"
+            draw=f"drawtext=fontfile={FONT}:textfile='{main_file}':expansion=none:fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1740"
         else:
-            draw=f"drawtext=fontfile={FONT}:textfile='{role_file}':fontcolor=white:fontsize=30:borderw=3:bordercolor=black@.75:x=60:y=120,drawtext=fontfile={FONT}:textfile='{main_file}':fontcolor=white:fontsize=48:borderw=4:bordercolor=black@.8:x=60:y=160"
-        rr=run(["ffmpeg","-y","-i",str(raw),"-vf",draw+",fade=t=in:st=0:d=.10,fade=t=out:st="+str(max(0,d-.18))+":d=.18","-an","-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-r","30",str(styled)],check=False)
+            draw=f"drawtext=fontfile={FONT}:textfile='{role_file}':expansion=none:fontcolor=white:fontsize=30:borderw=3:bordercolor=black@.75:x=60:y=120,drawtext=fontfile={FONT}:textfile='{main_file}':expansion=none:fontcolor=white:fontsize=48:borderw=4:bordercolor=black@.8:x=60:y=160"
+        rr=run(["ffmpeg","-hide_banner","-loglevel","error","-y","-i",str(raw),"-vf",draw+",fade=t=in:st=0:d=.10,fade=t=out:st="+str(max(0,d-.18))+":d=.18","-an","-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-r","30","-threads","2",str(styled)],check=False)
         role_path.unlink(missing_ok=True); main_path.unlink(missing_ok=True)
         if rr.returncode!=0 or not styled.exists() or styled.stat().st_size<20000:
             raise RuntimeError("Caption/motion render failed: "+(rr.stderr or "")[-1600:])

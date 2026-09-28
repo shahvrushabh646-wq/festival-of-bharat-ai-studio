@@ -15,6 +15,19 @@ export default async function handler(req,res){
     };
     const manifest=await readJson("manifest.json");
     if(!manifest) return res.status(200).json({ready:false,reels:[]});
+    // Do not display an older successful release while the same run is still
+    // executing or has failed. A stale batch is worse than showing no batch.
+    try{
+      const sr=await fetch("https://raw.githubusercontent.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/status/status/status.json?x="+Date.now(),{cache:"no-store"});
+      if(sr.ok){
+        const live=await sr.json();
+        const liveRun=String(live.run_number||"");
+        const batchRun=String(manifest.run_number||"");
+        if(batchRun && liveRun===batchRun && ["failed","running"].includes(String(live.phase||""))){
+          return res.status(200).json({ready:false,stale:true,reels:[],error:"Current production run is not ready yet."});
+        }
+      }
+    }catch(e){}
     const pack=await readJson("creator-pack.json");
     const rights={};
     for(let i=1;i<=4;i++){

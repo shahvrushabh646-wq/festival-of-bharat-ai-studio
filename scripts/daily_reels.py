@@ -250,8 +250,9 @@ stage("02-strategy",{
     "retention":"visual change every beat",
     "cta":"save/share/follow"
 })
+employee_handoff(22,"Creative & Story","Creative Director","Create four distinct story treatments from the researched topics","creative")
 for i,item in enumerate(daily_topics,1):
-    employee_handoff(20+i*4,"Strategy & Research","Cultural Researcher",f"Research and verification gate for Reel {i}: {item['topic']}","research",i)
+    employee_handoff(24+i*4,"Strategy & Research","Cultural Researcher",f"Research and verification gate for Reel {i}: {item['topic']}","research",i)
     stage(f"03-research-{i:02d}",{
         'status':'research_gate','reel':i,'topic':item['topic'],'fact':item['fact'],
         'verification_required':True,
@@ -279,7 +280,6 @@ for i,item in enumerate(daily_topics,1):
         "visual_direction":"cinematic realistic Indian culture; original editorial treatment; source intelligence from Instagram, Pinterest, Google and Canva; no random montage"
     })
 assets_by_reel={}
-employee_handoff(38,"Creative & Story","Creative Director","Create four distinct story treatments from the researched topics","creative")
 instagram_refs=[
  {"type":"explore","url":"https://www.instagram.com/explore/","use":"trend discovery"},
  {"type":"hashtag","url":"https://www.instagram.com/explore/tags/indianculture/","use":"culture patterns"},
@@ -706,6 +706,12 @@ manifest={
 "reels":reels}
 
 employee_handoff(100,"Quality & Growth","Learning Manager","Record baseline learning and prepare next-batch adjustments","learning")
+publish_status(100,"Quality & Growth","AI Manager / CEO","Batch complete. Human approval required before publishing.","complete",{
+    "Strategy & Research":"complete",
+    "Creative & Story":"complete",
+    "Production":"complete",
+    "Quality & Growth":"complete"
+})
 (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2,ensure_ascii=False))
 (OUT/"README.txt").write_text("Festival of Bharat — professional daily Reel batch\nSix-beat edit: hook → visual proof → context → detail → meaning → CTA.\n1080x1920, 30fps, no embedded commercial music. Add eligible/trending Instagram audio after approval.\nRisky creator/platform/watermarked sources are rejected rather than stripped. Verify rights before posting.\n")
 (OUT/"creator-pack.json").write_text(json.dumps({"topics":[x["topic"] for x in daily_topics],"caption_direction":"Lead with the useful cultural fact, then invite a save/share.","music_direction":"Use eligible/trending Instagram audio inside Instagram; do not embed commercial music in the master.","posting_note":"Human approval required before publishing."},indent=2))

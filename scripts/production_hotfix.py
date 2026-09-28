@@ -28,7 +28,7 @@ def caption_smoke_test():
         txt.write_text("STOP SCROLLING: A closer\\nlook at Indian culture • 100% real", encoding="utf-8")
         base = ["ffmpeg","-hide_banner","-loglevel","error","-y","-f","lavfi","-i"]
         subprocess.run(base + ["color=c=black:s=1080x1920:r=30:d=1.2","-an","-c:v","libx264","-pix_fmt","yuv420p","-threads","2",str(src)],check=True)
-        vf = "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:textfile=" + str(txt) + ":expansion=none:fontcolor=white:fontsize=48:x=60:y=160"
+        vf = "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:textfile='" + str(txt).replace("\\","\\\\").replace(":","\\:").replace("'","\\'") + "':expansion=none:fontcolor=white:fontsize=48:x=60:y=160"
         p = subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-i",str(src),"-vf",vf,
                             "-an","-c:v","libx264","-preset","veryfast","-crf","20",
                             "-pix_fmt","yuv420p","-r","30","-threads","2",str(out)],
@@ -117,7 +117,7 @@ if not SCRIPT.exists():
     raise SystemExit("Production script missing: scripts/daily_reels.py")
 
 text = SCRIPT.read_text(encoding="utf-8")
-for marker in ("TEMPLATES = {", "def choose_template", "def arrange_shots", "def render_reel", "def scout_openverse_topic", "concat=n="):
+for marker in ("TEMPLATES = {", "def choose_template", "def arrange_shots", "def render_reel", "def scout_openverse_topic", "def scout_topic", "set_render_step", "concat=n="):
     if marker not in text:
         raise SystemExit(f"Production preflight failed: missing {marker}")
 

@@ -137,6 +137,13 @@ if user_topic.startswith("EDITTOPICS:"):
         print("Could not lock previous topics for re-edit:",e)
 source_url=os.getenv("SOURCE_URL","").strip()
 edit_request=os.getenv("EDIT_REQUEST","").strip()
+try:
+    TARGET_REEL=int(os.getenv("TARGET_REEL","").strip() or "0")
+except Exception:
+    TARGET_REEL=0
+PREVIOUS_RELEASE_DIR=Path(os.getenv("PREVIOUS_RELEASE_DIR","").strip()) if os.getenv("PREVIOUS_RELEASE_DIR","").strip() else None
+if TARGET_REEL and TARGET_REEL not in range(1,5):
+    raise RuntimeError("TARGET_REEL must be 1, 2, 3, or 4")
 
 STAGES=OUT/"stages"; STAGES.mkdir(exist_ok=True)
 
@@ -519,18 +526,19 @@ def scout_openverse_topic(topic_item,reel_no):
     return pool[:4]
 
 def _finalize_media_pool(pool,limit=4):
-    clean_pool=[x for x in pool if x.get("file") and Path(x["file"]).exists()]
+    clean_pool=[x for x in pool if x.get("file") and Path(x["file"]).exists() and not x.get("fallback")]
     photos=[x for x in clean_pool if x.get("kind")=="photo"]
     videos=[x for x in clean_pool if x.get("kind")=="video"]
-    if videos and photos:
-        chosen=[videos[0]]+photos[:limit-1]
+    if photos and videos:
+        # Prefer a real mixed-media sequence: up to 3 photos + at least 1 video.
+        chosen=photos[:min(3,limit-1)]+videos[:1]
         for x in clean_pool:
             if len(chosen)>=limit: break
             if x not in chosen: chosen.append(x)
         return chosen[:limit]
     return clean_pool[:limit]
 
-def scout_topic(topic_item,reel_no):
+def scout_topic(def scout_topic(topic_item,reel_no):
     pool=scout_openverse_topic(topic_item,reel_no)
     print(f"Openverse returned {len(pool)} licensed photos; checking Wikimedia Commons for compatible media.")
     queries=list(dict.fromkeys(topic_item["queries"]))
@@ -566,21 +574,7 @@ def scout_topic(topic_item,reel_no):
                 return _finalize_media_pool(pool)
     return _finalize_media_pool(pool)
 
-def make_local_fallback_asset(item,reel_no):
-    # Last-resort production safety net. This keeps the batch alive without
-    # pretending an unlicensed/random web image is usable.
-    dest=RAW/f"reel{reel_no}_fallback.jpg"
-    title=esc(f"{item['title']}")
-    pillar=esc(f"{item['pillar'].upper()} • FESTIVAL OF BHARAT")
-    fallback_font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-    run(["ffmpeg","-y","-f","lavfi","-i","color=c=0x17120f:s=1080x1920:d=1",
-         "-vf",f"drawtext=fontfile={fallback_font}:text='{title}':fontcolor=white:fontsize=58:borderw=3:bordercolor=black@.8:x=70:y=780:enable='between(t,0,1)',"
-               f"drawtext=fontfile={fallback_font}:text='{pillar}':fontcolor=white:fontsize=30:borderw=2:bordercolor=black@.7:x=70:y=900",
-         "-frames:v","1",str(dest)])
-    return {"title":item["title"],"url":"","license":"Original fallback graphic","author":"Festival of Bharat","page":"",
-            "kind":"photo","rights_review":True,"file":str(dest),"fallback":True}
-
-def visual_risk(path):
+def visual_risk(def visual_risk(path):
     try:
         tmp=RAW/(Path(path).stem+"_ocr.jpg")
         run(["ffmpeg","-y","-ss","0.8","-i",str(path),"-frames:v","1","-q:v","3",str(tmp)],False)
@@ -591,10 +585,10 @@ def visual_risk(path):
     except Exception: return False
 
 for reel_no,item in enumerate(daily_topics,1):
+    if TARGET_REEL and reel_no != TARGET_REEL:
+        assets_by_reel[reel_no]=[]
+        continue
     employee_handoff(40+reel_no*7,"Production","Visual Source Director",f"Combine Instagram, Pinterest, Google and Canva intelligence and source visuals for Reel {reel_no}","visual sources",reel_no)
-    # A single provider failure must never block the whole batch. Try every permitted
-    # source and keep only topic-matched, clean assets. If fewer than four are found,
-    # retry broader queries for the SAME topic before considering the Reel blocked.
     pool=[]
     try:
         pool=scout_topic(item,reel_no)
@@ -604,10 +598,7 @@ for reel_no,item in enumerate(daily_topics,1):
     if len(pool)<4:
         retry_item=dict(item)
         retry_item["topic"]=item["topic"]+" India culture"
-        retry_item["queries"]=list(dict.fromkeys(
-            list(item.get("queries",[]))+
-            [item["title"],item["topic"],item["pillar"]+" India",item["topic"]+" Indian culture"]
-        ))
+        retry_item["queries"]=list(dict.fromkeys(list(item.get("queries",[]))+[item["title"],item["topic"],item["pillar"]+" India",item["topic"]+" Indian culture"]))
         try:
             retry_pool=scout_topic(retry_item,reel_no)
             retry_pool=[a for a in retry_pool if not visual_risk(a["file"])]
@@ -616,27 +607,18 @@ for reel_no,item in enumerate(daily_topics,1):
         except Exception as e:
             print(f"Fallback visual scouting failed for Reel {reel_no}: {e}")
     if len(pool)<4:
-        # Reuse clean assets from the SAME topic before falling back to an original
-        # generated card. Never mix an unrelated topic into this Reel.
-        if pool:
-            while len(pool)<4:
-                pool.append({**pool[len(pool)%len(pool)],"reused_for_continuity":True})
-            print(f"Reel {reel_no}: only {len(set(a.get('url') for a in pool))} unique clean assets; reusing same-topic assets to complete the visual sequence.")
-        else:
-            fallback=make_local_fallback_asset(item,reel_no)
-            pool=[fallback]*4
-            print(f"Reel {reel_no}: no licensed web assets available; using original fallback graphic so the production batch continues.")
-        stage(f"06-visual-sources-{reel_no:02d}",{"status":"complete_with_fallback" if any(a.get("fallback") for a in pool) else "complete",
-            "reel":reel_no,"topic":item["topic"],"asset_count":len(pool),
-            "unique_asset_count":len(set(a.get("url") or a.get("file") for a in pool)),
-            "fallback_used":any(a.get("fallback") for a in pool)})
+        if not pool:
+            raise RuntimeError(f"Reel {reel_no}: no licensed, validated photo/video assets found after all source retries")
+        while len(pool)<4:
+            pool.append({**pool[len(pool)%len(pool)],"reused_for_continuity":True})
+        print(f"Reel {reel_no}: only {len(set(a.get('url') for a in pool))} unique clean assets; reusing validated same-topic assets.")
     assets_by_reel[reel_no]=pool[:4]
     stage(f"06-visual-sources-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"asset_count":len(assets_by_reel[reel_no]),"assets":assets_by_reel[reel_no],"source_intelligence":{"Instagram":"trend/hook/pacing reference","Pinterest":"composition and visual mood reference","Google":"topic/image research reference","Canva":"eligible design/layout/asset reference"}})
     employee_handoff(58+reel_no,"Production","Rights & Copyright Manager",f"Screen licenses, authors, watermarks and platform-risk sources for Reel {reel_no}","rights",reel_no)
     stage(f"07-rights-{reel_no:02d}",{"status":"complete","reel":reel_no,"topic":item["topic"],"gate":"reject risky creator/platform/watermarked sources",
            "assets":[{"title":a["title"],"license":a["license"],"author":a["author"],"page":a["page"],"rights_review":True} for a in assets_by_reel[reel_no]]})
 
-FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 def preflight_render_environment():
     required=["ffmpeg","ffprobe","tesseract"]
     missing=[x for x in required if subprocess.call(["bash","-lc",f"command -v {x} >/dev/null 2>&1"])!=0]
@@ -712,9 +694,7 @@ def render_reel(idx,style,item,assets,template=None):
     # This is intentionally redundant with visual sourcing so a future sourcing change
     # cannot reintroduce the assets[... % len(assets)] crash.
     if not assets:
-        fallback=make_local_fallback_asset(item,idx)
-        assets=[fallback,fallback,fallback,fallback]
-        print(f"Reel {idx}: render guard created an original fallback asset.")
+        raise RuntimeError(f"Reel {idx}: no validated licensed visual assets available for rendering")
     name,label,order,durations,tempo=style
     template=template or choose_template(item,edit_request)
     grade=template["eq"]
@@ -751,10 +731,7 @@ def render_reel(idx,style,item,assets,template=None):
                 raise RuntimeError("visual asset file is missing")
             make_clip(source,raw,d,asset.get("effect") or "slow_zoom_in",grade)
         except Exception as e:
-            print(f"Reel {idx} beat {j+1}: source render failed; replacing only this visual with an original fallback: {e}")
-            fallback=make_local_fallback_asset(item,idx)
-            make_clip(fallback["file"],raw,d,"slow_zoom_in",grade)
-            asset=fallback
+            raise RuntimeError(f"Reel {idx} beat {j+1}: validated source render failed; no generated placeholder is allowed: {e}") from e
         # Use FFmpeg textfile= for editorial copy. This prevents filter-parser
         # failures from commas, apostrophes, brackets and other trend text.
         role_path=OUT/f"_role{idx}_{j}.txt"
@@ -825,8 +802,26 @@ def music_direction(item):
             "youtube_source":"YouTube Audio Library only; verify the track's current licence and cross-platform permission before importing.",
             "license_status":"not_assumed","master_audio":"none"}
 
+def load_previous_reel(reel_no):
+    if not TARGET_REEL or not PREVIOUS_RELEASE_DIR: return None
+    mp4=PREVIOUS_RELEASE_DIR/f"reel_{reel_no:02d}.mp4"
+    manifest_path=PREVIOUS_RELEASE_DIR/"manifest.json"
+    if not mp4.exists() or not manifest_path.exists():
+        raise RuntimeError(f"Targeted re-edit requires previous Reel {reel_no} and manifest.json")
+    manifest=json.loads(manifest_path.read_text(encoding="utf-8"))
+    prev=next((r for r in manifest.get("reels",[]) if int(r.get("reel",0))==reel_no),None)
+    if not prev: raise RuntimeError(f"Previous manifest does not contain Reel {reel_no}")
+    dest=OUT/mp4.name; dest.write_bytes(mp4.read_bytes())
+    prev=dict(prev); prev["file"]=dest.name; prev["preserved_from_previous_batch"]=True; return prev
+
 reels=[]
 for i,(item,style) in enumerate(zip(daily_topics,styles),1):
+    if TARGET_REEL and i != TARGET_REEL:
+        preserved=load_previous_reel(i)
+        if not preserved: raise RuntimeError(f"Could not preserve Reel {i} during targeted re-edit")
+        reels.append(preserved)
+        stage(f"05-template-{i:02d}",{"status":"preserved","reel":i,"reason":f"Targeted re-edit for Reel {TARGET_REEL}; this Reel was not re-rendered."})
+        continue
     set_render_step("starting Reel",i,"Video Director")
     employee_handoff(68+i*5,"Production","Video Director",f"Direct shot order, pacing and cinematic treatment for Reel {i}","direction",i)
     employee_handoff(69+i*5,"Production","Video Editor",f"Render six-beat 1080x1920 edit for Reel {i}","edit",i)
@@ -849,7 +844,7 @@ for i,(item,style) in enumerate(zip(daily_topics,styles),1):
                     safe_assets.append(a)
             except Exception: pass
         if not safe_assets:
-            safe_assets=[make_local_fallback_asset(item,i)]
+            raise RuntimeError(f"Reel {i} recovery failed: no validated licensed assets remain; refusing to create a placeholder Reel")
         while len(safe_assets)<4:
             safe_assets.append(dict(safe_assets[len(safe_assets)%len(safe_assets)]))
         try:
@@ -879,7 +874,7 @@ for i,(item,reel) in enumerate(zip(daily_topics,reels),1):
         "cover_text":item["title"][:54],
         "music":music_direction(item)})
 
-stage("12-four-reels",{"status":"complete","count":4,"distinct_topics":[x["topic"] for x in daily_topics],
+stage("12-four-reels",{"status":"complete","count":4,"targeted_reedit":TARGET_REEL or None,"distinct_topics":[x["topic"] for x in daily_topics],
       "distinct_pillars":[x["pillar"] for x in daily_topics],"files":[r["file"] for r in reels],
       "rule":"Four different topics; four independent production tracks."})
 employee_handoff(98,"Quality & Growth","Analytics Manager","Prepare analytics input stage and wait for provided Instagram results","analytics")

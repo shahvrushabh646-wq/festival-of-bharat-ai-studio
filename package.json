@@ -11,6 +11,6 @@
     "validate": "npm run build && npm run validate:workflow"
   },
   "engines": {
-    "node": ">=18"
+    "node": "24.x"
   }
 }

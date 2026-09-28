@@ -13,7 +13,7 @@ export default async function handler(req,res){
       const ii=p.imageinfo?.[0]||{}, m=ii.extmetadata||{};
       const mime=ii.mime||'';
       const license=[m.LicenseShortName?.value,m.License?.value,m.UsageTerms?.value].filter(Boolean).join(' ');
-      return {title:p.title||'',mime,license,author:m.Artist?.value||'',pageUrl:'https://commons.wikimedia.org/wiki/'+encodeURIComponent((p.title||'').replace(/ /g,'_')),downloadUrl:ii.url||''};
+      return {title:p.title||'',mime,license,author:m.Artist?.value||'',pageUrl:'https://commons.wikimedia.org/wiki/'+encodeURIComponent((p.title||'').replace(/ /g,'_')),downloadUrl:ii.url||'',page:'https://commons.wikimedia.org/wiki/'+encodeURIComponent((p.title||'').replace(/ /g,'_')),url:ii.url||''};
     }).filter(x=>/^video\//i.test(x.mime)&&/(CC|Creative Commons|Public Domain|PD|GFDL|GPL|Attribution|ShareAlike)/i.test(x.license));
     res.setHeader('Cache-Control','s-maxage=300, stale-while-revalidate=600');
     return res.status(200).json({query:q,results});

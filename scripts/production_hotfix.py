@@ -100,9 +100,9 @@ if not SCRIPT.exists():
     raise SystemExit("Production script missing: scripts/daily_reels.py")
 
 text = SCRIPT.read_text(encoding="utf-8")
-for marker in ("def render_reel", "def scout_openverse_topic", "concat=n="):
+for marker in ("TEMPLATES = {", "def choose_template", "def arrange_shots", "def render_reel", "def scout_openverse_topic", "concat=n="):
     if marker not in text:
         raise SystemExit(f"Production preflight failed: missing {marker}")
 
 smoke_test()
-print("Production preflight OK: renderer and FFmpeg concat are executable")
+print("Production preflight OK: renderer, template engine, mixed-media shot planner and FFmpeg concat are executable")

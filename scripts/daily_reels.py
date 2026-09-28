@@ -634,14 +634,23 @@ def render_reel(idx,style,item,assets):
             fallback=make_local_fallback_asset(item,idx)
             make_clip(fallback["file"],raw,d)
             asset=fallback
-        main=esc(fit_text(texts[j],30 if j in [2,3,4] else 25)); role=esc(roles[j])
+        # Use FFmpeg textfile= for editorial copy. This prevents filter-parser
+        # failures from commas, apostrophes, brackets and other trend text.
+        role_path=OUT/f"_role{idx}_{j}.txt"
+        main_path=OUT/f"_text{idx}_{j}.txt"
+        role_path.write_text(roles[j],encoding="utf-8")
+        main_path.write_text(fit_text(texts[j],30 if j in [2,3,4] else 25),encoding="utf-8")
+        role_file=esc(str(role_path)); main_file=esc(str(main_path))
         if j in [2,3,4]:
-            draw=f"drawtext=fontfile={FONT}:text='{role}':fontcolor=white:fontsize=28:borderw=3:bordercolor=black@.75:x=55:y=1510,drawtext=fontfile={FONT}:text='{main}':fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1555"
+            draw=f"drawtext=fontfile={FONT}:textfile='{role_file}':fontcolor=white:fontsize=28:borderw=3:bordercolor=black@.75:x=55:y=1510,drawtext=fontfile={FONT}:textfile='{main_file}':fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1555"
         elif j==5:
-            draw=f"drawtext=fontfile={FONT}:text='{main}':fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1740"
+            draw=f"drawtext=fontfile={FONT}:textfile='{main_file}':fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1740"
         else:
-            draw=f"drawtext=fontfile={FONT}:text='{role}':fontcolor=white:fontsize=30:borderw=3:bordercolor=black@.75:x=60:y=120,drawtext=fontfile={FONT}:text='{main}':fontcolor=white:fontsize=48:borderw=4:bordercolor=black@.8:x=60:y=160"
-        run(["ffmpeg","-y","-i",str(raw),"-vf",draw+",fade=t=in:st=0:d=.10,fade=t=out:st="+str(max(0,d-.18))+":d=.18","-an","-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p",str(styled)])
+            draw=f"drawtext=fontfile={FONT}:textfile='{role_file}':fontcolor=white:fontsize=30:borderw=3:bordercolor=black@.75:x=60:y=120,drawtext=fontfile={FONT}:textfile='{main_file}':fontcolor=white:fontsize=48:borderw=4:bordercolor=black@.8:x=60:y=160"
+        rr=run(["ffmpeg","-y","-i",str(raw),"-vf",draw+",fade=t=in:st=0:d=.10,fade=t=out:st="+str(max(0,d-.18))+":d=.18","-an","-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-r","30",str(styled)],check=False)
+        role_path.unlink(missing_ok=True); main_path.unlink(missing_ok=True)
+        if rr.returncode!=0 or not styled.exists() or styled.stat().st_size<20000:
+            raise RuntimeError("Caption/motion render failed: "+(rr.stderr or "")[-1600:])
         clips.append(styled)
     final=OUT/f"reel_{idx:02d}.mp4"
     valid=[Path(x) for x in clips if Path(x).exists() and Path(x).stat().st_size>20000]
@@ -650,14 +659,16 @@ def render_reel(idx,style,item,assets):
     inputs=[];parts=[]
     for j,clip in enumerate(valid):
         inputs += ["-i",str(clip)]
-        parts.append(f"[{j}:v]settb=AVTB,scale=1080:1920:force_original_aspect_ratio=decrease,"
-                     f"pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps=30,format=yuv420p[v{j}]")
+        parts.append(f"[{j}:v]settb=AVTB,setpts=PTS-STARTPTS,"
+                     f"scale=1080:1920:force_original_aspect_ratio=decrease,"
+                     f"pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,"
+                     f"fps=30,settb=AVTB,setpts=PTS-STARTPTS,format=yuv420p[v{j}]")
     n=len(valid)
     fc=";".join(parts)+";"+"".join(f"[v{j}]" for j in range(n))+f"concat=n={n}:v=1:a=0:unsafe=1[v]"
     r=run(["ffmpeg","-y","-filter_threads","1","-filter_complex_threads","1",*inputs,
            "-filter_complex",fc,"-map","[v]","-an","-r","30","-s","1080x1920",
            "-c:v","libx264","-preset","veryfast","-crf","18","-pix_fmt","yuv420p",
-           "-threads","2","-movflags","+faststart",str(final)],check=False)
+           "-threads","2","-fps_mode","cfr","-movflags","+faststart",str(final)],check=False)
     if r.returncode!=0 or not final.exists() or final.stat().st_size<100000:
         raise RuntimeError("Final concat failed: "+(r.stderr or "")[-1600:])
     q=quality_check(final)

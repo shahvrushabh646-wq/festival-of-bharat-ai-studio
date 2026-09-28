@@ -21,7 +21,7 @@ for (const file of required) {
 
 const html = fs.readFileSync('index.html', 'utf8');
 for (const id of ['makeBtn','planBtn','topic','startMsg','reviewReels','reviewCount','sendEdit']) {
-  if (!new RegExp('id=["\\\']' + id + '["\\\']').test(html)) {
+  if (!html.includes('id="' + id + '"') && !html.includes("id='" + id + "'")) {
     throw new Error('Missing required DOM id: ' + id);
   }
 }

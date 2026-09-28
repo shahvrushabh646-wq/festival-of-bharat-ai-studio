@@ -812,7 +812,11 @@ def load_previous_reel(reel_no):
     prev=next((r for r in manifest.get("reels",[]) if int(r.get("reel",0))==reel_no),None)
     if not prev: raise RuntimeError(f"Previous manifest does not contain Reel {reel_no}")
     dest=OUT/mp4.name; dest.write_bytes(mp4.read_bytes())
-    prev=dict(prev); prev["file"]=dest.name; prev["preserved_from_previous_batch"]=True; return prev
+    cover_name=prev.get("cover_file") or f"reel_{reel_no:02d}_cover.jpg"
+    prior_cover=PREVIOUS_RELEASE_DIR/Path(cover_name).name
+    if prior_cover.exists():
+        covers=OUT/"covers"; covers.mkdir(exist_ok=True); (covers/Path(cover_name).name).write_bytes(prior_cover.read_bytes())
+    prev=dict(prev); prev["file"]=dest.name; prev["cover_file"]=Path(cover_name).name; prev["preserved_from_previous_batch"]=True; return prev
 
 reels=[]
 for i,(item,style) in enumerate(zip(daily_topics,styles),1):

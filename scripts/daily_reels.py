@@ -27,7 +27,10 @@ def fetch(url, timeout=60):
             time.sleep(min(20,2**attempt*2))
     raise last
 def run(cmd, check=True):
-    return subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,check=check)
+    try:
+        return subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,check=check)
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Command failed ({e.returncode}): {' '.join(map(str,cmd))}\n{(e.stderr or '')[-4000:]}") from e
 def esc(s):
     return str(s or "").replace("\\","\\\\").replace(":","\\:").replace("'","\\'").replace("%","\\%").replace("[","\\[").replace("]","\\]")
 def clean(s): return re.sub("<[^>]+>"," ",str(s or "")).strip()
@@ -146,6 +149,14 @@ GH_TOKEN=os.getenv("GITHUB_TOKEN","").strip()
 STATUS_BRANCH="status"
 RUN_STARTED_AT=datetime.now(timezone.utc)
 RUN_STARTED_MONO=time.monotonic()
+CURRENT_STEP={"name":"initialization","reel":None,"employee":"AI Manager / CEO"}
+
+def set_render_step(name, reel=None, employee="Production"):
+    CURRENT_STEP.update({"name":name,"reel":reel,"employee":employee})
+    print(f"PRODUCTION_STEP reel={reel or '-'} employee={employee} step={name}", flush=True)
+    if reel is not None:
+        publish_status(74 + min(reel,4), "Production", employee,
+                       f"Reel {reel}: {name}", name, reel)
 HANDOFF_FILE=ROOT/"daily-handoff-history.json"
 try:
     HANDOFF_FILE.unlink(missing_ok=True)
@@ -478,35 +489,14 @@ def _openverse_results(endpoint,q):
         return []
 
 def scout_openverse_videos(topic_item,reel_no):
-    pool=[]; seen=set()
-    for q in list(dict.fromkeys(topic_item["queries"])):
-        for item in _openverse_results("https://api.openverse.org/v1/videos/",q):
-            url=item.get("url") or item.get("thumbnail")
-            title=clean(item.get("title") or q); lic=clean(item.get("license") or "")
-            author=clean(item.get("creator") or "")
-            pageurl=item.get("foreign_landing_url") or item.get("detail_url") or ""
-            if not url or url in seen or str(item.get("license","")).lower() not in {"cc0","by","by-sa"}: continue
-            if reject_source(title,author,pageurl): continue
-            dest=RAW/(f"reel{reel_no}_video{len(pool):02d}.mp4")
-            try:
-                dest.write_bytes(fetch(url,90))
-                dur,w,h,codec=probe(dest)
-                if dest.stat().st_size<30000 or w<400 or h<400 or dur<1:
-                    dest.unlink(missing_ok=True); continue
-                seen.add(url)
-                add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"video")
-            except Exception as e:
-                dest.unlink(missing_ok=True)
-                print("Openverse video skip",e)
-            if len(pool)>=4: return pool
-    return pool
+    # The old /v1/videos/ endpoint is unreliable here; avoid repeated 404s.
+    # Licensed video discovery is handled by the Wikimedia Commons fallback.
+    print("Openverse video search disabled; using Wikimedia Commons for licensed video.")
+    return []
 
 def scout_openverse_topic(topic_item,reel_no):
-    """Build a mixed visual pool: always try to include both video and photo."""
-    videos=scout_openverse_videos(topic_item,reel_no)
-    pool=list(videos[:3])
-    seen={a.get("url") for a in pool}
-    image_target=1 if videos else 4
+    """Collect licensed photos from Openverse; video comes from Wikimedia fallback."""
+    pool=[]; seen=set()
     for q in list(dict.fromkeys(topic_item["queries"])):
         for item in _openverse_results("https://api.openverse.org/v1/images/",q):
             url=item.get("url") or item.get("thumbnail")
@@ -521,63 +511,60 @@ def scout_openverse_topic(topic_item,reel_no):
                 dur,w,h,codec=probe(dest)
                 if dest.stat().st_size<15000 or w<400 or h<400:
                     dest.unlink(missing_ok=True); continue
-                seen.add(url)
-                add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"photo")
+                seen.add(url); add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"photo")
             except Exception as e:
-                dest.unlink(missing_ok=True)
-                print("Openverse image skip",e)
-            if sum(1 for x in pool if x.get("kind")=="photo")>=image_target:
-                break
-        if sum(1 for x in pool if x.get("kind")=="photo")>=image_target:
-            break
-    # Fill any remaining slots with licensed visuals; preserve at least one photo whenever available.
-    if len(pool)<4:
-        for extra in scout_openverse_videos(topic_item,reel_no):
-            if extra.get("url") not in seen:
-                pool.append(extra); seen.add(extra.get("url"))
+                dest.unlink(missing_ok=True); print("Openverse image skip",e)
             if len(pool)>=4: break
+        if len(pool)>=4: break
     return pool[:4]
 
+def _finalize_media_pool(pool,limit=4):
+    clean_pool=[x for x in pool if x.get("file") and Path(x["file"]).exists()]
+    photos=[x for x in clean_pool if x.get("kind")=="photo"]
+    videos=[x for x in clean_pool if x.get("kind")=="video"]
+    if videos and photos:
+        chosen=[videos[0]]+photos[:limit-1]
+        for x in clean_pool:
+            if len(chosen)>=limit: break
+            if x not in chosen: chosen.append(x)
+        return chosen[:limit]
+    return clean_pool[:limit]
+
 def scout_topic(topic_item,reel_no):
-    # Source priority: openly licensed video -> openly licensed image -> Wikimedia.
-    # Instagram/Pinterest/Google/Canva remain intelligence/reference sources, not
-    # arbitrary media download targets.
     pool=scout_openverse_topic(topic_item,reel_no)
-    if len(pool)>=4: return pool
-    print(f"Openverse supplied {len(pool)} assets; trying Wikimedia Commons fallback.")
+    print(f"Openverse returned {len(pool)} licensed photos; checking Wikimedia Commons for compatible media.")
     queries=list(dict.fromkeys(topic_item["queries"]))
     seen={a.get("url") for a in pool}
     for q in queries:
-        import time; time.sleep(1.2)
+        time.sleep(1.0)
         api=("https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+urllib.parse.quote(q)+
-             "&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=600&format=json&origin=*")
-        try:data=json.loads(fetch(api))
+             "&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=600&format=json&origin=*")
+        try: data=json.loads(fetch(api))
         except Exception as e:
             print("Wikimedia search failed",q,e); continue
         for page in data.get("query",{}).get("pages",{}).values():
-            info=(page.get("imageinfo") or [{}])[0]
-            url=(info.get("thumburl") if info.get("mime","").startswith("image/") and info.get("thumburl") else info.get("url",""))
-            mime=info.get("mime",""); meta=info.get("extmetadata",{})
-            title=page.get("title","")
+            info=(page.get("imageinfo") or [{}])[0]; mime=info.get("mime","")
+            url=info.get("url","")
+            if mime.startswith("image/") and info.get("thumburl"): url=info["thumburl"]
+            meta=info.get("extmetadata",{}); title=page.get("title","")
             lic=clean((meta.get("LicenseShortName") or {}).get("value",""))
             author=clean((meta.get("Artist") or {}).get("value",""))
             pageurl="https://commons.wikimedia.org/?curid="+str(page.get("pageid"))
             if not url or url in seen or not (mime.startswith("video/") or mime.startswith("image/")): continue
             if not re.search(r"CC BY|CC BY-SA|CC0|Public Domain|PD|GFDL|Attribution|ShareAlike",re.sub("<[^>]+>","",lic),re.I): continue
             if reject_source(title,author,pageurl): continue
-            seen.add(url)
             ext=".webm" if "webm" in mime else ".mp4" if "mp4" in mime else ".jpg"
             dest=RAW/(f"reel{reel_no}_asset{len(pool):02d}{ext}")
             try:
-                dest.write_bytes(fetch(url,90))
-                dur,w,h,codec=probe(dest)
-                if dest.stat().st_size<15000 or w<400 or h<400 or (dur and dur<1):
+                dest.write_bytes(fetch(url,90)); dur,w,h,codec=probe(dest)
+                if dest.stat().st_size<15000 or w<400 or h<400 or (mime.startswith("video/") and (dur<1 or h<400)):
                     dest.unlink(missing_ok=True); continue
-                add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"video" if mime.startswith("video/") else "photo")
+                seen.add(url); add_source_asset(pool,title,url,lic,author,pageurl,str(dest),"video" if mime.startswith("video/") else "photo")
             except Exception as e:
-                print("Wikimedia asset skip",e)
-            if len(pool)>=4: return pool
-    return pool
+                dest.unlink(missing_ok=True); print("Wikimedia asset skip",e)
+            if any(x.get("kind")=="video" for x in pool) and any(x.get("kind")=="photo" for x in pool) and len(pool)>=4:
+                return _finalize_media_pool(pool)
+    return _finalize_media_pool(pool)
 
 def make_local_fallback_asset(item,reel_no):
     # Last-resort production safety net. This keeps the batch alive without
@@ -675,31 +662,36 @@ def make_cover(reel_path,item,idx):
     return dest.name
 
 def make_clip(src,out,dur,effect="slow_zoom_in",grade="eq=contrast=1.06:saturation=1.12:brightness=.01"):
-    """Normalize photos/videos while applying the selected template motion."""
-    sd,sw,sh,codec=probe(src); start=0 if sd<dur+0.3 else min(.7,sd-dur)
-    is_image=Path(src).suffix.lower() in [".jpg",".jpeg",".png",".webp"]
+    """Normalize one source into a deterministic 1080x1920 silent H.264 clip."""
+    set_render_step("source render", CURRENT_STEP.get("reel"), "Video Editor")
+    if not Path(src).exists() or Path(src).stat().st_size < 1000:
+        raise RuntimeError(f"Missing/empty visual source: {src}")
+    dur=max(1.2,float(dur or 2.0))
+    is_image=Path(src).suffix.lower() in [".jpg",".jpeg",".png",".webp",".avif"]
     if is_image:
         if effect=="pan_right":
-            motion=f"scale=1680:1920:force_original_aspect_ratio=increase,crop=1680:1920,crop=1080:1920:x='(in_w-1080)*t/{max(dur,0.1)}':y=0"
+            motion=f"scale=1680:1920:force_original_aspect_ratio=increase,crop=1680:1920,crop=1080:1920:x='max(0,(in_w-1080)*t/{dur})':y=0"
         elif effect=="pan_left":
-            motion=f"scale=1680:1920:force_original_aspect_ratio=increase,crop=1680:1920,crop=1080:1920:x='(in_w-1080)*(1-t/{max(dur,0.1)})':y=0"
+            motion=f"scale=1680:1920:force_original_aspect_ratio=increase,crop=1680:1920,crop=1080:1920:x='max(0,(in_w-1080)*(1-t/{dur}))':y=0"
         elif effect=="tilt_up":
-            motion=f"scale=1080:2300:force_original_aspect_ratio=increase,crop=1080:2300,crop=1080:1920:x=0:y='(in_h-1920)*(1-t/{max(dur,0.1)})'"
+            motion=f"scale=1080:2300:force_original_aspect_ratio=increase,crop=1080:2300,crop=1080:1920:x=0:y='max(0,(in_h-1920)*(1-t/{dur}))'"
         elif effect=="tilt_down":
-            motion=f"scale=1080:2300:force_original_aspect_ratio=increase,crop=1080:2300,crop=1080:1920:x=0:y='(in_h-1920)*t/{max(dur,0.1)}'"
+            motion=f"scale=1080:2300:force_original_aspect_ratio=increase,crop=1080:2300,crop=1080:1920:x=0:y='max(0,(in_h-1920)*t/{dur})'"
         else:
             frames=max(2,int(dur*30))
             motion=f"scale=1600:2844:force_original_aspect_ratio=increase,crop=1600:2844,zoompan=z='min(1+0.0013*on,1.14)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s=1080x1920:fps=30"
         vf=motion+","+grade+",setsar=1,format=yuv420p"
-        cmd=["ffmpeg","-y","-loop","1","-framerate","30","-i",str(src),"-t",str(dur),"-vf",vf,
-             "-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p","-r","30","-threads","2",str(out)]
+        cmd=["ffmpeg","-hide_banner","-loglevel","error","-y","-loop","1","-framerate","30","-i",str(src),
+             "-t",str(dur),"-vf",vf,"-an","-c:v","libx264","-preset","veryfast","-crf","19",
+             "-pix_fmt","yuv420p","-r","30","-threads","2",str(out)]
     else:
         vf=f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,{grade},unsharp=5:5:.35:5:5:0,fps=30,setsar=1,format=yuv420p"
-        cmd=["ffmpeg","-y","-ss",str(start),"-i",str(src),"-t",str(dur),"-vf",vf,
-             "-an","-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p","-r","30","-threads","2",str(out)]
+        cmd=["ffmpeg","-hide_banner","-loglevel","error","-y","-ss","0","-i",str(src),
+             "-t",str(dur),"-vf",vf,"-an","-c:v","libx264","-preset","veryfast","-crf","19",
+             "-pix_fmt","yuv420p","-r","30","-threads","2",str(out)]
     r=run(cmd,check=False)
     if r.returncode!=0 or not Path(out).exists() or Path(out).stat().st_size<20000:
-        raise RuntimeError((r.stderr or "")[-1200:])
+        raise RuntimeError(f"Source render failed for {src}: {(r.stderr or '')[-2500:]}")
     return out
 
 def quality_check(path):
@@ -776,6 +768,7 @@ def render_reel(idx,style,item,assets,template=None):
             draw=f"drawtext=fontfile={FONT}:textfile='{main_file}':expansion=none:fontcolor=white:fontsize=42:borderw=4:bordercolor=black@.8:x=55:y=1740"
         else:
             draw=f"drawtext=fontfile={FONT}:textfile='{role_file}':expansion=none:fontcolor=white:fontsize=30:borderw=3:bordercolor=black@.75:x=60:y=120,drawtext=fontfile={FONT}:textfile='{main_file}':expansion=none:fontcolor=white:fontsize=48:borderw=4:bordercolor=black@.8:x=60:y=160"
+        set_render_step(f"caption render beat {j+1}/6",idx,"Caption Designer")
         rr=run(["ffmpeg","-hide_banner","-loglevel","error","-y","-i",str(raw),"-vf",draw+",fade=t=in:st=0:d=.10,fade=t=out:st="+str(max(0,d-.18))+":d=.18","-an","-c:v","libx264","-preset","veryfast","-crf","20","-pix_fmt","yuv420p","-r","30","-threads","2",str(styled)],check=False)
         role_path.unlink(missing_ok=True); main_path.unlink(missing_ok=True)
         if rr.returncode!=0 or not styled.exists() or styled.stat().st_size<20000:
@@ -794,7 +787,8 @@ def render_reel(idx,style,item,assets,template=None):
                      f"fps=30,settb=AVTB,setpts=PTS-STARTPTS,format=yuv420p[v{j}]")
     n=len(valid)
     fc=";".join(parts)+";"+"".join(f"[v{j}]" for j in range(n))+f"concat=n={n}:v=1:a=0:unsafe=1[v]"
-    r=run(["ffmpeg","-y","-filter_threads","1","-filter_complex_threads","1",*inputs,
+    set_render_step("final concat",idx,"Video Editor")
+    r=run(["ffmpeg","-hide_banner","-loglevel","error","-y","-filter_threads","1","-filter_complex_threads","1",*inputs,
            "-filter_complex",fc,"-map","[v]","-an","-r","30","-s","1080x1920",
            "-c:v","libx264","-preset","veryfast","-crf","18","-pix_fmt","yuv420p",
            "-threads","2","-fps_mode","cfr","-movflags","+faststart",str(final)],check=False)
@@ -833,18 +827,41 @@ def music_direction(item):
 
 reels=[]
 for i,(item,style) in enumerate(zip(daily_topics,styles),1):
+    set_render_step("starting Reel",i,"Video Director")
     employee_handoff(68+i*5,"Production","Video Director",f"Direct shot order, pacing and cinematic treatment for Reel {i}","direction",i)
     employee_handoff(69+i*5,"Production","Video Editor",f"Render six-beat 1080x1920 edit for Reel {i}","edit",i)
     employee_handoff(70+i*5,"Production","Motion Graphics Designer",f"Apply motion treatment and readable graphics for Reel {i}","motion",i)
     employee_handoff(71+i*5,"Production","Caption Designer",f"Apply on-screen hook, context and CTA text for Reel {i}","caption design",i)
     employee_handoff(72+i*5,"Production","Music & Sound Designer",f"Set music direction while keeping master audio-free for Reel {i}","sound",i)
     employee_handoff(73+i*5,"Production","Voiceover Director",f"Check voiceover requirement for Reel {i}; keep silent master unless required","voiceover",i)
-    employee_handoff(74+i*5,"Production","Colorist",f"Apply crop, contrast, saturation and sharpening treatment for Reel {i}","color",i)
+    employee_handoff(74+i*5,"Production","Colorist",f"Prepare crop, contrast, saturation and sharpening treatment for Reel {i}","color",i)
     template=choose_template(item,edit_request)
-    rendered=render_reel(i,style,item,assets_by_reel[i],template)
-    stage(f"05-template-{i:02d}",{"status":"complete","reel":i,"template":template["id"],"template_name":template["name"],
-        "pacing":template["pacing"],"photo_motion":template["effects"],"beat_durations":template["beat_durations"],
-        "asset_rule":"Templates must use the actual licensed photo/video assets assigned to their slots."})
+    try:
+        set_render_step("template selection",i,"Video Director")
+        rendered=render_reel(i,style,item,assets_by_reel[i],template)
+    except Exception as first_error:
+        print(f"REEL {i} PRIMARY RENDER FAILED: {first_error}",flush=True)
+        publish_status(78+i,"Production","Production Recovery",f"Reel {i} failed at {CURRENT_STEP.get('name')}: retrying","recovery",i)
+        safe_assets=[]
+        for a in assets_by_reel[i]:
+            try:
+                if a.get("file") and Path(a["file"]).exists() and Path(a["file"]).stat().st_size>1000:
+                    safe_assets.append(a)
+            except Exception: pass
+        if not safe_assets:
+            safe_assets=[make_local_fallback_asset(item,i)]
+        while len(safe_assets)<4:
+            safe_assets.append(dict(safe_assets[len(safe_assets)%len(safe_assets)]))
+        try:
+            set_render_step("safe recovery render",i,"Production Recovery")
+            rendered=render_reel(i,style,item,safe_assets[:4],TEMPLATES["documentary"])
+            rendered["recovery_render"]=True
+            rendered["recovery_reason"]=str(first_error)[-2000:]
+        except Exception as recovery_error:
+            set_render_step("render failed",i,"Production Recovery")
+            raise RuntimeError(f"Reel {i} render failed at {CURRENT_STEP.get('name')}. Primary: {first_error}. Recovery: {recovery_error}") from recovery_error
+    stage(f"05-template-{i:02d}",{"status":"complete","reel":i,"template":template["id"],"template_name":template["name"],"pacing":template["pacing"],"photo_motion":template["effects"],"beat_durations":template["beat_durations"],"asset_rule":"Templates use the actual licensed photo/video assets assigned to their slots."})
+    set_render_step("cover generation",i,"Cover Designer")
     rendered["cover_file"]=make_cover(OUT/rendered["file"],item,i)
     reels.append(rendered)
 

@@ -7,7 +7,7 @@
     "build": "node scripts/build-check.mjs",
     "start": "npx serve .",
     "validate:py": "python3 -m py_compile scripts/daily_reels.py scripts/production_hotfix.py",
-    "validate:workflow": "python3 -c "import yaml,sys; yaml.safe_load(open('.github/workflows/daily-reels.yml')); print('workflow YAML OK')"",
+    "validate:workflow": "python3 -c \"import yaml,sys; yaml.safe_load(open('.github/workflows/daily-reels.yml')); print('workflow YAML OK')\"",
     "validate": "npm run build && npm run validate:workflow"
   },
   "engines": {

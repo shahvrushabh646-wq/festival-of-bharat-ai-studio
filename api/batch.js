@@ -15,8 +15,6 @@ export default async function handler(req,res){
     };
     const manifest=await readJson("manifest.json");
     if(!manifest) return res.status(200).json({ready:false,reels:[]});
-    // Do not display an older successful release while the same run is still
-    // executing or has failed. A stale batch is worse than showing no batch.
     try{
       const sr=await fetch("https://raw.githubusercontent.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/status/status/status.json?x="+Date.now(),{cache:"no-store"});
       if(sr.ok){
@@ -29,6 +27,11 @@ export default async function handler(req,res){
       }
     }catch(e){}
     const pack=await readJson("creator-pack.json");
+    let approvals={};
+    try{
+      const ar=await fetch("https://raw.githubusercontent.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/status/status/approvals.json?x="+Date.now(),{cache:"no-store",headers:{"User-Agent":"FestivalOfBharatCreatorOS"}});
+      if(ar.ok){const aj=await ar.json(); approvals=aj.approvals?.[String(manifest.daily_key||"")]||{};}
+    }catch(e){}
     const rights={};
     for(let i=1;i<=4;i++){
       const rec=await readJson(`07-rights-${String(i).padStart(2,"0")}.json`);
@@ -45,7 +48,7 @@ export default async function handler(req,res){
         hook:r.hook||t.hook,
         caption:r.caption||t.caption,
         cover_text:r.cover_text||t.cover_text,
-        fact:t.fact||t.fact,
+        fact:r.fact||t.fact,
         music_direction:r.music_direction||t.music_direction,
         sensitivity:r.sensitivity||t.sensitivity,
         videoUrl:r.file?assets[r.file]:undefined,
@@ -55,6 +58,6 @@ export default async function handler(req,res){
       };
     });
     res.setHeader("Cache-Control","no-store");
-    return res.status(200).json({ready:reels.length===4&&!manifest.plan_only,planOnly:Boolean(manifest.plan_only),date:manifest.daily_key,generatedAt:manifest.generated_at,reels,pack,manifest,releaseUrl:latest.html_url});
+    return res.status(200).json({ready:reels.length===4&&!manifest.plan_only,planOnly:Boolean(manifest.plan_only),date:manifest.daily_key,generatedAt:manifest.generated_at,reels,approvals,pack,manifest,releaseUrl:latest.html_url});
   }catch(e){return res.status(500).json({ready:false,error:e.message||"batch lookup failed"})}
 }

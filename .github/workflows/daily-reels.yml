@@ -69,6 +69,12 @@ jobs:
           headers={"Authorization":f"Bearer {token}","Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"FestivalOfBharatCreatorOS"}
           old={}
           sha=None
+          local_history=[]
+          try:
+              with open("daily-handoff-history.json","r",encoding="utf-8") as fh:
+                  local_history=json.load(fh).get("history") or []
+          except Exception:
+              pass
           try:
               req=urllib.request.Request(api,headers=headers)
               with urllib.request.urlopen(req,timeout=20) as r:
@@ -86,18 +92,24 @@ jobs:
                   history[-1]["duration_seconds"]=round((datetime.datetime.fromisoformat(now)-started).total_seconds(),1)
               except Exception:
                   pass
+          recovered=list(local_history[-100:] or history[-100:])
+          last=recovered[-1] if recovered else {}
+          current_team=last.get("team") or "Production"
+          current_employee=last.get("employee") or "AI Manager / CEO"
+          current_task=("Production failed after the last recorded handoff: "+str(last.get("task") or "Open the GitHub Run for the exact failing step."))
+          completed_percent=int(last.get("percent") or old.get("overall_percent") or 0)
           old.update({
               "phase":"failed",
-              "current_team":"Production",
-              "current_employee":"AI Manager / CEO",
-              "current_task":"Production failed. Previous successful handoffs are preserved; open the GitHub Run for the exact failing step.",
-              "overall_percent":int(old.get("overall_percent") or 0),
+              "current_team":current_team,
+              "current_employee":current_employee,
+              "current_task":current_task,
+              "overall_percent":completed_percent,
               "departments":{"Strategy & Research":"complete","Creative & Story":"complete","Production":"failed","Quality & Growth":"waiting"},
               "updated_at":now,
               "run_id":os.environ.get("GITHUB_RUN_ID",""),
               "run_number":os.environ.get("GITHUB_RUN_NUMBER",""),
-              "history":history[-100:],
-              "error":"Production workflow failed. Previous handoffs were preserved."
+              "history":recovered,
+              "error":"Production workflow failed. Recorded handoffs were preserved from the local production journal."
           })
           body={"message":"Record failed production status (preserve handoffs)","content":base64.b64encode(json.dumps(old,ensure_ascii=False).encode()).decode(),"branch":"status"}
           if sha: body["sha"]=sha

@@ -8,6 +8,9 @@ export default async function handler(req,res){
   const edit_request=String(body.edit_request||'').trim();
   const plan_only=String(body.plan_only||'').toLowerCase()==='true';
   const owner='shahvrushabh646-wq', repo='festival-of-bharat-ai-studio', workflow='daily-reels.yml';
+  if(plan_only){
+    return res.status(200).json({ok:true,planOnly:true,message:'Plan only selected. No GitHub Actions production run was started.',planUrl:`https://github.com/${owner}/${repo}/actions/workflows/${workflow}`});
+  }
   let dispatchTopic=topic;
   if(edit_request){
     try{

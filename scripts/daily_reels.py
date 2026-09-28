@@ -146,6 +146,40 @@ GH_TOKEN=os.getenv("GITHUB_TOKEN","").strip()
 STATUS_BRANCH="status"
 RUN_STARTED_AT=datetime.now(timezone.utc)
 RUN_STARTED_MONO=time.monotonic()
+HANDOFF_FILE=ROOT/"daily-handoff-history.json"
+try:
+    HANDOFF_FILE.unlink(missing_ok=True)
+except Exception:
+    pass
+
+def record_local_handoff(percent, team, employee, task, phase, reel=None):
+    """Durable local journal used by workflow failure recovery."""
+    event={
+        "started_at":datetime.now(timezone.utc).isoformat(),
+        "ended_at":None,
+        "duration_seconds":None,
+        "percent":percent,
+        "phase":phase,
+        "team":team,
+        "employee":employee,
+        "task":task,
+        "reel":reel,
+        "topic":(daily_topics[reel-1].get("topic") if isinstance(reel,int) and 1 <= reel <= len(daily_topics) else None)
+    }
+    try:
+        history=[]
+        if HANDOFF_FILE.exists():
+            history=json.loads(HANDOFF_FILE.read_text(encoding="utf-8")).get("history") or []
+        if history and history[-1].get("ended_at") is None:
+            history[-1]["ended_at"]=event["started_at"]
+            try:
+                history[-1]["duration_seconds"]=round(max(0,(datetime.fromisoformat(event["started_at"])-datetime.fromisoformat(history[-1]["started_at"])).total_seconds()),1)
+            except Exception:
+                pass
+        history.append(event)
+        HANDOFF_FILE.write_text(json.dumps({"history":history[-100:]},ensure_ascii=False),encoding="utf-8")
+    except Exception as e:
+        print("local handoff journal skipped:",e)
 
 def publish_status(percent, team, employee, task, phase, departments=None, reel=None):
 
@@ -217,9 +251,8 @@ def publish_status(percent, team, employee, task, phase, departments=None, reel=
         print("status telemetry skipped:",e)
 
 def employee_handoff(percent, team, employee, task, phase, reel=None):
-    """Record a real employee handoff in live telemetry and a stage artifact.
-    Employees are production roles backed by concrete code stages, not simulated workers.
-    """
+    """Record a real employee handoff in local and live telemetry."""
+    record_local_handoff(percent, team, employee, task, phase, reel)
     publish_status(percent, team, employee, task, phase, {
         "Strategy & Research":"complete" if team != "Strategy & Research" else "working",
         "Creative & Story":"complete" if team in ["Production","Quality & Growth"] else ("working" if team == "Creative & Story" else "waiting"),

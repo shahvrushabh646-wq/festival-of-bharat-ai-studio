@@ -20,6 +20,23 @@ def require(cmd):
         raise SystemExit(f"Production preflight failed: missing {cmd}")
 
 
+def caption_smoke_test():
+    require("ffmpeg")
+    with tempfile.TemporaryDirectory(prefix="fob_drawtext_smoke_") as td:
+        d = Path(td)
+        src = d / "src.mp4"; out = d / "caption.mp4"; txt = d / "text.txt"
+        txt.write_text("STOP SCROLLING: A closer\\nlook at Indian culture • 100% real", encoding="utf-8")
+        base = ["ffmpeg","-hide_banner","-loglevel","error","-y","-f","lavfi","-i"]
+        subprocess.run(base + ["color=c=black:s=1080x1920:r=30:d=1.2","-an","-c:v","libx264","-pix_fmt","yuv420p","-threads","2",str(src)],check=True)
+        vf = "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:textfile=" + str(txt) + ":expansion=none:fontcolor=white:fontsize=48:x=60:y=160"
+        p = subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-i",str(src),"-vf",vf,
+                            "-an","-c:v","libx264","-preset","veryfast","-crf","20",
+                            "-pix_fmt","yuv420p","-r","30","-threads","2",str(out)],
+                           stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+        if p.returncode != 0 or not out.exists() or out.stat().st_size < 10000:
+            raise SystemExit("FFmpeg caption smoke test failed:\\n"+(p.stderr or "")[-3000:])
+        print("FFmpeg caption smoke test PASSED")
+
 def smoke_test():
     require("ffmpeg")
     require("ffprobe")

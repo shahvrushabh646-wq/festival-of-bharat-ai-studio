@@ -16,7 +16,6 @@ on:
         required: false
         default: ""
   schedule:
-    # 02:00 IST = 20:30 UTC on the previous day
     - cron: "30 20 * * *"
 permissions:
   contents: write
@@ -30,14 +29,19 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+
       - name: Install FFmpeg
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core tesseract-ocr
+
       - name: Prepare live status branch
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           git fetch origin status 2>/dev/null || true
           git show-ref --verify --quiet refs/remotes/origin/status || gh api repos/${GITHUB_REPOSITORY}/git/refs -f ref=refs/heads/status -f sha=${GITHUB_SHA} >/dev/null 2>&1 || true
+
+      - name: Apply production hotfixes
+        run: python3 scripts/production_hotfix.py
 
       - name: Validate production script
         run: python3 -m py_compile scripts/daily_reels.py
@@ -51,41 +55,58 @@ jobs:
           EDIT_REQUEST: ${{ github.event.inputs.edit_request }}
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
         run: python3 scripts/daily_reels.py
-      - name: Record failed production status
+
+      - name: Record failed production status without erasing history
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          SHA="$(gh api "repos/${GITHUB_REPOSITORY}/contents/status/status.json?ref=status" --jq '.sha' 2>/dev/null || true)"
-          python3 - <<'PY' > /tmp/failure-status.json
-          import json, os, datetime
+          python3 - <<'PY'
+          import base64, datetime, json, os, urllib.request
+          repo=os.environ["GITHUB_REPOSITORY"]
+          token=os.environ["GH_TOKEN"]
+          api=f"https://api.github.com/repos/{repo}/contents/status/status.json?ref=status"
+          headers={"Authorization":f"Bearer {token}","Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"FestivalOfBharatCreatorOS"}
+          old={}
+          sha=None
+          try:
+              req=urllib.request.Request(api,headers=headers)
+              with urllib.request.urlopen(req,timeout=20) as r:
+                  obj=json.loads(r.read().decode())
+                  sha=obj.get("sha")
+                  old=json.loads(base64.b64decode(obj["content"]).decode())
+          except Exception:
+              pass
           now=datetime.datetime.now(datetime.timezone.utc).isoformat()
-          ist=datetime.timezone(datetime.timedelta(hours=5, minutes=30))
-          print(json.dumps({
-            "date": datetime.datetime.now(ist).date().isoformat(),
-            "run_id": os.environ.get("GITHUB_RUN_ID"),
-            "run_number": os.environ.get("GITHUB_RUN_NUMBER"),
-            "overall_percent": 0,
-            "phase": "failed",
-            "current_team": "Production",
-            "current_employee": "AI Manager / CEO",
-            "current_task": "Production failed. Open Run to view the error and recovery status.",
-            "reel": None,
-            "departments": {"Strategy & Research":"complete","Creative & Story":"complete","Production":"failed","Quality & Growth":"waiting"},
-            "updated_at": now,
-            "elapsed_seconds": None,
-            "history": [],
-            "error": "Production workflow failed. Check the GitHub Actions run logs."
-          }))
+          history=list(old.get("history") or [])
+          if history and history[-1].get("ended_at") is None:
+              history[-1]["ended_at"]=now
+              try:
+                  started=datetime.datetime.fromisoformat(history[-1]["started_at"])
+                  history[-1]["duration_seconds"]=round((datetime.datetime.fromisoformat(now)-started).total_seconds(),1)
+              except Exception:
+                  pass
+          old.update({
+              "phase":"failed",
+              "current_team":"Production",
+              "current_employee":"AI Manager / CEO",
+              "current_task":"Production failed. Previous successful handoffs are preserved; open the GitHub Run for the exact failing step.",
+              "overall_percent":int(old.get("overall_percent") or 0),
+              "departments":{"Strategy & Research":"complete","Creative & Story":"complete","Production":"failed","Quality & Growth":"waiting"},
+              "updated_at":now,
+              "run_id":os.environ.get("GITHUB_RUN_ID",""),
+              "run_number":os.environ.get("GITHUB_RUN_NUMBER",""),
+              "history":history[-100:],
+              "error":"Production workflow failed. Previous handoffs were preserved."
+          })
+          body={"message":"Record failed production status (preserve handoffs)","content":base64.b64encode(json.dumps(old,ensure_ascii=False).encode()).decode(),"branch":"status"}
+          if sha: body["sha"]=sha
+          req=urllib.request.Request(f"https://api.github.com/repos/{repo}/contents/status/status.json",data=json.dumps(body).encode(),headers={**headers,"Content-Type":"application/json"},method="PUT")
+          with urllib.request.urlopen(req,timeout=20) as r: r.read()
           PY
-          CONTENT="$(base64 -w0 /tmp/failure-status.json)"
-          if [ -n "$SHA" ]; then
-            gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/status/status.json" -f message="Record failed production status" -f content="$CONTENT" -f branch="status" -f sha="$SHA" >/dev/null
-          else
-            gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/status/status.json" -f message="Record failed production status" -f content="$CONTENT" -f branch="status" >/dev/null
-          fi
 
       - name: Verify production outputs
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
@@ -112,6 +133,7 @@ jobs:
           echo "PRODUCTION OUTPUT CHECK PASSED — exactly four valid 1080x1920 H.264 Reels."
 
       - name: Upload four MP4 Reels
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: festival-of-bharat-4-reels-${{ github.run_number }}
@@ -119,6 +141,7 @@ jobs:
           retention-days: 14
 
       - name: Publish daily MP4 release
+        if: success()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -128,4 +151,5 @@ jobs:
           git push --delete origin "${TAG}" 2>/dev/null || true
           gh release create "${TAG}" daily-output/*.mp4 daily-output/covers/*.jpg daily-output/manifest.json daily-output/README.txt daily-output/creator-pack.json daily-output/stages/*.json \
             --target "${GITHUB_SHA}" \
-            --title "Festival of Bharat — 4 Reels — ${DATE}"             --notes "Automated daily batch. Useful cultural content + four creative cuts. Virality is optimized for, not guaranteed. Verify each source license before posting; add eligible Instagram audio after approval."
+            --title "Festival of Bharat — 4 Reels — ${DATE}" \
+            --notes "Automated daily batch. Verify each source license before posting; add eligible Instagram audio after approval."

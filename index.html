@@ -105,7 +105,7 @@ $("pipeline").innerHTML=PIPE.map((x,i)=>`<div class="stage"><b>${i+1}. ${x}</b><
 
 async function getStatus(){
  try{
-  const r=await fetch("https://raw.githubusercontent.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/status/status/status.json?x="+Date.now(),{cache:"no-store"});
+  const r=await fetch("/api/status?x="+Date.now(),{cache:"no-store"});
   if(!r.ok)throw 0; status=await r.json();
   const pct=Number(status.overall_percent||0);
   $("overallBar").style.width=pct+"%";$("overallPct").textContent=pct+"%";

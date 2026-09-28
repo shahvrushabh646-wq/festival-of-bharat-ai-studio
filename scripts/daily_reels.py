@@ -684,6 +684,8 @@ EMPLOYEE_ROSTER=[
 
 manifest={
 "generated_at":datetime.now(timezone.utc).isoformat(),
+"run_id":os.getenv("GITHUB_RUN_ID",""),
+"run_number":os.getenv("GITHUB_RUN_NUMBER",""),
 "daily_key":today_key,
 "reference_intelligence":{"instagram":instagram_refs,"pinterest":pinterest_refs,"canva":canva_refs},
 "topics":[{"reel":i+1,"topic":x["topic"],"pillar":x["pillar"],"title":x["title"]} for i,x in enumerate(daily_topics)],

@@ -1,29 +1,40 @@
-# Festival of Bharat AI Studio V24 — Performance Memory
+# Festival of Bharat AI Studio — Merged Production Edition
 
-V24 adds a local Performance Memory layer to the V23 Daily Autopilot.
+This edition combines the newer React/TypeScript production studio with the previous Festival of Bharat Creator OS backend.
 
-## What it does
-- Record views, likes, shares, comments, average watch time and Reel duration.
-- Label each result with topic, hook style and creative type.
-- Store up to the latest 100 result records in the browser's localStorage.
-- Analyze averages and top-viewed history.
-- Build tomorrow's four creative treatments using the user's own history as a planning signal.
-- Does not claim or predict viral performance.
-- Human approval remains required.
+## Two production paths
 
-## Privacy / free mode
-Performance data stays in the browser localStorage for this module. No paid analytics API is required.
+### 1. Browser production / preview
+- React production dashboard
+- Four reel angles
+- Six-scene storyboard
+- Wikimedia image collection
+- Rights metadata
+- Canvas 1080x1920 rendering
+- WebM recording with MP4 conversion attempt
+- QC and approval/re-edit flow
+- Local persistence
 
-## V25 — Performance-Directed AI
-V25 connects V24 local performance memory to the creative director. Historical results influence practical planning signals for topic, hook family, creative type, target duration, opening treatment and footage allocation. It does not claim to predict virality and does not auto-publish.
+### 2. Cloud / 24×7 production
+The previous working production system is preserved under:
+- \`scripts/daily_reels.py\`
+- \`api/run-reels.js\`
+- \`api/batch.js\`
+- \`api/scout.js\`
+- \`api/status.js\`
+- \`api/approval.js\`
+- \`.github/workflows/daily-reels.yml\`
+- \`.github/workflows/24x7-watchdog.yml\`
 
-## Automation
-The Daily 4 Reels workflow runs at 06:00 IST and can also be started manually from GitHub Actions. It supports an optional topic and an optional public MP4 source URL. The pipeline downloads/processes source footage, creates four 1080x1920/30fps MP4 variants, runs a quality gate with one self-re-encode fallback, and uploads the final files plus a production manifest as a 7-day Actions artifact. Instagram audio is added in Instagram after human approval.
+The dashboard's **Run 4 Reels** button dispatches the GitHub Actions production pipeline through \`/api/run-reels\`.
 
-Studio Day 1 launch trigger: 2026-09-27 — automated 4-Reel production started.
+## Cloud requirements
+Configure a Vercel \`GITHUB_TOKEN\`/\`GITHUB_PAT\`/\`GH_TOKEN\` with the repository permissions required by the existing workflow. The GitHub Actions workflow needs the media tools used by \`daily_reels.py\`, including FFmpeg/ffprobe.
 
-Production retry trigger: 2026-09-27 — fresh 4-Reel batch requested using latest rights/rate-limit fixes.
+## Important
+No fake MP4 path should be treated as a completed render. The browser renderer only marks a render complete after a real Blob is produced. The cloud pipeline validates rendered media with ffprobe before publishing.
 
-Vercel deployment trigger: 2026-09-27 — latest AI employee production telemetry build.
-
-Vercel production fix trigger: 2026-09-27 — restored the original static/API deployment architecture after removing temporary build configuration.
+## Validation
+- \`npm run build:check\`
+- \`npm run validate:py\`
+- \`npm run build\`

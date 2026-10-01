@@ -1,22 +1,21 @@
 name: Daily 4 Reels
-# Production window: 02:00–06:00 IST. Morning review/edit cycle begins after the batch is ready.
 on:
   workflow_dispatch:
     inputs:
       topic:
-        description: "Optional topic; leave blank for India trend selection"
+        description: "Optional topic"
         required: false
         default: ""
       source_url:
-        description: "Optional public direct MP4 URL"
+        description: "Optional public source URL"
         required: false
         default: ""
       edit_request:
-        description: "Morning human edit instructions for the next re-edit pass"
+        description: "Morning re-edit request"
         required: false
         default: ""
       target_reel:
-        description: "Optional Reel number 1-4 to re-render only"
+        description: "Reel 1-4 for targeted re-edit"
         required: false
         default: ""
   schedule:
@@ -34,143 +33,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install FFmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core tesseract-ocr
-      - name: Prepare live status branch
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+      - name: Validate Python
+        run: python3 -m py_compile scripts/daily_reels.py scripts/production_hotfix.py
+      - name: Build four Reels
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          git fetch origin status 2>/dev/null || true
-          git show-ref --verify --quiet refs/remotes/origin/status || gh api repos/${GITHUB_REPOSITORY}/git/refs -f ref=refs/heads/status -f sha=${GITHUB_SHA} >/dev/null 2>&1 || true
-      - name: Apply production hotfixes
-        run: python3 scripts/production_hotfix.py
-      - name: Prepare previous batch for targeted re-edit
-        if: ${{ github.event.inputs.target_reel != '' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TARGET_REEL: ${{ github.event.inputs.target_reel }}
-        run: |
-          set -euo pipefail
-          mkdir -p previous-release
-          DATE="$(TZ=Asia/Kolkata date +%Y-%m-%d)"
-          if ! gh release download "daily-${DATE}" --dir previous-release --pattern 'reel_*.mp4' --pattern 'reel_*_cover.jpg' --pattern 'manifest.json' --pattern 'creator-pack.json' --clobber; then
-            echo "No completed daily release is available for targeted re-edit."
-            exit 1
-          fi
-          test -f previous-release/manifest.json
-          echo "Previous batch loaded for targeted Reel ${TARGET_REEL}."
-      - name: Validate production script
-        run: python3 -m py_compile scripts/daily_reels.py
-      - name: Build today's four Reels
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
           TOPIC: ${{ github.event.inputs.topic }}
           SOURCE_URL: ${{ github.event.inputs.source_url }}
           EDIT_REQUEST: ${{ github.event.inputs.edit_request }}
           TARGET_REEL: ${{ github.event.inputs.target_reel }}
-          PREVIOUS_RELEASE_DIR: previous-release
-          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
         run: python3 scripts/daily_reels.py
-      - name: Record failed production status without erasing history
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Verify four real MP4 outputs
         run: |
-          python3 - <<'PY'
-          import base64, datetime, json, os, urllib.request
-          repo=os.environ["GITHUB_REPOSITORY"]
-          token=os.environ["GH_TOKEN"]
-          api=f"https://api.github.com/repos/{repo}/contents/status/status.json?ref=status"
-          headers={"Authorization":f"Bearer {token}","Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"FestivalOfBharatCreatorOS"}
-          old={}
-          sha=None
-          local_history=[]
-          try:
-              with open("daily-handoff-history.json","r",encoding="utf-8") as fh:
-                  local_history=json.load(fh).get("history") or []
-          except Exception:
-              pass
-          try:
-              req=urllib.request.Request(api,headers=headers)
-              with urllib.request.urlopen(req,timeout=20) as r:
-                  obj=json.loads(r.read().decode())
-                  sha=obj.get("sha")
-                  old=json.loads(base64.b64decode(obj["content"]).decode())
-          except Exception:
-              pass
-          now=datetime.datetime.now(datetime.timezone.utc).isoformat()
-          history=list(old.get("history") or [])
-          if history and history[-1].get("ended_at") is None:
-              history[-1]["ended_at"]=now
-              try:
-                  started=datetime.datetime.fromisoformat(history[-1]["started_at"])
-                  history[-1]["duration_seconds"]=round((datetime.datetime.fromisoformat(now)-started).total_seconds(),1)
-              except Exception:
-                  pass
-          recovered=list(local_history[-100:] or history[-100:])
-          last=recovered[-1] if recovered else {}
-          current_team=last.get("team") or "Production"
-          current_employee=last.get("employee") or "AI Manager / CEO"
-          current_task=("Production failed after the last recorded handoff: "+str(last.get("task") or "Open the GitHub Run for the exact failing step."))
-          completed_percent=int(last.get("percent") or old.get("overall_percent") or 0)
-          old.update({
-              "phase":"failed",
-              "current_team":current_team,
-              "current_employee":current_employee,
-              "current_task":current_task,
-              "overall_percent":completed_percent,
-              "departments":{"Strategy & Research":"complete","Creative & Story":"complete","Production":"failed","Quality & Growth":"waiting"},
-              "updated_at":now,
-              "run_id":os.environ.get("GITHUB_RUN_ID",""),
-              "run_number":os.environ.get("GITHUB_RUN_NUMBER",""),
-              "history":recovered,
-              "error":"Production workflow failed. Recorded handoffs were preserved from the local production journal."
-          })
-          body={"message":"Record failed production status (preserve handoffs)","content":base64.b64encode(json.dumps(old,ensure_ascii=False).encode()).decode(),"branch":"status"}
-          if sha: body["sha"]=sha
-          req=urllib.request.Request(f"https://api.github.com/repos/{repo}/contents/status/status.json",data=json.dumps(body).encode(),headers={**headers,"Content-Type":"application/json"},method="PUT")
-          with urllib.request.urlopen(req,timeout=20) as r: r.read()
-          PY
-      - name: Verify production outputs
-        if: success()
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -d daily-output
-          count="$(find daily-output -maxdepth 1 -type f -name '*.mp4' | wc -l)"
-          if [ "$count" -ne 4 ]; then
-            echo "Expected exactly 4 Reel MP4 files; found $count"
-            find daily-output -maxdepth 2 -type f -print
-            exit 1
-          fi
+          set -e
           test -f daily-output/manifest.json
           test -f daily-output/creator-pack.json
-          test -f daily-output/README.txt
-          test -d daily-output/stages
+          count=$(find daily-output -maxdepth 1 -type f -name '*.mp4' | wc -l)
+          test "$count" -eq 4
           for f in daily-output/*.mp4; do
-            w="$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$f")"
-            h="$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$f")"
-            codec="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$f")"
-            if [ "$w" != "1080" ] || [ "$h" != "1920" ] || [ "$codec" != "h264" ]; then
-              echo "Invalid Reel format: $f"
-              exit 1
-            fi
+            w=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$f")
+            h=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$f")
+            c=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$f")
+            test "$w" = "1080" && test "$h" = "1920" && test "$c" = "h264"
           done
-          echo "PRODUCTION OUTPUT CHECK PASSED — exactly four valid 1080x1920 H.264 Reels."
-      - name: Upload four MP4 Reels
-        if: success()
+      - name: Upload production outputs
         uses: actions/upload-artifact@v4
         with:
           name: festival-of-bharat-4-reels-${{ github.run_number }}
           path: daily-output/
           retention-days: 14
-      - name: Publish daily MP4 release
-        if: success()
+      - name: Publish daily release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          DATE="$(TZ=Asia/Kolkata date +%Y-%m-%d)"
+          DATE=$(TZ=Asia/Kolkata date +%Y-%m-%d)
           TAG="daily-${DATE}"
-          gh release delete "${TAG}" --yes 2>/dev/null || true
-          git push --delete origin "${TAG}" 2>/dev/null || true
-          gh release create "${TAG}" daily-output/*.mp4 daily-output/covers/*.jpg daily-output/manifest.json daily-output/README.txt daily-output/creator-pack.json daily-output/stages/*.json             --target "${GITHUB_SHA}"             --title "Festival of Bharat — 4 Reels — ${DATE}"             --notes "Automated daily batch. Verify each source license before posting; add eligible Instagram audio after approval."
+          gh release delete "$TAG" --yes 2>/dev/null || true
+          gh release create "$TAG" daily-output/*.mp4 daily-output/manifest.json daily-output/README.txt daily-output/creator-pack.json --target "${GITHUB_SHA}" --title "Festival of Bharat — 4 Reels — ${DATE}" --notes "Generated Reel batch. Human approval and rights verification required before posting."

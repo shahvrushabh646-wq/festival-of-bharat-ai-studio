@@ -6,42 +6,19 @@ on:
 permissions:
   contents: read
   actions: write
-concurrency:
-  group: reel-factory-watchdog
-  cancel-in-progress: false
-
 jobs:
   watchdog:
     runs-on: ubuntu-latest
     steps:
-      - name: Check today's production
+      - name: Recover missing daily run during production window
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          DATE="$(TZ=Asia/Kolkata date +%Y-%m-%d)"
-          HOUR="$(TZ=Asia/Kolkata date +%H)"
-          TAG="daily-${DATE}"
-
-          # Recovery is allowed only inside the planned overnight production window.
-          # 02:00–06:00 IST = 02 <= hour < 06.
-          if [ "$HOUR" -lt 2 ] || [ "$HOUR" -ge 6 ]; then
-            echo "Outside overnight production window (02:00–06:00 IST). No recovery dispatch."
-            exit 0
-          fi
-
-          if gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            echo "Today's four-Reel release already exists: ${TAG}"
-            exit 0
-          fi
-
-          RUNNING="$(gh run list --repo "${GITHUB_REPOSITORY}" --workflow daily-reels.yml --status in_progress --json databaseId --jq 'length')"
-          QUEUED="$(gh run list --repo "${GITHUB_REPOSITORY}" --workflow daily-reels.yml --status queued --json databaseId --jq 'length')"
-
-          if [ "${RUNNING}" -gt 0 ] || [ "${QUEUED}" -gt 0 ]; then
-            echo "Production is already running/queued. No duplicate dispatch."
-            exit 0
-          fi
-
-          echo "No completed batch and no active production run. Starting recovery run."
-          gh workflow run daily-reels.yml --repo "${GITHUB_REPOSITORY}" --ref main
+          set -e
+          HOUR=$(TZ=Asia/Kolkata date +%H)
+          [ "$HOUR" -ge 2 ] && [ "$HOUR" -lt 6 ] || exit 0
+          DATE=$(TZ=Asia/Kolkata date +%Y-%m-%d)
+          if gh release view "daily-${DATE}" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then exit 0; fi
+          running=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow daily-reels.yml --status in_progress --json databaseId --jq 'length')
+          queued=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow daily-reels.yml --status queued --json databaseId --jq 'length')
+          if [ "$running" -eq 0 ] && [ "$queued" -eq 0 ]; then gh workflow run daily-reels.yml --repo "$GITHUB_REPOSITORY" --ref main; fi

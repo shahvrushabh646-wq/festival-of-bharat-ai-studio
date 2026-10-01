@@ -1,21 +1,5 @@
 export default async function handler(req,res){
   const q=String(req.query?.q||'Indian festival India').slice(0,120);
-  const api='https://commons.wikimedia.org/w/api.php?'+new URLSearchParams({
-    action:'query',format:'json',origin:'*',generator:'search',gsrsearch:q+' filetype:video',gsrnamespace:'6',gsrlimit:'12',
-    prop:'imageinfo',iiprop:'url|extmetadata|mime',iiurlwidth:'640'
-  });
-  try{
-    const r=await fetch(api,{headers:{'user-agent':'Festival-of-Bharat-CreatorOS/1.0'}});
-    if(!r.ok) throw new Error('Commons '+r.status);
-    const j=await r.json();
-    const pages=Object.values(j.query?.pages||{});
-    const results=pages.map(p=>{
-      const ii=p.imageinfo?.[0]||{}, m=ii.extmetadata||{};
-      const mime=ii.mime||'';
-      const license=[m.LicenseShortName?.value,m.License?.value,m.UsageTerms?.value].filter(Boolean).join(' ');
-      return {title:p.title||'',mime,license,author:m.Artist?.value||'',pageUrl:'https://commons.wikimedia.org/wiki/'+encodeURIComponent((p.title||'').replace(/ /g,'_')),downloadUrl:ii.url||'',page:'https://commons.wikimedia.org/wiki/'+encodeURIComponent((p.title||'').replace(/ /g,'_')),url:ii.url||''};
-    }).filter(x=>/^video\//i.test(x.mime)&&/(CC|Creative Commons|Public Domain|PD|GFDL|GPL|Attribution|ShareAlike)/i.test(x.license));
-    res.setHeader('Cache-Control','s-maxage=300, stale-while-revalidate=600');
-    return res.status(200).json({query:q,results});
-  }catch(e){return res.status(502).json({query:q,results:[],error:String(e.message||e)})}
+  const api='https://commons.wikimedia.org/w/api.php?'+new URLSearchParams({action:'query',format:'json',origin:'*',generator:'search',gsrsearch:q+' filetype:video',gsrnamespace:'6',gsrlimit:'12',prop:'imageinfo',iiprop:'url|extmetadata|mime',iiurlwidth:'640'});
+  try{const r=await fetch(api,{headers:{'user-agent':'Festival-of-Bharat-CreatorOS/1.0'}});if(!r.ok)throw new Error('Commons '+r.status);const j=await r.json();const pages=Object.values(j.query?.pages||{});const results=pages.map(p=>{const ii=p.imageinfo?.[0]||{},m=ii.extmetadata||{},mime=ii.mime||'';const license=[m.LicenseShortName?.value,m.License?.value,m.UsageTerms?.value].filter(Boolean).join(' ');return {title:p.title||'',mime,license,author:m.Artist?.value||'',pageUrl:'https://commons.wikimedia.org/wiki/'+encodeURIComponent((p.title||'').replace(/ /g,'_')),downloadUrl:ii.url||'',page:'https://commons.wikimedia.org/wiki/'+encodeURIComponent((p.title||'').replace(/ /g,'_')),url:ii.url||''};}).filter(x=>/^video\\//i.test(x.mime)&&/(CC|Creative Commons|Public Domain|PD|GFDL|GPL|Attribution|ShareAlike)/i.test(x.license));res.setHeader('Cache-Control','s-maxage=300, stale-while-revalidate=600');return res.status(200).json({query:q,results});}catch(e){return res.status(502).json({query:q,results:[],error:String(e.message||e)})}
 }

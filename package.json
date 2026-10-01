@@ -1,16 +1,7 @@
 {
-  "name": "festival-of-bharat-ai-studio",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Festival of Bharat AI Studio / Creator OS — production pipeline for 4 daily Instagram-style Reels",
-  "scripts": {
-    "build": "node scripts/build-check.mjs",
-    "start": "npx serve .",
-    "validate:py": "python3 -m py_compile scripts/daily_reels.py scripts/production_hotfix.py",
-    "validate:workflow": "python3 -c \"import yaml,sys; yaml.safe_load(open('.github/workflows/daily-reels.yml')); print('workflow YAML OK')\"",
-    "validate": "npm run build && npm run validate:workflow"
-  },
-  "engines": {
-    "node": "24.x"
-  }
+  "name":"festival-of-bharat-ai-studio","private":true,"version":"1.0.0","type":"module",
+  "scripts":{"dev":"vite","build":"tsc -b && vite build","preview":"vite preview","build:check":"node scripts/build-check.mjs","validate:py":"python3 -m py_compile scripts/daily_reels.py scripts/production_hotfix.py","validate:workflow":"python3 -c \"import yaml,sys; yaml.safe_load(open('.github/workflows/daily-reels.yml')); yaml.safe_load(open('.github/workflows/24x7-watchdog.yml')); print('workflow YAML OK')\"","validate":"npm run build:check && npm run validate:py && npm run build"},
+  "dependencies":{"@ffmpeg/ffmpeg":"^0.12.15","@ffmpeg/util":"^0.12.2","lucide-react":"^0.468.0","react":"^18.3.1","react-dom":"^18.3.1"},
+  "devDependencies":{"@types/react":"^18.3.12","@types/react-dom":"^18.3.1","@vitejs/plugin-react":"^4.3.4","typescript":"^5.7.2","vite":"^6.0.5","tailwindcss":"^3.4.17","postcss":"^8.4.49","autoprefixer":"^10.4.20"},
+  "engines":{"node":">=20"}
 }

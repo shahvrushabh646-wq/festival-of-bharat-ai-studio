@@ -1,0 +1,17 @@
+export type ProductionStatus = "WAITING" | "WORKING" | "COMPLETED" | "FAILED" | "NEEDS_REVIEW" | "BLOCKED";
+
+export interface Asset {
+  id:string; title:string; type:"image"|"video"|"audio"; localPath?:string; previewUrl?:string; mimeType?:string; sourcePageUrl?:string; generatedLocally?:boolean; assetHash?:string; usageAllowed?:boolean; downloadedAt?:string; licenseUrl?:string; attributionText?:string; source:string; sourceUrl:string; creator?:string; license:string; attributionRequired:boolean; dateCollected:string; topic:string; reelId:string; sceneId?:string;
+  downloadStatus:"SEARCHING"|"FOUND"|"DOWNLOADING"|"DOWNLOADED"|"FAILED"|"REJECTED";
+  rightsStatus:"LICENSE_VERIFIED"|"PUBLIC_DOMAIN"|"CREATIVE_COMMONS"|"NEEDS_REVIEW"|"UNKNOWN"|"REJECTED";
+}
+export interface Scene {id:string;sceneNumber:number;duration:number;narration:string;onScreenText:string;visualDescription:string;preferredMediaType:"image"|"video"|"mixed";fallbackMediaType:"image"|"video";transition:string;motion:string;template:string;assetIds:string[];status:"pending"|"ready"|"failed";}
+export interface Storyboard {id:string;scenes:Scene[];totalDuration:number;style:string;pacing:string;}
+export interface Script {id:string;hook:string;body:string;cta:string;narration:string;tone:string;language:string;researchSources?:string[];facts?:string[];}
+export interface QCResult {passed:boolean;checks:{fileExists:boolean;isPlayable:boolean;resolution:boolean;durationValid:boolean;noMissingScenes:boolean;noBlankFrames:boolean;noBrokenImages:boolean;textInSafeArea:boolean;audioPresent:boolean;captionsReadable:boolean;sourceRecordsExist:boolean;notDuplicated:boolean;visualVariety:boolean;h264Codec?:boolean;fpsValid?:boolean;audioStreamExists?:boolean;noCorruptFrames?:boolean;noBlankScenes?:boolean;noMissingAssets?:boolean;rightsVerified?:boolean;captionReadable?:boolean;noSceneTooShort?:boolean;noDuplicateReel?:boolean;};ffprobeOutput?:string;issues:string[];timestamp:string;}
+export interface Caption {hook:string;body:string;hashtags:string[];cta:string;fullText:string;language:string;}
+export interface Cover {imagePath?:string;title:string;subtitle:string;}
+export interface ReelVersion {version:number;videoPath:string;createdAt:string;qcResult?:QCResult;status:"GENERATING"|"READY"|"FAILED";}
+export interface Reel {id:string;reelNumber:number;title:string;angle:string;script:Script;storyboard:Storyboard;assets:Asset[];template:string;videoPath?:string;videoMimeType?:string;videoBlobUrl?:string;renderError?:string;currentVersion?:number;versions?:ReelVersion[];caption:Caption;cover:Cover;qcResult?:QCResult;status:"GENERATING"|"READY"|"NEEDS_REEDIT"|"APPROVED"|"REJECTED";}
+export interface MusicTrack {id:string;title:string;source:string;sourceUrl:string;license:string;volume:number;fadeIn:number;fadeOut:number;}
+export interface ProductionRun {id:string;runNumber:number;topic:string;festivalId:string;language:string;createdAt:string;currentStage:string;overallProgress:number;status:ProductionStatus;reels:Reel[];assets:Asset[];stageHistory:{stage:string;status:ProductionStatus;startedAt?:string;completedAt?:string;output?:string;error?:string;}[];approvalStatus:"WAITING"|"APPROVED"|"REJECTED";music?:MusicTrack;rejectionReason?:string;analytics?:{views:number;likes:number;comments:number;shares:number;saves:number;watchTime:number;completionRate:number;};}

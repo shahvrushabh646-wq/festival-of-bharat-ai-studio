@@ -1,12 +1,3 @@
 export default async function handler(req,res){
-  try{
-    const url="https://raw.githubusercontent.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/status/status/status.json?x="+Date.now();
-    const r=await fetch(url,{cache:"no-store",headers:{"User-Agent":"FestivalOfBharatCreatorOS"}});
-    if(!r.ok) return res.status(200).json({phase:"ready",overall_percent:0,current_employee:"AI Manager / CEO",current_task:"No active production run.",departments:{}});
-    const data=await r.json();
-    res.setHeader("Cache-Control","no-store, max-age=0");
-    return res.status(200).json(data);
-  }catch(e){
-    return res.status(200).json({phase:"ready",overall_percent:0,current_employee:"AI Manager / CEO",current_task:"Status temporarily unavailable.",departments:{},error:e.message||"status lookup failed"});
-  }
+  try{const url="https://raw.githubusercontent.com/shahvrushabh646-wq/festival-of-bharat-ai-studio/status/status/status.json?x="+Date.now();const r=await fetch(url,{cache:"no-store",headers:{"User-Agent":"FestivalOfBharatCreatorOS"}});if(!r.ok)return res.status(200).json({phase:"ready",overall_percent:0,current_employee:"AI Manager / CEO",current_task:"No active production run.",departments:{}});const data=await r.json();res.setHeader("Cache-Control","no-store, max-age=0");return res.status(200).json(data);}catch(e){return res.status(200).json({phase:"ready",overall_percent:0,current_employee:"AI Manager / CEO",current_task:"Status temporarily unavailable.",departments:{},error:e.message||"status lookup failed"});}
 }

@@ -1,6 +1,6 @@
 {
-  "$schema":"https://openapi.vercel.sh/vercel.json",
-  "git":{"deploymentEnabled":{"main":true,"status":false}},
-  "ignoreCommand":"if [ \"$VERCEL_GIT_COMMIT_REF\" = \"status\" ]; then echo 'Skipping Vercel deployment for status branch'; exit 0; else exit 1; fi",
-  "buildCommand":"npm run build","outputDirectory":"dist"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite"
 }

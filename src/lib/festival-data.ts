@@ -1,4 +1,4 @@
-export interface Festival {id:string;name:string;month:string;emoji:string;description:string;traditions:string;colors:{name:string;hex:string}[];regions:string[];deities:string[];culturalElements:string[];story:string;hashtags:string[];searchTerms:string[];}
+export interface Festival {id:string;name:string;month:string;emoji:string;description:string;traditions:string;colors:{name:string;hex:string}[];regions:string;deities:string[];culturalElements:string[];story:string[];hashtags:string[];searchTerms:string[];}
 export const festivals = [
   {
     "id": "ganesh-chaturthi",

@@ -127,7 +127,8 @@ def render_reel(reel,item,assets):
             "duration":float(probe["format"].get("duration",0)),"quality":{"pass":True,"width":1080,"height":1920,"codec":"h264","fps":30},
             "assets":[{k:a.get(k) for k in ["title","page","creator","license"]} for a in assets]}
 
-for p in OUT.glob("reel_*.mp4"): p.unlink(missing_ok=True)
+if not TARGET_REEL:
+    for p in OUT.glob("reel_*.mp4"): p.unlink(missing_ok=True)
 for p in OUT.glob("_*.mp4"): p.unlink(missing_ok=True)
 reels=[]
 for i,item in enumerate(daily,1):
